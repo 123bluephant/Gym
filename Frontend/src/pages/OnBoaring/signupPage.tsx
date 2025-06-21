@@ -88,7 +88,7 @@ const SignupPage: React.FC = () => {
       if (response.ok) {
         setUser(body.user);
         localStorage.setItem("user", JSON.stringify(body.user));
-        navigate("/onboarding");
+        navigate("/dashboard");
         return;
       }
       setError(body.message || "Something went wrong. Please try again.");

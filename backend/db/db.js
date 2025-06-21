@@ -2,7 +2,7 @@ import moongose from "mongoose"
 
 export const connectdb = async()=>{
     try {
-        await moongose.connect(process.env.MONGO_ATLAS)
+        await moongose.connect(process.env.MONGO_URI)
         console.log("connected to db");
     } catch (error) {
         console.log(`error while connecting db${error}`)
