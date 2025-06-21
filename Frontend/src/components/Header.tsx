@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ShoppingCart, User, Heart } from 'lucide-react';
 import { useRecoilState } from 'recoil';
@@ -78,6 +78,16 @@ const Header = () => {
             >
               Tracking
             </Link>
+            {user && (
+              <Link 
+                to="/calories" 
+                className={`transition-colors ${
+                  isActive('/calories') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                }`}
+              >
+                Calories
+              </Link>
+            )}
             <Link 
               to="/womens-health" 
               className={`transition-colors ${
@@ -105,7 +115,7 @@ const Header = () => {
             
             {user ? (
               <>
-                <Link to="/account" className="p-2 text-gray-700 hover:text-purple-600 transition-colors">
+                <Link to="/profile" className="p-2 text-gray-700 hover:text-purple-600 transition-colors">
                   <User className="w-5 h-5" />
                 </Link>
                 <button 
@@ -165,6 +175,17 @@ const Header = () => {
               >
                 Tracking
               </Link>
+              {user && (
+                <Link 
+                  to="/calories" 
+                  className={`transition-colors ${
+                    isActive('/calories') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Calories
+                </Link>
+              )}
               <Link 
                 to="/womens-health" 
                 className={`transition-colors ${

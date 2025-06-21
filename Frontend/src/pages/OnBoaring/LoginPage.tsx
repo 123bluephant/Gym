@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
       if (response.ok) {
         setuser(body.user)
         localStorage.setItem('user',JSON.stringify(body.user))
-        navigate('/');
+        navigate('/onboarding');
       }
       setError(body.message || "Login failed");
     } catch (err) {
