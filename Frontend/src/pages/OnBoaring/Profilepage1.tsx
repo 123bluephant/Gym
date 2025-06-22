@@ -1,5 +1,7 @@
 import React from 'react';
 import { User, Edit2, Activity, Target, AlertTriangle, Calendar } from 'lucide-react';
+import { useRecoilValue } from 'recoil';
+import userAtom from '../../atoms/UserAtom'; // Adjust the import path as needed
 
 interface UserProfileData {
   fullName: string;
@@ -12,11 +14,14 @@ interface UserProfileData {
 }
 
 const ProfilePage: React.FC = () => {
+  // Get user data from Recoil
+  const user = useRecoilValue(userAtom);
+  
   // Retrieve profile data from localStorage
   const profileData: UserProfileData = JSON.parse(localStorage.getItem('userProfile') || JSON.stringify({
-    fullName: '',
+    fullName: user ? `${user.firstName} ${user.lastName}` : '',
     age: 0,
-    gender: '',
+    gender: user?.gender || '',
     fitnessLevel: '',
     goals: [],
     injuries: '',
@@ -44,7 +49,9 @@ const ProfilePage: React.FC = () => {
               <Edit2 className="w-4 h-4" />
             </button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">{profileData.fullName || 'Your Profile'}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">
+            {user ? `${user.firstName} ${user.lastName}` : profileData.fullName || 'Your Profile'}
+          </h1>
           <p className="mt-2 text-gray-600 max-w-md">
             {profileData.fitnessLevel 
               ? `${profileData.fitnessLevel} fitness level` 

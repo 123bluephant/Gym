@@ -7,7 +7,7 @@ import UserRoute from "./route/user.route.js"
 
 const app = express();
 app.use(cors({
-  origin: ["https://fitflow123.netlify.app"],
+  origin: ["https://localhost:3000"],
   credentials: true, 
 }));
 app.use(express.json());

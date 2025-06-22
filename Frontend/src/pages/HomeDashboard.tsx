@@ -1,16 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRecoilValue } from "recoil";
+import { Link } from "react-router-dom";
+import userAtom from "../atoms/UserAtom";
 import ActionButton from "../components/modal/ActionButton";
 import MetricsCard from "../components/modal/MetricsCard";
 import FitnessCalendar from "../components/modal/FitnessCalendar";
 import TrackProgressModal from "../components/modal/TrackProgressModal";
 import AskCoachModal from "../components/modal/AskCoachModal";
-import { Link } from "react-router-dom";
 
 export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }) {
+  const user = useRecoilValue(userAtom);
+  const [isLoading, setIsLoading] = useState(true);
   const [showTrackProgress, setShowTrackProgress] = useState(false);
   const [showAskCoach, setShowAskCoach] = useState(false);
   const [showTrainToday, setShowTrainToday] = useState(false);
   const [showEatToday, setShowEatToday] = useState(false);
+
+  useEffect(() => {
+    // This ensures we don't show loading state if there's no user (logged out state)
+    setIsLoading(false);
+  }, [user]);
 
   // Enhanced data with progress indicators
   const metrics = [
@@ -50,11 +59,23 @@ export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }
     }
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p>Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-8 mt-16">
       {/* Header with greeting and date */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, Alex!</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {user ? `Welcome back, ${user.firstName}!` : 'Welcome to FitLife!'}
+        </h1>
         <p className="text-gray-600 mt-2">
           Here's your personalized dashboard for {new Date().toLocaleDateString('en-US', { 
             weekday: 'long', 
@@ -64,6 +85,7 @@ export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }
         </p>
       </div>
 
+      {/* Rest of your component remains the same */}
       {/* Metrics Section */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Today's Progress</h2>
@@ -77,22 +99,18 @@ export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }
 
       {/* Action Buttons Grid */}
       <div className="grid grid-cols-2 gap-4">
-       
-          <ActionButton 
-            label="Train Today" 
-            icon="💪" 
-            color="#00b894" 
-            onClick={() => setShowTrainToday(true)}
-          />
-        
-        
-          <ActionButton 
-            label="Eat Today" 
-            icon="🍽️" 
-            color="#fdcb6e" 
-            onClick={() => setShowEatToday(true)}
-          />
-        
+        <ActionButton 
+          label="Train Today" 
+          icon="💪" 
+          color="#00b894" 
+          onClick={() => setShowTrainToday(true)}
+        />
+        <ActionButton 
+          label="Eat Today" 
+          icon="🍽️" 
+          color="#fdcb6e" 
+          onClick={() => setShowEatToday(true)}
+        />
         <ActionButton 
           label="Ask Coach" 
           icon="🤖" 

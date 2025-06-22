@@ -49,11 +49,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Community</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="/community" className="hover:text-white transition-colors">Community</a></li>
+              <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="/term" className="hover:text-white transition-colors">Terms of Service</a></li>
             </ul>
           </div>
 
@@ -96,8 +96,9 @@ const Footer = () => {
             © 2024 FitFlow. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/term" className="hover:text-white transition-colors">Terms</a>
+            <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
             <a href="#" className="hover:text-white transition-colors">Cookies</a>
           </div>
         </div>
