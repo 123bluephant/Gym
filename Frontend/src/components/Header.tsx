@@ -40,6 +40,10 @@ const Header = () => {
       console.log(error);
     }
   };
+
+  // Check if user is male to hide Women's Health section
+  const shouldShowWomensHealth = !user || user.gender !== 'male';
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,14 +92,16 @@ const Header = () => {
                 Calories
               </Link>
             )}
-            <Link 
-              to="/womens-health" 
-              className={`transition-colors ${
-                isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-              }`}
-            >
-              Women's Health
-            </Link>
+            {shouldShowWomensHealth && (
+              <Link 
+                to="/womens-health" 
+                className={`transition-colors ${
+                  isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                }`}
+              >
+                Women's Health
+              </Link>
+            )}
             <Link 
               to="/shop" 
               className={`transition-colors ${
@@ -186,15 +192,17 @@ const Header = () => {
                   Calories
                 </Link>
               )}
-              <Link 
-                to="/womens-health" 
-                className={`transition-colors ${
-                  isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Women's Health
-              </Link>
+              {shouldShowWomensHealth && (
+                <Link 
+                  to="/womens-health" 
+                  className={`transition-colors ${
+                    isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Women's Health
+                </Link>
+              )}
               <Link 
                 to="/shop" 
                 className={`transition-colors ${

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OnboardingStep1 from '../../components/OnboardingSteps/Step1';
 import OnboardingStep2 from '../../components/OnboardingSteps/Step2';
 import OnboardingStep3 from '../../components/OnboardingSteps/Step3';
 import ProgressBar from '../../components/Ui/ProcessBar';
+import { useRecoilValue } from 'recoil';
+import userAtom from '../../atoms/UserAtom';
 
 interface UserProfileData {
   fullName: string;
@@ -19,6 +21,17 @@ const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<UserProfileData>>({});
   const navigate = useNavigate();
+  const user = useRecoilValue(userAtom);
+
+  // Initialize form data with user's name if available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: `${user.firstName} ${user.lastName}`
+      }));
+    }
+  }, [user]);
 
   const updateFormData = (newData: Partial<UserProfileData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
@@ -36,11 +49,27 @@ const OnboardingPage: React.FC = () => {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <OnboardingStep1 data={formData} updateData={updateFormData} nextStep={nextStep} />;
+        return <OnboardingStep1 
+                 data={formData} 
+                 updateData={updateFormData} 
+                 nextStep={nextStep} 
+                 userName={user ? `${user.firstName} ${user.lastName}` : ''} 
+               />;
       case 2:
-        return <OnboardingStep2 data={formData} updateData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+        return <OnboardingStep2 
+                 data={formData} 
+                 updateData={updateFormData} 
+                 nextStep={nextStep} 
+                 prevStep={prevStep} 
+               />;
       case 3:
-        return <OnboardingStep3 data={formData} updateData={updateFormData} prevStep={prevStep} onSubmit={handleSubmit} isLoading={false} />;
+        return <OnboardingStep3 
+                 data={formData} 
+                 updateData={updateFormData} 
+                 prevStep={prevStep} 
+                 onSubmit={handleSubmit} 
+                 isLoading={false} 
+               />;
       default:
         return null;
     }
@@ -50,7 +79,9 @@ const OnboardingPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600">Welcome to FitLife!</h1>
+          <h1 className="text-3xl font-bold text-indigo-600">
+            {user ? `Welcome, ${user.firstName}!` : 'Welcome to FitLife!'}
+          </h1>
           <p className="mt-2 text-gray-600">Let's set up your profile</p>
         </div>
         

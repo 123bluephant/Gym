@@ -17,6 +17,11 @@ import HomeDashboard from './pages/HomeDashboard';
 import OnboardingPage from './pages/OnBoaring/OnboardingPage';
 import Calories from './pages/CaloriesPage';
 import ProfilePage from './pages/OnBoaring/Profilepage1';
+import Community from './pages/Community';
+import PrivacyPolicy from './pages/Privacypolicy';
+import TermsOfService from './pages/termsandconditions';
+import HelpCenter from './pages/Helpcenter';
+import ContactUs from './pages/Contactus';
 
 function App() {
   return (
@@ -31,7 +36,7 @@ function App() {
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/dashboard" element={<HomeDashboard onShowFeed={function (): void {
               throw new Error('Function not implemented.');
-            } } />} />
+            }} />} />
             <Route path="/workouts" element={<WorkoutsPage />} />
             <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
             <Route path="/nutrition" element={<NutritionPage />} />
@@ -42,6 +47,12 @@ function App() {
             <Route path="/shop/:id" element={<ProductDetailPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/term" element={<TermsOfService />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/contact" element={<ContactUs />} />
+
           </Routes>
         </main>
         <Footer />
