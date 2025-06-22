@@ -19,8 +19,8 @@ const LoginPage: React.FC = () => {
   const primaryDark = '#B56DCE';
   const primaryLight = '#E8B5F2';
 
-  
- const handleLogin = async (data: AuthFormData) => {
+
+  const handleLogin = async (data: AuthFormData) => {
     setIsLoading(true);
     setError(undefined);
 
@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
 
       if (response.ok) {
         setuser(body.user)
-        localStorage.setItem('user',JSON.stringify(body.user))
+        localStorage.setItem('user', JSON.stringify(body.user))
         navigate('/onboarding');
       }
       setError(body.message || "Login failed");
@@ -54,14 +54,14 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       {/* Left Side - Gym Animation */}
-      <div 
+      <div
         className="hidden md:flex md:w-1/2 items-center justify-center p-8"
         style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryDark})` }}
       >
         <div className="max-w-md text-center">
-          <Lottie 
-            animationData={gymAnimation} 
-            loop={true} 
+          <Lottie
+            animationData={gymAnimation}
+            loop={true}
             className="w-full h-64"
           />
           <h2 className="mt-6 text-3xl font-bold text-white">
@@ -80,11 +80,11 @@ const LoginPage: React.FC = () => {
             title="Sign in to your account"
             subtitle="New to our platform? Start your journey today"
           >
-            <LoginForm 
-              onSubmit={handleLogin} 
-              isLoading={isLoading} 
+            <LoginForm
+              onSubmit={handleLogin}
+              isLoading={isLoading}
               error={error}
-            />    
+            />
             {/* Social Login Divider */}
             <div className="mt-6">
               <div className="relative">
@@ -124,8 +124,8 @@ const LoginPage: React.FC = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link 
-                  to="/signup" 
+                <Link
+                  to="/signup"
                   style={{ color: primaryColor }}
                   className="font-medium hover:underline"
                 >

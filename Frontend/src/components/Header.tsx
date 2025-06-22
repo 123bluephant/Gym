@@ -8,6 +8,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [user, setUser] = useRecoilState(userAtom);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -18,31 +19,37 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
-  const [user, setUser] = useRecoilState(userAtom);
   const handleLogout = async () => {
     try {
-      const res = await fetch(
-        "/api/user/logout",
-        {
-          credentials: "include",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await fetch("/api/user/logout", {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (res.ok) {
         setUser(null);
         localStorage.removeItem("user");
         navigate("/");
       }
     } catch (error) {
-      console.log(error);
+      console.error('Logout failed:', error);
     }
   };
 
-  // Check if user is male to hide Women's Health section
-  const shouldShowWomensHealth = !user || user.gender !== 'male';
+  // Determine if Women's Health should be shown
+  const showWomensHealth = !user || user.gender !== 'male';
+
+  // Navigation items configuration
+  const navItems = [
+    { path: '/workouts', label: 'Workouts' },
+    { path: '/nutrition', label: 'Nutrition' },
+    { path: '/tracking', label: 'Tracking' },
+    ...(user ? [{ path: '/calories', label: 'Calories' }] : []),
+    ...(showWomensHealth ? [{ path: '/womens-health', label: 'Women\'s Health' }] : []),
+    { path: '/shop', label: 'Shop' },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
@@ -58,58 +65,17 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/workouts" 
-              className={`transition-colors ${
-                isActive('/workouts') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-              }`}
-            >
-              Workouts
-            </Link>
-            <Link 
-              to="/nutrition" 
-              className={`transition-colors ${
-                isActive('/nutrition') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-              }`}
-            >
-              Nutrition
-            </Link>
-            <Link 
-              to="/tracking" 
-              className={`transition-colors ${
-                isActive('/tracking') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-              }`}
-            >
-              Tracking
-            </Link>
-            {user && (
-              <Link 
-                to="/calories" 
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
                 className={`transition-colors ${
-                  isActive('/calories') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                  isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
                 }`}
               >
-                Calories
+                {item.label}
               </Link>
-            )}
-            {shouldShowWomensHealth && (
-              <Link 
-                to="/womens-health" 
-                className={`transition-colors ${
-                  isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-              >
-                Women's Health
-              </Link>
-            )}
-            <Link 
-              to="/shop" 
-              className={`transition-colors ${
-                isActive('/shop') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-              }`}
-            >
-              Shop
-            </Link>
+            ))}
           </nav>
 
           {/* Desktop Actions */}
@@ -145,6 +111,7 @@ const Header = () => {
           <button 
             className="md:hidden p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -154,64 +121,19 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
-              <Link 
-                to="/workouts" 
-                className={`transition-colors ${
-                  isActive('/workouts') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Workouts
-              </Link>
-              <Link 
-                to="/nutrition" 
-                className={`transition-colors ${
-                  isActive('/nutrition') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Nutrition
-              </Link>
-              <Link 
-                to="/tracking" 
-                className={`transition-colors ${
-                  isActive('/tracking') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Tracking
-              </Link>
-              {user && (
-                <Link 
-                  to="/calories" 
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
                   className={`transition-colors ${
-                    isActive('/calories') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                    isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Calories
+                  {item.label}
                 </Link>
-              )}
-              {shouldShowWomensHealth && (
-                <Link 
-                  to="/womens-health" 
-                  className={`transition-colors ${
-                    isActive('/womens-health') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Women's Health
-                </Link>
-              )}
-              <Link 
-                to="/shop" 
-                className={`transition-colors ${
-                  isActive('/shop') ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Shop
-              </Link>
+              ))}
+              
               <div className="flex items-center space-x-4 pt-4">
                 <Link to="/shop" className="flex items-center space-x-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                   <ShoppingCart className="w-5 h-5" />
