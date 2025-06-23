@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfileData } from '../../pages/OnBoaring/OnboardingPage';
 import { User } from 'lucide-react';
 
-interface OnboardingStep1Props {
-  data: Partial<UserProfileData>;
-  updateData: (data: Partial<UserProfileData>) => void;
-  nextStep: () => void;
-  userName: string;
-}
 
-const OnboardingStep1: React.FC<OnboardingStep1Props> = ({ data, updateData, nextStep, userName }) => {
+const OnboardingStep1: React.FC<any> = ({ data, updateData, nextStep, userName }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isInitialized, setIsInitialized] = useState(false);
 

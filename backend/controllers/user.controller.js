@@ -1,43 +1,40 @@
+import GymOwner from "../Models/GymOwner.js";
 import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
+// controllers/user.controller.js
 export const register = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      username,
-      fullName,
-      location,
-      fitnessGoals,
-      gender,
-      dob,
-      height,
-      weight,
-      role,
-      periodTrackingOptIn,
-    } = req.body;
+    const { role, gender, dob, email, password, username, fullName } = req.body;
 
+    // 1. Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      email,
-      password: hashedPassword,
-      username,
-      name: fullName,
-      location,
-      fitnessGoals,
-      gender,
-      dob,
-      height,
-      weight,
-      role,
-      periodTrackingOptIn,
-    });
+    // 2. Create new user
+    let user;
+    if (role !== "gym_owner") {
+      user = new User({
+        email,
+        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
+        username,
+        name: fullName,
+        role,
+        gender,
+        dob,
+      });
+    } else {
+      user = new GymOwner({
+        email,
+        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
+        username,
+        name: fullName,
+        role,gender,
+        dob,
+      });
+    }
 
     await user.save();
 
@@ -50,27 +47,26 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({
-      message: "Registration failed",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Registration failed", error: error.message });
   }
 };
-
 
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ err: "All fields are required" });
     }
 
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
     if (!user) {
+      user = await GymOwner.findOne({ email });
+    }
+     if(!user) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
-    console.log(user.password, password);
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {

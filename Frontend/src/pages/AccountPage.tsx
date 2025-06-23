@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Settings, Activity, Heart, ShoppingBag, Award, Lock, CreditCard } from 'lucide-react';
 import axios from 'axios';
+import { useRecoilValue } from 'recoil';
+import userAtom from '../atoms/UserAtom';
 
 interface UserProfile {
   id: string;
@@ -53,7 +55,7 @@ const AccountPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const userProfile = useRecoilValue(userAtom);
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -79,7 +81,6 @@ const AccountPage = () => {
           axios.get('/api/achievements')
         ]);
 
-        setUserProfile(profileRes.data);
         setRecentActivity(activityRes.data);
         setOrders(ordersRes.data);
         setAchievements(achievementsRes.data);
@@ -152,7 +153,7 @@ const AccountPage = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {userProfile.firstName} {userProfile.lastName}
+                {userProfile.fullName} {userProfile.lastName}
               </h1>
               <p className="text-gray-600">Member since {new Date(userProfile.joinDate).toLocaleDateString()}</p>
               <div className="flex items-center space-x-4 mt-2">

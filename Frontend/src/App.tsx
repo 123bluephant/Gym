@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -21,8 +21,12 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
+import { useRecoilValue } from 'recoil';
+import userAtom from './atoms/UserAtom';
 
 function App() {
+  const user = useRecoilValue(userAtom);
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
@@ -30,28 +34,50 @@ function App() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/dashboard" element={<HomeDashboard onShowFeed={function (): void {
-              throw new Error('Function not implemented.');
-            }} />} />
-            <Route path="/workouts" element={<WorkoutsPage />} />
-            <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
-            <Route path="/nutrition" element={<NutritionPage />} />
-            <Route path="/tracking" element={<TrackingPage />} />
-            <Route path="/womens-health" element={<WomensHealthPage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/Calories" element={<Calories />} />
-            <Route path="/shop/:id" element={<ProductDetailPage />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/community" element={<Community />} />
+
+            {!user && <Route path="/login" element={<LoginPage />} />}
+            {!user && <Route path="/signup" element={<SignupPage />} />}
+            {user && <Route path="/onboarding" element={<OnboardingPage />} />}
+            {user && user.gender === "female"  ? (
+              <Route path="/womens-health" element={<WomensHealthPage />} />
+            ) : (
+              <Route path="/womens-health" element={<Navigate to="/" />} />
+            )}
+            {user ? (
+              <>
+                <Route path="/dashboard" element={<HomeDashboard onShowFeed={() => { }} />} />
+                <Route path="/workouts" element={<WorkoutsPage />} />
+                <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
+                <Route path="/nutrition" element={<NutritionPage />} />
+                <Route path="/tracking" element={<TrackingPage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/Calories" element={<Calories />} />
+                <Route path="/shop/:id" element={<ProductDetailPage />} />
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/community" element={<Community />} />
+              </>
+            ) : (
+              // 🔁 Fallback redirect for any protected route
+              <>
+                <Route path="/dashboard" element={<Navigate to="/login" />} />
+                <Route path="/workouts" element={<Navigate to="/login" />} />
+                <Route path="/workouts/:id" element={<Navigate to="/login" />} />
+                <Route path="/nutrition" element={<Navigate to="/login" />} />
+                <Route path="/tracking" element={<Navigate to="/login" />} />
+                <Route path="/shop" element={<Navigate to="/login" />} />
+                <Route path="/Calories" element={<Navigate to="/login" />} />
+                <Route path="/shop/:id" element={<Navigate to="/login" />} />
+                <Route path="/account" element={<Navigate to="/login" />} />
+                <Route path="/profile" element={<Navigate to="/login" />} />
+                <Route path="/community" element={<Navigate to="/login" />} />
+              </>
+            )}
+
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/term" element={<TermsOfService />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<ContactUs />} />
-
           </Routes>
         </main>
         <Footer />

@@ -28,13 +28,9 @@ export interface SignupFormData {
   username: string;
   fullName: string;
   gender: string;
-  height: number;
-  weight: number;
   dob: string;
-  location: string;
-  fitnessGoals: string[];
-  acceptTerms: boolean;
-  role: "user" | "gym_owner" | "admin"; // ✅ add this
+  acceptTerms:boolean;
+  role: "user" | "gym_owner"; 
 }
 
 

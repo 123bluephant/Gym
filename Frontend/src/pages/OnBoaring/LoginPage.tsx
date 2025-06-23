@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: data.email.trim(),
+          email: data.email,
           password: data.password,
         }),
       });
@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
       if (response.ok) {
         setuser(body.user)
         localStorage.setItem('user', JSON.stringify(body.user))
-        navigate('/onboarding');
+        navigate('/dashboard');
       }
       setError(body.message || "Login failed");
     } catch (err) {
