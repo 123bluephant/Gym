@@ -7,36 +7,22 @@ import OnboardingStep2 from '../../components/OnboardingSteps/Step2';
 import OnboardingStep3 from '../../components/OnboardingSteps/Step3';
 import ProgressBar from '../../components/Ui/ProcessBar';
 
-interface UserProfileData {
-  fullName: string;
-  age: number;
-  gender: 'male' | 'female' | 'other' | 'prefer-not-to-say';
-  fitnessLevel: 'beginner' | 'intermediate' | 'advanced';
-  goals: string[];
-  injuries: string;
-  availability: string[];
-}
 
 const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<Partial<UserProfileData>>({});
+  const [formData, setFormData] = useState<any>({});
   const navigate = useNavigate();
   const user = useRecoilValue(userAtom);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize form data with user's information
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
-        ...prev,
-        fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-        gender: user.gender // Use the gender from userAtom if available
-      }));
+      setFormData(user);
     }
     setIsInitialized(true);
   }, [user]);
 
-  const updateFormData = (newData: Partial<UserProfileData>) => {
+  const updateFormData = (newData: any) => {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
@@ -98,7 +84,7 @@ const OnboardingPage: React.FC = () => {
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-600">
-            {user?.firstName ? `Welcome, ${user.firstName}!` : 'Welcome to FitLife!'}
+            {user?.username ? `Welcome, ${user.username}!` : 'Welcome to FitLife!'}
           </h1>
           <p className="mt-2 text-gray-600">Let's set up your profile</p>
         </div>

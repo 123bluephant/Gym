@@ -1,3 +1,4 @@
+import GymOwner from "../Models/GymOwner.js";
 import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
@@ -5,15 +6,7 @@ import bcrypt from "bcrypt";
 // controllers/user.controller.js
 export const register = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      username,
-      fullName,
-      location,
-      fitnessGoals,
-      membershipPlan,
-    } = req.body;
+    const { role, gender, dob, email, password, username, fullName } = req.body;
 
     // 1. Check if user exists
     const existingUser = await User.findOne({ email });
@@ -21,15 +14,27 @@ export const register = async (req, res) => {
       return res.status(409).json({ message: "Email already exists" });
     }
     // 2. Create new user
-    const user = new User({
-      email,
-      password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
-      username,
-      location,
-      fitnessGoals: fitnessGoals, // Convert back to array if needed
-      membershipPlan,
-      name: fullName,
-    });
+    let user;
+    if (role !== "gym_owner") {
+      user = new User({
+        email,
+        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
+        username,
+        name: fullName,
+        role,
+        gender,
+        dob,
+      });
+    } else {
+      user = new GymOwner({
+        email,
+        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
+        username,
+        name: fullName,
+        role,gender,
+        dob,
+      });
+    }
 
     await user.save();
 
@@ -51,16 +56,17 @@ export const register = async (req, res) => {
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ err: "All fields are required" });
     }
 
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
     if (!user) {
+      user = await GymOwner.findOne({ email });
+    }
+     if(!user) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
-    console.log(user.password, password);
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {

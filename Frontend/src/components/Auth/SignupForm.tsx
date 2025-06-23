@@ -4,12 +4,15 @@ import Button from '../Ui/Button';
 
 interface SignupFormProps {
   values: {
+    dob: string;
+    gender: string;
     email: string;
     username: string;
     password: string;
     confirmPassword: string;
     fullName?: string;
     acceptTerms?: boolean;
+    role: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -33,6 +36,37 @@ const SignupForm: React.FC<SignupFormProps> = ({
           {error}
         </div>
       )}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Registering As*
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          {["user", "gym_owner"].map((option) => {
+            const isSelected = values.role === option;
+            return (
+              <label
+                key={option}
+                className={`flex items-center justify-center border px-4 py-3 rounded-lg cursor-pointer transition-all
+            ${isSelected
+                    ? "border-purple-600 bg-purple-100 text-purple-800 font-semibold"
+                    : "border-gray-300 bg-white text-gray-700 hover:border-purple-300"
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={option}
+                  checked={isSelected}
+                  onChange={onChange}
+                  className="hidden"
+                />
+                <span className="capitalize">{option.replace("_", " ")}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
 
       <Input
         label="Username"
@@ -44,6 +78,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
         minLength={3}
       />
 
+
       <Input
         label="Full Name"
         name="fullName"
@@ -51,7 +86,50 @@ const SignupForm: React.FC<SignupFormProps> = ({
         onChange={onChange}
         autoComplete="name"
       />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Gender*
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          {["male", "female"].map((genderOption) => {
+            const isSelected = values.gender === genderOption;
+            return (
+              <label
+                key={genderOption}
+                className={`flex items-center justify-center border px-4 py-3 rounded-lg cursor-pointer transition-all
+            ${isSelected
+                    ? "border-purple-600 bg-purple-100 text-purple-800 font-semibold"
+                    : "border-gray-300 bg-white text-gray-700 hover:border-purple-300"
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="gender"
+                  value={genderOption}
+                  checked={isSelected}
+                  onChange={onChange}
+                  className="hidden"
+                />
+                <span className="capitalize">{genderOption}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
 
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Date of Birth
+        </label>
+        <input
+          type="date"
+          name="dob"
+          value={values.dob}
+          onChange={onChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          max={new Date().toISOString().split("T")[0]}
+        />
+      </div>
       <Input
         label="Email Address"
         name="email"
@@ -82,6 +160,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
         autoComplete="new-password"
         required
       />
+      
 
       <div className="flex items-center mb-4">
         <input
@@ -91,16 +170,18 @@ const SignupForm: React.FC<SignupFormProps> = ({
           checked={values.acceptTerms || false}
           onChange={onChange}
           className="h-4 w-4 rounded border-gray-300 focus:ring-2"
-          style={{ 
+          style={{
             borderColor: primaryColor,
             color: primaryColor,
           }}
           required
         />
+
         <label htmlFor="accept-terms" className="ml-2 text-sm text-gray-700">
           I agree to the <a href="#" className="font-medium" style={{ color: primaryColor }}>Terms and Conditions</a>
         </label>
       </div>
+
       <Button
         type="submit"
         className="w-full"

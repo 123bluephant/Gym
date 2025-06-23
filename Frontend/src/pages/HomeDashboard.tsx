@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { Link } from "react-router-dom";
 import userAtom from "../atoms/UserAtom";
@@ -8,7 +8,10 @@ import FitnessCalendar from "../components/modal/FitnessCalendar";
 import TrackProgressModal from "../components/modal/TrackProgressModal";
 import AskCoachModal from "../components/modal/AskCoachModal";
 
+
+
 export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }) {
+ 
   const user = useRecoilValue(userAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [showTrackProgress, setShowTrackProgress] = useState(false);
@@ -17,7 +20,7 @@ export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }
   const [showEatToday, setShowEatToday] = useState(false);
 
   useEffect(() => {
-    // This ensures we don't show loading state if there's no user (logged out state)
+    console.log(onShowFeed)
     setIsLoading(false);
   }, [user]);
 
@@ -74,7 +77,7 @@ export default function HomeDashboard({ onShowFeed }: { onShowFeed: () => void }
       {/* Header with greeting and date */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          {user ? `Welcome back, ${user.firstName}!` : 'Welcome to FitLife!'}
+          {user ? `Welcome back, ${user.username}!` : 'Welcome to FitLife!'}
         </h1>
         <p className="text-gray-600 mt-2">
           Here's your personalized dashboard for {new Date().toLocaleDateString('en-US', { 

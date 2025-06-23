@@ -1,16 +1,24 @@
 // atoms/userAtom.ts
 import { atom } from "recoil";
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
+ interface User {
   email: string;
-  gender?: 'male' | 'female' | 'other' | 'prefer-not-to-say';
+  password: string;
+  confirmPassword: string;
+  username: string;
+  fullName: string;
+  gender: string;
+  height: number;
+  weight: number;
+  dob: string;
+  location: string;
+  fitnessGoals: string[];
+  acceptTerms: boolean;
+  role: string
 }
 
 const userAtom = atom<User | null>({
-  key: 'user',  // This key must be unique across your entire application
+  key: 'user',  
   default: (() => {
     try {
       const user = localStorage.getItem('user');
