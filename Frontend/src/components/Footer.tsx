@@ -1,105 +1,67 @@
+// src/components/Footer.js
 import React from 'react';
-import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">FitFlow</span>
-            </div>
-            <p className="text-gray-400 leading-relaxed">
-              Transform your body and mind with personalized fitness programs designed for every stage of your journey.
+    <footer className="bg-gray-900 text-white w-full">
+      <div className="mx-auto px-4 py-10 max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">FitFlow</h3>
+            <p className="mb-4 text-gray-300">
+              Transform your body and mind with personalized fitness programs.
             </p>
-            <div className="flex space-x-4">
-              <button className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Facebook className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Twitter className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Instagram className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Youtube className="w-5 h-5" />
-              </button>
-            </div>
+            <p className="text-gray-400">© {new Date().getFullYear()} FitFlow</p>
           </div>
 
-          {/* Programs */}
+          {/* Programs Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Programs</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Workout Videos</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Meal Planning</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Fitness Tracking</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Women's Health</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Personal Training</a></li>
+            <h3 className="text-xl font-bold mb-4">Programs</h3>
+            <ul className="space-y-2">
+              {['Workout Videos', 'Meal Planning', 'Fitness Tracking', 'Women\'s Health', 'Personal Training'].map(item => (
+                <li key={item} className="flex items-center">
+                  <span className="w-5 h-5 bg-blue-500 rounded-full mr-2 flex items-center justify-center text-xs">✓</span>
+                  <span>{item}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Support Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="/community" className="hover:text-white transition-colors">Community</a></li>
-              <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="/term" className="hover:text-white transition-colors">Terms of Service</a></li>
+            <h3 className="text-xl font-bold mb-4">Support</h3>
+            <ul className="space-y-2">
+              <li><Link to="/help" className="text-gray-300 hover:text-white">Help Center</Link></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-white">Contact Us</Link></li>
+              <li><Link to="/community" className="text-gray-300 hover:text-white">Community</Link></li>
+              <li><Link to="/privacy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
+              <li><Link to="/term" className="text-gray-300 hover:text-white">Terms of Service</Link></li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Newsletter */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <div className="space-y-3 text-gray-400">
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5" />
-                <span>hello@fitflow.com</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5" />
-                <span>San Francisco, CA</span>
-              </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold mb-4">Contact</h3>
+              <p className="text-gray-300">hello@fitflow.com</p>
+              <p className="text-gray-300">+1 (555) 123-4567</p>
+              <p className="text-gray-300">San Francisco, CA</p>
             </div>
-            
-            <div className="mt-6">
-              <h4 className="text-sm font-semibold mb-2">Newsletter</h4>
+            <div>
+              <h3 className="text-xl font-bold mb-4">Newsletter</h3>
               <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:border-purple-500"
+                <input 
+                  type="email" 
+                  placeholder="Your email" 
+                  className="px-4 py-2 rounded-l-lg w-full text-gray-800 focus:outline-none"
                 />
-                <button className="bg-purple-600 px-4 py-2 rounded-r-lg hover:bg-purple-700 transition-colors">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r-lg">
                   Subscribe
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © 2024 FitFlow. All rights reserved.
-          </p>
-          <div className="flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0">
-            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-            <a href="/term" className="hover:text-white transition-colors">Terms</a>
-            <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
-            <a href="#" className="hover:text-white transition-colors">Cookies</a>
           </div>
         </div>
       </div>

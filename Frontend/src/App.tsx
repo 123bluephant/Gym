@@ -1,5 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import userAtom from './atoms/UserAtom';
 import Header from './components/Header';
+import Sidebar from './components/sidebar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import WorkoutsPage from './pages/Workout/WorkoutsPage';
@@ -7,12 +10,11 @@ import NutritionPage from './pages/Workout/NutritionPage';
 import TrackingPage from './pages/Workout/TrackingPage';
 import WomensHealthPage from './pages/Workout/WomensHealthPage';
 import ShopPage from './pages/ShopPage';
-import AccountPage from './pages/AccountPage';
 import WorkoutDetailPage from './pages/Workout/WorkoutDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import LoginPage from './pages/OnBoaring/LoginPage';
 import SignupPage from './pages/OnBoaring/signupPage';
-import HomeDashboard from './pages/HomeDashboard';
+import HomeDashboard from './Dashboard/HomeDashboard';
 import OnboardingPage from './pages/OnBoaring/OnboardingPage';
 import Calories from './pages/CaloriesPage';
 import ProfilePage from './pages/OnBoaring/Profilepage1';
@@ -21,31 +23,53 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
-import { useRecoilValue } from 'recoil';
-import userAtom from './atoms/UserAtom';
+import { useState } from 'react';
 
-function App() {
+function AppContent() {
   const user = useRecoilValue(userAtom);
+  const location = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const isDashboard = location.pathname === '/dashboard';
+  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
+
+  const toggleSidebar = () => {
+      setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
+      <div className="relative flex h-screen w-full bg-white">
+          {/* Fixed Sidebar */}
+          {user && !isAuthPage && (
+              <div className={`fixed inset-y-0 left-0 h-screen z-10 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+                  <Sidebar onToggle={toggleSidebar} isCollapsed={isSidebarCollapsed} />
+              </div>
+          )}
+          
+          {/* Main Content Area */}
+          <div className={`flex flex-col flex-1 min-h-full transition-all duration-300 ${
+              user && !isAuthPage ? (isSidebarCollapsed ? 'ml-20' : 'ml-64') : ''
+          }`}>
+              {/* Header */}
+              {!user && !isDashboard && <Header />}
+          
+        
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto">
           <Routes>
+            {/* All route definitions remain the same */}
             <Route path="/" element={<HomePage />} />
-
             {!user && <Route path="/login" element={<LoginPage />} />}
             {!user && <Route path="/signup" element={<SignupPage />} />}
             {user && <Route path="/onboarding" element={<OnboardingPage />} />}
-            {user && user.gender === "female"  ? (
+            
+            {user?.gender === "female" && (
               <Route path="/womens-health" element={<WomensHealthPage />} />
-            ) : (
-              <Route path="/womens-health" element={<Navigate to="/" />} />
             )}
+
             {user ? (
               <>
-                <Route path="/dashboard" element={<HomeDashboard onShowFeed={() => { }} />} />
+                <Route path="/dashboard" element={<HomeDashboard />} />
                 <Route path="/workouts" element={<WorkoutsPage />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
@@ -53,12 +77,10 @@ function App() {
                 <Route path="/shop" element={<ShopPage />} />
                 <Route path="/Calories" element={<Calories />} />
                 <Route path="/shop/:id" element={<ProductDetailPage />} />
-                <Route path="/account" element={<AccountPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/community" element={<Community />} />
               </>
             ) : (
-              // 🔁 Fallback redirect for any protected route
               <>
                 <Route path="/dashboard" element={<Navigate to="/login" />} />
                 <Route path="/workouts" element={<Navigate to="/login" />} />
@@ -68,9 +90,9 @@ function App() {
                 <Route path="/shop" element={<Navigate to="/login" />} />
                 <Route path="/Calories" element={<Navigate to="/login" />} />
                 <Route path="/shop/:id" element={<Navigate to="/login" />} />
-                <Route path="/account" element={<Navigate to="/login" />} />
                 <Route path="/profile" element={<Navigate to="/login" />} />
                 <Route path="/community" element={<Navigate to="/login" />} />
+                <Route path="/womens-health" element={<Navigate to="/login" />} />
               </>
             )}
 
@@ -79,11 +101,27 @@ function App() {
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<ContactUs />} />
           </Routes>
-        </main>
-        <Footer />
+          
+          {/* Footer - appears at end of content */}
+          {!isDashboard && !isAuthPage && (
+            <div className="mt-auto">
+              <Footer />
+            </div>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
 
 export default App;
+
+

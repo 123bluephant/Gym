@@ -38,18 +38,34 @@ const Header = () => {
     }
   };
 
-  // Determine if Women's Health should be shown
-  const showWomensHealth = !user || user.gender !== 'male';
-
   // Navigation items configuration
-  const navItems = [
-    { path: '/workouts', label: 'Workouts' },
-    { path: '/nutrition', label: 'Nutrition' },
-    { path: '/tracking', label: 'Tracking' },
-    ...(user ? [{ path: '/calories', label: 'Calories' }] : []),
-    ...(showWomensHealth ? [{ path: '/womens-health', label: 'Women\'s Health' }] : []),
-    { path: '/shop', label: 'Shop' },
-  ];
+  const getNavItems = () => {
+    const baseItems = [
+      { path: '/workouts', label: 'Workouts' },
+      { path: '/nutrition', label: 'Nutrition' },
+      { path: '/shop', label: 'Shop' },
+    ];
+
+    // For logged-in users
+    if (user) {
+      const userSpecificItems = [
+        { path: '/tracking', label: 'Tracking' },
+        { path: '/calories', label: 'Calories' },
+      ];
+
+      // Add Women's Health only for female users
+      if (user.gender === 'female') {
+        userSpecificItems.push({ path: '/womens-health', label: 'Women\'s Health' });
+      }
+
+      return [...baseItems, ...userSpecificItems];
+    }
+
+    // For non-logged-in users
+    return baseItems;
+  };
+
+  const navItems = getNavItems();
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
@@ -80,10 +96,12 @@ const Header = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/shop" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-            </Link>
+            {user && (
+              <Link to="/shop" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+              </Link>
+            )}
             
             {user ? (
               <>
@@ -98,12 +116,17 @@ const Header = () => {
                 </button>
               </>
             ) : (
-              <button 
-                onClick={handleGetStarted}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all"
-              >
-                Get Started
-              </button>
+              <>
+                <Link to="/login" className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors">
+                  Login
+                </Link>
+                <button 
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all"
+                >
+                  Sign Up
+                </button>
+              </>
             )}
           </div>
 
@@ -134,36 +157,47 @@ const Header = () => {
                 </Link>
               ))}
               
-              <div className="flex items-center space-x-4 pt-4">
-                <Link to="/shop" className="flex items-center space-x-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>Cart (3)</span>
-                </Link>
+              <div className="flex flex-col space-y-4 pt-4">
+                {user && (
+                  <Link to="/shop" className="flex items-center space-x-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>Cart (3)</span>
+                  </Link>
+                )}
                 
                 {user ? (
                   <>
                     <Link 
-                      to="/account" 
+                      to="/profile" 
                       className="flex items-center space-x-2 text-gray-700"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />
-                      <span>Account</span>
+                      <span>Profile</span>
                     </Link>
                     <button 
                       onClick={handleLogout}
-                      className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
+                      className="text-left text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
                     >
                       Logout
                     </button>
                   </>
                 ) : (
-                  <button 
-                    onClick={handleGetStarted}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Get Started
-                  </button>
+                  <>
+                    <Link 
+                      to="/login" 
+                      className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <button 
+                      onClick={handleGetStarted}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg"
+                    >
+                      Sign Up
+                    </button>
+                  </>
                 )}
               </div>
             </nav>
