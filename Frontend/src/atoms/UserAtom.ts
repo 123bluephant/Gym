@@ -2,6 +2,7 @@
 import { atom } from "recoil";
 
  interface User {
+  [x: string]: string;
   email: string;
   password: string;
   confirmPassword: string;
