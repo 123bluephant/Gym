@@ -2,7 +2,6 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-// controllers/user.controller.js
 export const register = async (req, res) => {
   try {
     const {
@@ -12,23 +11,32 @@ export const register = async (req, res) => {
       fullName,
       location,
       fitnessGoals,
-      membershipPlan,
+      gender,
+      dob,
+      height,
+      weight,
+      role,
+      periodTrackingOptIn,
     } = req.body;
 
-    // 1. Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    // 2. Create new user
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
       email,
-      password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
+      password: hashedPassword,
       username,
-      location,
-      fitnessGoals: fitnessGoals, // Convert back to array if needed
-      membershipPlan,
       name: fullName,
+      location,
+      fitnessGoals,
+      gender,
+      dob,
+      height,
+      weight,
+      role,
+      periodTrackingOptIn,
     });
 
     await user.save();
@@ -42,11 +50,13 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    res
-      .status(500)
-      .json({ message: "Registration failed", error: error.message });
+    res.status(500).json({
+      message: "Registration failed",
+      error: error.message,
+    });
   }
 };
+
 
 const loginController = async (req, res) => {
   try {

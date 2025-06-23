@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  username:{
+  username: {
     type: String,
     required: true,
     unique: true,
@@ -15,22 +15,48 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  location:{
-    type: String,
-    required: true,
-  },
   password: {
     type: String,
     required: true,
   },
-  fitnessGoals:{
+  gender: {
+    type: String,
+    enum: ["male", "female"],
+    required: true,
+  },
+  dob: {
+    type: String, // you can use Date if needed
+    required: true,
+  },
+  height: {
+    type: Number,
+    required: true,
+  },
+  weight: {
+    type: Number,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  fitnessGoals: {
     type: [String],
     required: true,
   },
-  membershipPlan:{
+  periodTrackingOptIn: {
+    type: Boolean,
+    default: false,
+  },
+  role: {
     type: String,
-    required: true,
-  }
-},{timestamps:true});
+    enum: ["user", "gym_owner", "admin"],
+    default: "user",
+  },
+  membershipPlan: {
+    type: String,
+    required: false,  
+  },
+}, { timestamps: true });
 
-export default mongoose.model('User', UserSchema)
+export default mongoose.model("User", UserSchema);

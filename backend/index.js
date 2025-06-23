@@ -4,6 +4,12 @@ import 'dotenv/config'
 import { connectdb } from "./db/db.js";
 import cookieParser from "cookie-parser"
 import UserRoute from "./route/user.route.js"
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use(cors({
@@ -15,14 +21,15 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 connectdb();
 
-app.use('/api/user',UserRoute)
+app.use('/api/user', UserRoute);
+
 
 const port = process.env.PORT
 if(process.env.NODE_ENV === 'production'){
-    app.use(express.static(path.join(_dirname, '/Frontend/dist')));
+    app.use(express.static(path.join(__dirname, '/Frontend/dist')));
 
     app.get('*', (req, res) => {
-        res.sendFile(path.resolve(_dirname, 'Frontend', 'dist', 'index.html'));
+        res.sendFile(path.resolve(__dirname, 'Frontend', 'dist', 'index.html'));
     })
 }
 app.listen(port,()=>{

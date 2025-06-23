@@ -27,11 +27,17 @@ export interface SignupFormData {
   confirmPassword: string;
   username: string;
   fullName: string;
+  gender: string;
+  height: number;
+  weight: number;
+  dob: string;
   location: string;
-  fitnessGoals: string[]; // Changed to required array
-  membershipPlan: string;
-  acceptTerms: boolean; // Changed to required
+  fitnessGoals: string[];
+  acceptTerms: boolean;
+  role: "user" | "gym_owner" | "admin"; // ✅ add this
 }
+
+
 
 // API response structure
 export interface AuthResponse {

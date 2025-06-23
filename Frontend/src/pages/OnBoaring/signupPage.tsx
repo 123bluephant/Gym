@@ -20,11 +20,16 @@ const SignupPage: React.FC = () => {
     password: "",
     confirmPassword: "",
     fullName: "",
+    gender: "",
+    weight: 0,
+    height: 0,
+    dob: "",
     location: "",
     fitnessGoals: [],
-    membershipPlan: "",
     acceptTerms: false,
+    role: "user", // default role
   });
+
 
   const primaryColor = "#D68CE8";
   const primaryDark = "#B56DCE";
@@ -113,24 +118,23 @@ const SignupPage: React.FC = () => {
             {step === 1
               ? "Join Our Community"
               : step === 2
-              ? "Personalize Your Journey"
-              : "Complete Your Profile"}
+                ? "Personalize Your Journey"
+                : "Complete Your Profile"}
           </h2>
           <p className="mt-4 text-white text-opacity-90">
             {step === 1
               ? "Start your fitness transformation today"
               : step === 2
-              ? "Help us create your perfect workout plan"
-              : "Review your preferences and get started"}
+                ? "Help us create your perfect workout plan"
+                : "Review your preferences and get started"}
           </p>
           <div className="mt-8 flex justify-center">
             <div className="flex space-x-2">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className={`h-2 w-8 rounded-full ${
-                    i <= step ? "bg-white" : "bg-white bg-opacity-30"
-                  }`}
+                  className={`h-2 w-8 rounded-full ${i <= step ? "bg-white" : "bg-white bg-opacity-30"
+                    }`}
                 />
               ))}
             </div>
@@ -145,8 +149,8 @@ const SignupPage: React.FC = () => {
               step === 1
                 ? "Create Account"
                 : step === 2
-                ? "Your Preferences"
-                : "Membership Options"
+                  ? "Your Preferences"
+                  : "Membership Options"
             }
             subtitle={step < 3 ? `Step ${step} of 3` : "Final details"}
           >
@@ -244,48 +248,95 @@ const SignupPage: React.FC = () => {
             {/* Step 3 */}
             {step === 3 && (
               <div className="space-y-6">
+                {/* GENDER SELECTION */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Membership Plan*
+                    Gender*
                   </label>
-                  <div className="space-y-3">
-                    {["basic", "standard", "premium"].map((plan) => (
-                      <label
-                        key={plan}
-                        className={`block border rounded-lg p-4 hover:border-purple-300 ${
-                          formData.membershipPlan === plan
-                            ? "border-purple-500"
-                            : "border-gray-300"
-                        }`}
-                      >
-                        <div className="flex items-start">
-                          <input
-                            type="radio"
-                            name="membershipPlan"
-                            value={plan}
-                            checked={formData.membershipPlan === plan}
-                            onChange={handleInputChange}
-                            className="mt-1 h-4 w-4 border-gray-300"
-                          />
-                          <div className="ml-3">
-                            <div className="flex justify-between">
-                              <span className="font-medium text-gray-700 capitalize">
-                                {plan}
-                              </span>
-                              <span className="font-medium text-purple-500">
-                                {plan === "basic"
-                                  ? "$29/month"
-                                  : plan === "standard"
-                                  ? "$49/month"
-                                  : "$79/month"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="flex space-x-4">
+                    {["male", "female"].map((genderOption) => (
+                      <label key={genderOption} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={genderOption}
+                          checked={formData.gender === genderOption}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 border-gray-300"
+                        />
+                        <span className="ml-2 text-gray-700 capitalize">
+                          {genderOption}
+                        </span>
                       </label>
                     ))}
                   </div>
                 </div>
+
+                {/* Optional fields (age, height, weight) */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      max={new Date().toISOString().split("T")[0]} // disallow future dates
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Height (cm)
+                    </label>
+                    <input
+                      type="number"
+                      name="height"
+                      value={formData.height || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Weight (kg)
+                    </label>
+                    <input
+                      type="number"
+                      name="weight"
+                      value={formData.weight || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Registering As*
+                  </label>
+                  <div className="space-y-2">
+                    {["user", "gym_owner", "admin"].map((option) => (
+                      <label key={option} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="role"
+                          value={option}
+                          checked={formData.role === option}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 border-gray-300"
+                        />
+                        <span className="ml-2 text-gray-700 capitalize">
+                          {option.replace("_", " ")}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Buttons */}
                 <div className="pt-4 space-y-4">
                   <button
                     type="button"
@@ -299,7 +350,7 @@ const SignupPage: React.FC = () => {
                     onClick={handleFinalSubmit}
                     className="w-full px-4 py-2 rounded-md text-sm font-medium text-white hover:opacity-90"
                     style={{ backgroundColor: primaryColor }}
-                    disabled={isLoading || !formData.membershipPlan}
+                    disabled={isLoading || !formData.gender}
                   >
                     {isLoading ? "Processing..." : "Complete Registration"}
                   </button>
