@@ -4,40 +4,58 @@ import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
 // controllers/user.controller.js
-export const register = async (req, res) => {
+export const register_gym = async (req, res) => {
   try {
-    const { role, gender, dob, email, password, username, fullName } = req.body;
-
-    // 1. Check if user exists
+    const { gender, dob, email, password, username, fullName } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    // 2. Create new user
-    let user;
-    if (role !== "gym_owner") {
-      user = new User({
-        email,
-        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
-        username,
-        name: fullName,
-        role,
-        gender,
-        dob,
-      });
-    } else {
-      user = new GymOwner({
-        email,
-        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
-        username,
-        name: fullName,
-        role,gender,
-        dob,
-      });
-    }
+
+    const user = new GymOwner({
+      email,
+      password: await bcrypt.hash(password, 10), 
+      username,
+      name: fullName,
+      role: "gym_owner",
+      gender,
+      dob,
+    });
 
     await user.save();
 
+    generateCookie(user._id, res);
+    const { password: _, ...userData } = user.toObject();
+
+    res.status(201).json({
+      message: "Registration successful",
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res
+      .status(500)
+      .json({ message: "Registration failed", error: error.message });
+  }
+};
+
+export const register_user = async (req, res) => {
+  try {
+    const { gender, dob, email, password, username, fullName } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+    const user = new User({
+      email,
+      password: await bcrypt.hash(password, 10), 
+      username,
+      name: fullName,
+      role: "user",
+      gender,
+      dob,
+    });
+    await user.save();
     generateCookie(user._id, res);
     const { password: _, ...userData } = user.toObject();
 
@@ -64,7 +82,7 @@ const loginController = async (req, res) => {
     if (!user) {
       user = await GymOwner.findOne({ email });
     }
-     if(!user) {
+    if (!user) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
 

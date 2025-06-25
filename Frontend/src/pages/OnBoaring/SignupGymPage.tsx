@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import userAtom from "../../atoms/UserAtom";
 
-const SignupPage: React.FC = () => {
+const SignupGymPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const setUser = useSetRecoilState(userAtom);
@@ -46,7 +46,7 @@ const SignupPage: React.FC = () => {
     setError(undefined);
 
     try {
-      const response = await fetch("/api/user/register/user", {
+      const response = await fetch("/api/user/register/gym_owner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -103,4 +103,4 @@ const SignupPage: React.FC = () => {
   );
 };
 
-export default SignupPage;
+export default SignupGymPage;
