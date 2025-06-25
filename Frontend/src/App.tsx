@@ -24,6 +24,7 @@ import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
 import { useState } from 'react';
+import SignupGymPage from './pages/OnBoaring/SignupGymPage';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -61,6 +62,7 @@ function AppContent() {
             <Route path="/" element={<HomePage />} />
             {!user && <Route path="/login" element={<LoginPage />} />}
             {!user && <Route path="/signup" element={<SignupPage />} />}
+            {!user && <Route path="/signup/gymowner" element={<SignupGymPage />} />}
             {user && <Route path="/onboarding" element={<OnboardingPage />} />}
             
             {user?.gender === "female" && (
