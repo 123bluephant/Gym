@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, Clock, Target, Users, ChevronRight, Filter, Search, Star } from 'lucide-react';
+interface WorkoutsPageProps {
+  isLoggedIn?: boolean; // Add this prop to determine login status
+}
 
-const WorkoutsPage = () => {
+const WorkoutsPage: React.FC<WorkoutsPageProps> = ({ isLoggedIn = false }) => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeLevel, setActiveLevel] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -149,13 +152,13 @@ const WorkoutsPage = () => {
   };
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
+     <div className={`${isLoggedIn ? '' : 'pt-16'} min-h-screen bg-gray-50`}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-600 to-pink-600 text-white py-20">
+      <section className={`bg-gradient-to-br from-purple-600 to-pink-600 text-white ${isLoggedIn ? 'py-12' : 'py-20'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">Workout Library</h1>
-            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            <h1 className={`${isLoggedIn ? 'text-4xl' : 'text-5xl'} font-bold mb-6`}>Workout Library</h1>
+            <p className={`${isLoggedIn ? 'text-lg' : 'text-xl'} text-purple-100 max-w-3xl mx-auto`}>
               Discover thousands of expert-led workout videos for every fitness level and goal. 
               From beginner-friendly sessions to advanced challenges.
             </p>

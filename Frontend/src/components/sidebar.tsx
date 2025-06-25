@@ -1,5 +1,3 @@
-// components/Sidebar.tsx
-import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home,
@@ -69,7 +67,7 @@ export default function Sidebar({ onToggle, isCollapsed }: { onToggle: () => voi
                         <Activity size={20} />
                     </div>
                 ) : (
-                    <h1 className="text-xl font-bold">FitTrack</h1>
+                    <h1 className="text-xl font-bold">FitPass</h1>
                 )}
                 <button
                     onClick={onToggle}
