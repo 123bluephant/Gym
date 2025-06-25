@@ -34,35 +34,33 @@ function AppContent() {
   const isAuthPage = ['/login', '/signup'].includes(location.pathname);
 
   const toggleSidebar = () => {
-      setIsSidebarCollapsed(!isSidebarCollapsed);
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   return (
-      <div className="relative flex h-screen w-full bg-white">
-          {/* Fixed Sidebar */}
-          {user && !isAuthPage && (
-              <div className={`fixed inset-y-0 left-0 h-screen z-10 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
-                  <Sidebar onToggle={toggleSidebar} isCollapsed={isSidebarCollapsed} />
-              </div>
-          )}
-          
-          {/* Main Content Area */}
-          <div className={`flex flex-col flex-1 min-h-full transition-all duration-300 ${
-              user && !isAuthPage ? (isSidebarCollapsed ? 'ml-20' : 'ml-64') : ''
-          }`}>
-              {/* Header */}
-              {!user && !isDashboard && <Header />}
-          
-        
+    <div className="relative flex h-screen w-full bg-white">
+      {/* Fixed Sidebar */}
+      {user && !isAuthPage && (
+        <div className={`fixed inset-y-0 left-0 h-screen z-10 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+          <Sidebar onToggle={toggleSidebar} isCollapsed={isSidebarCollapsed} />
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className={`flex flex-col flex-1 min-h-full transition-all duration-300 ${user && !isAuthPage ? (isSidebarCollapsed ? 'ml-20' : 'ml-64') : ''
+        }`}>
+        {/* Header */}
+        {!user && !isDashboard && <Header />}
+
+
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto">
           <Routes>
-            {/* All route definitions remain the same */}
             <Route path="/" element={<HomePage />} />
             {!user && <Route path="/login" element={<LoginPage />} />}
             {!user && <Route path="/signup" element={<SignupPage />} />}
             {user && <Route path="/onboarding" element={<OnboardingPage />} />}
-            
+
             {user?.gender === "female" && (
               <Route path="/womens-health" element={<WomensHealthPage />} />
             )}
@@ -70,11 +68,11 @@ function AppContent() {
             {user ? (
               <>
                 <Route path="/dashboard" element={<HomeDashboard />} />
-                <Route path="/workouts" element={<WorkoutsPage />} />
+                <Route path="/workouts" element={<WorkoutsPage isLoggedIn={true} />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
-                <Route path="/tracking" element={<TrackingPage />} />
-                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/tracking" element={<TrackingPage isLoggedIn={true} />} />
+                <Route path="/shop" element={<ShopPage isLoggedIn={true} />} />
                 <Route path="/Calories" element={<Calories />} />
                 <Route path="/shop/:id" element={<ProductDetailPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
@@ -101,7 +99,7 @@ function AppContent() {
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<ContactUs />} />
           </Routes>
-          
+
           {/* Footer - appears at end of content */}
           {!isDashboard && !isAuthPage && (
             <div className="mt-auto">

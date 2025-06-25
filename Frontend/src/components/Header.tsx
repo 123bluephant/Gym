@@ -15,7 +15,7 @@ const Header = () => {
   };
 
   const handleGetStarted = () => {
-    navigate('/login');
+    navigate('/signup');
     setIsMenuOpen(false);
   };
 
