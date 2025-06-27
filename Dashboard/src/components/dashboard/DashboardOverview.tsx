@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { StatsCard } from './StatsCard';
 
 export const DashboardOverview: React.FC = () => {
-  const { dashboardStats, users } = useApp();
+  const { dashboardStats, users, setCurrentView } = useApp();
 
   const recentMembers = users.slice(-3);
 
@@ -96,25 +96,37 @@ export const DashboardOverview: React.FC = () => {
             <h3 className="text-lg font-semibold text-[#000000]">Quick Actions</h3>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors">
+            <button 
+              onClick={() => setCurrentView('users')}
+              className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors"
+            >
               <div className="text-center">
                 <Users className="h-6 w-6 text-[#A856B2] mx-auto mb-2" />
                 <span className="text-sm font-medium text-[#A856B2]">Add Member</span>
               </div>
             </button>
-            <button className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors">
+            <button 
+              onClick={() => setCurrentView('workouts')}
+              className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors"
+            >
               <div className="text-center">
                 <Dumbbell className="h-6 w-6 text-[#A856B2] mx-auto mb-2" />
                 <span className="text-sm font-medium text-[#A856B2]">New Workout</span>
               </div>
             </button>
-            <button className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors">
+            <button 
+              onClick={() => setCurrentView('diets')}
+              className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors"
+            >
               <div className="text-center">
                 <Utensils className="h-6 w-6 text-[#A856B2] mx-auto mb-2" />
                 <span className="text-sm font-medium text-[#A856B2]">Diet Plan</span>
               </div>
             </button>
-            <button className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors">
+            <button 
+              onClick={() => setCurrentView('analytics')}
+              className="flex items-center justify-center p-4 bg-[#F4E1F0] border border-[#D4A4C8] rounded-lg hover:bg-[#D4A4C8] transition-colors"
+            >
               <div className="text-center">
                 <TrendingUp className="h-6 w-6 text-[#A856B2] mx-auto mb-2" />
                 <span className="text-sm font-medium text-[#A856B2]">Analytics</span>

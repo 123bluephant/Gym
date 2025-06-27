@@ -6,16 +6,45 @@ export const WorkoutManagement: React.FC = () => {
   const { workouts } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredWorkouts = workouts.filter(workout =>
+  // Static workout data for new cards
+  const additionalWorkouts = [
+    {
+      id: 'full-body-advanced',
+      name: 'Full Body Advanced',
+      description: 'An intense full-body workout for advanced users, focusing on strength and endurance.',
+      difficulty: 'Advanced',
+      duration: 60,
+      targetMuscles: ['Chest', 'Back', 'Legs', 'Arms', 'Core'],
+      exercises: ['Deadlifts', 'Bench Press', 'Pull-Ups', 'Squats', 'Plank'],
+    },
+    {
+      id: 'full-body-expert',
+      name: 'Full Body Expert',
+      description: 'A challenging full-body workout for expert-level athletes, maximizing performance.',
+      difficulty: 'Expert',
+      duration: 75,
+      targetMuscles: ['Chest', 'Back', 'Legs', 'Arms', 'Core'],
+      exercises: ['Clean and Jerk', 'Muscle-Ups', 'Front Squats', 'Handstand Push-Ups', 'Weighted Plank'],
+    },
+  ];
+
+  // Merge static workouts with context workouts, avoiding duplicates
+  const allWorkouts = [
+    ...workouts.filter((w) => !additionalWorkouts.some((aw) => aw.id === w.id)),
+    ...additionalWorkouts,
+  ];
+
+  const filteredWorkouts = allWorkouts.filter(workout =>
     workout.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     workout.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Beginner': return 'bg-[#D4A4C8] text-[#FFFFFF]';
+      case 'Beginner': return 'bg-[#D4A4C8] text-[#000000]';
       case 'Intermediate': return 'bg-[#F4E1F0] text-[#000000]';
-      case 'Advanced': return 'bg-[#A856B2] text-[#FFFFFF]';
+      case 'Advanced': return 'bg-[#A856B2] text-[#000000]';
+      case 'Expert': return 'bg-[#A856B2] text-[#000000u]'; // Added for Expert
       default: return 'bg-[#F4E1F0] text-[#000000]';
     }
   };
@@ -60,7 +89,7 @@ export const WorkoutManagement: React.FC = () => {
               </div>
 
               <h3 className="text-lg font-semibold text-[#000000] mb-2">{workout.name}</h3>
-              <p className="text-[#D4A4C8] text-sm mb-4 line-clamp-2">{workout.description}</p>
+              <p className="text-[#000000] text-sm mb-4 line-clamp-2">{workout.description}</p>
 
               <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-[#000000]">
@@ -74,10 +103,10 @@ export const WorkoutManagement: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#D4A4C8]">
+                <span className="text-sm text-[#000000]">
                   {workout.exercises.length} exercises
                 </span>
-                <button className="text-[#A856B2] hover:text-[#D4A4C8] text-sm font-medium">
+                <button className="text-[#A856B2] hover:text-[#000000] text-sm font-medium">
                   View Details
                 </button>
               </div>
