@@ -31,7 +31,7 @@ export const register = async (req, res) => {
         password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
         username,
         name: fullName,
-        role,gender,
+        role, gender,
         dob,
       });
     }
@@ -64,7 +64,7 @@ const loginController = async (req, res) => {
     if (!user) {
       user = await GymOwner.findOne({ email });
     }
-     if(!user) {
+    if (!user) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
 

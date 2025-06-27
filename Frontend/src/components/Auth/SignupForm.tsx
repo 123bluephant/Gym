@@ -36,36 +36,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
           {error}
         </div>
       )}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Registering As*
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          {["user", "gym_owner"].map((option) => {
-            const isSelected = values.role === option;
-            return (
-              <label
-                key={option}
-                className={`flex items-center justify-center border px-4 py-3 rounded-lg cursor-pointer transition-all
-            ${isSelected
-                    ? "border-purple-600 bg-purple-100 text-purple-800 font-semibold"
-                    : "border-gray-300 bg-white text-gray-700 hover:border-purple-300"
-                  }`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value={option}
-                  checked={isSelected}
-                  onChange={onChange}
-                  className="hidden"
-                />
-                <span className="capitalize">{option.replace("_", " ")}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+
 
 
       <Input
@@ -160,7 +131,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
         autoComplete="new-password"
         required
       />
-      
+
 
       <div className="flex items-center mb-4">
         <input
