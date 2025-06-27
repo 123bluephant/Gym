@@ -105,7 +105,6 @@ const ProfilePage: React.FC = () => {
 
   const handleGoalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-
     setProfile(prev => {
       let updatedGoals = [...(prev.goals || [])];
 
