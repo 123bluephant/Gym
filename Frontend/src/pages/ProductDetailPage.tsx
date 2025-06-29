@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Star, Heart, Share2, ChevronLeft, Truck, Shield, RotateCcw, Plus, Minus } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import toast from 'react-hot-toast';
+import { useProducts } from '../context/ProductContext';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -8,6 +11,8 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  const { cartItems, addToCart, removeFromCart } = useCart();
+   const { products } = useProducts();
 
   // Mock product data - in a real app, this would be fetched based on the ID
   const product = {
@@ -101,10 +106,16 @@ const ProductDetailPage = () => {
     }
   ];
 
-  const handleAddToCart = () => {
-    // Add to cart logic here
-    console.log('Added to cart:', { productId: product.id, quantity, selectedSize, selectedColor });
-  };
+ 
+   const toggleCart = (product: products) => {
+  if (cartItems.some(item => item.id === product.id)) {
+    removeFromCart(product.id);
+    toast.success(`${product.name} removed from cart`);
+  } else {
+    addToCart(product); // Now correctly passing the product object
+    toast.success(`${product.name} added to cart`);
+  }
+};
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
@@ -120,8 +131,8 @@ const ProductDetailPage = () => {
             <span className="text-gray-400">/</span>
             <span className="text-gray-900">{product.name}</span>
           </div>
-          <Link 
-            to="/shop" 
+          <Link
+            to="/shop"
             className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors mt-2"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -135,8 +146,8 @@ const ProductDetailPage = () => {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <img 
-                src={product.images[selectedImage]} 
+              <img
+                src={product.images[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -146,12 +157,11 @@ const ProductDetailPage = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === index ? 'border-purple-500' : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-purple-500' : 'border-gray-200 hover:border-gray-300'
+                    }`}
                 >
-                  <img 
-                    src={image} 
+                  <img
+                    src={image}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
@@ -167,20 +177,18 @@ const ProductDetailPage = () => {
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center space-x-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating) 
-                          ? 'text-yellow-400 fill-current' 
+                    <Star
+                      key={i}
+                      className={`w-5 h-5 ${i < Math.floor(product.rating)
+                          ? 'text-yellow-400 fill-current'
                           : 'text-gray-300'
-                      }`} 
+                        }`}
                     />
                   ))}
                 </div>
                 <span className="text-gray-600">({product.reviews} reviews)</span>
-                <span className={`px-2 py-1 rounded-full text-sm font-medium ${
-                  product.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-sm font-medium ${product.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
                   {product.inStock ? 'In Stock' : 'Out of Stock'}
                 </span>
               </div>
@@ -210,9 +218,8 @@ const ProductDetailPage = () => {
                     <button
                       key={color.name}
                       onClick={() => setSelectedColor(color.name)}
-                      className={`w-10 h-10 rounded-full border-2 transition-colors ${
-                        selectedColor === color.name ? 'border-gray-900' : 'border-gray-300'
-                      }`}
+                      className={`w-10 h-10 rounded-full border-2 transition-colors ${selectedColor === color.name ? 'border-gray-900' : 'border-gray-300'
+                        }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     />
@@ -230,11 +237,10 @@ const ProductDetailPage = () => {
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-lg font-medium transition-colors ${
-                        selectedSize === size 
-                          ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                      className={`px-4 py-2 border rounded-lg font-medium transition-colors ${selectedSize === size
+                          ? 'border-purple-500 bg-purple-50 text-purple-700'
                           : 'border-gray-300 hover:border-gray-400'
-                      }`}
+                        }`}
                     >
                       {size}
                     </button>
@@ -267,8 +273,8 @@ const ProductDetailPage = () => {
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button 
-                onClick={handleAddToCart}
+              <button
+                onClick={() => toggleCart(product)}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center space-x-2"
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -320,7 +326,7 @@ const ProductDetailPage = () => {
                 </button>
               </nav>
             </div>
-            
+
             <div className="p-8">
               {/* Features Tab */}
               <div>
@@ -358,13 +364,12 @@ const ProductDetailPage = () => {
                   </div>
                   <div className="flex items-center space-x-1 mb-3">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-4 h-4 ${
-                          i < review.rating 
-                            ? 'text-yellow-400 fill-current' 
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < review.rating
+                            ? 'text-yellow-400 fill-current'
                             : 'text-gray-300'
-                        }`} 
+                          }`}
                       />
                     ))}
                   </div>
@@ -380,13 +385,13 @@ const ProductDetailPage = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">You Might Also Like</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {relatedProducts.map((relatedProduct) => (
-              <Link 
+              <Link
                 key={relatedProduct.id}
                 to={`/shop/${relatedProduct.id}`}
                 className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all border border-gray-100 overflow-hidden"
               >
-                <img 
-                  src={relatedProduct.image} 
+                <img
+                  src={relatedProduct.image}
                   alt={relatedProduct.name}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />

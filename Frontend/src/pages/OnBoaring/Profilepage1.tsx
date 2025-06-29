@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { User, Settings, Activity, Heart, ShoppingBag, Award, Lock, CreditCard, Edit2, Target, AlertTriangle, Calendar } from 'lucide-react';
+import { User, Settings, Activity, Heart, ShoppingBag, Award, Lock, CreditCard, Edit2, Target, AlertTriangle, Calendar, LogOut } from 'lucide-react';
+import { useRecoilState } from 'recoil';
+import userAtom from '../../atoms/UserAtom';
+import { useNavigate } from 'react-router-dom';
 
 interface FitnessGoals {
   primaryGoal: string;
@@ -18,44 +21,155 @@ interface UserProfile {
   goals?: string[];
   injuries?: string;
   availability?: string[];
-  fitnessGoals: FitnessGoals; // Make this required
+  fitnessGoals: FitnessGoals;
   joinDate?: string;
   membershipType?: string;
   streak?: number;
 }
 
-// Create default fitness goals
+interface WorkoutActivity {
+  id: string;
+  date: string;
+  type: string;
+  duration: string;
+  caloriesBurned: number;
+  completed: boolean;
+}
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  dateEarned?: string;
+}
+
 const defaultFitnessGoals: FitnessGoals = {
   primaryGoal: 'General Fitness',
   currentWeight: 0,
   targetWeight: 0,
 };
 
-// Create default profile with all required fields
 const defaultProfile: UserProfile = {
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
-  fitnessGoals: defaultFitnessGoals, // Ensure this is always defined
+  fitnessGoals: defaultFitnessGoals,
   joinDate: new Date().toISOString(),
   membershipType: 'Basic',
   streak: 0,
 };
 
+// Sample workout activities data
+const sampleActivities: WorkoutActivity[] = [
+  {
+    id: '1',
+    date: '2023-06-15',
+    type: 'Strength Training',
+    duration: '45 min',
+    caloriesBurned: 320,
+    completed: true
+  },
+  {
+    id: '2',
+    date: '2023-06-14',
+    type: 'Cardio',
+    duration: '30 min',
+    caloriesBurned: 280,
+    completed: true
+  },
+  {
+    id: '3',
+    date: '2023-06-12',
+    type: 'Yoga',
+    duration: '60 min',
+    caloriesBurned: 180,
+    completed: true
+  },
+  {
+    id: '4',
+    date: '2023-06-10',
+    type: 'HIIT',
+    duration: '25 min',
+    caloriesBurned: 350,
+    completed: true
+  },
+  {
+    id: '5',
+    date: '2023-06-08',
+    type: 'Running',
+    duration: '40 min',
+    caloriesBurned: 420,
+    completed: true
+  }
+];
+
+// Sample achievements data
+const sampleAchievements: Achievement[] = [
+  {
+    id: '1',
+    title: 'First Workout',
+    description: 'Completed your first workout',
+    icon: '🏆',
+    earned: true,
+    dateEarned: '2023-05-01'
+  },
+  {
+    id: '2',
+    title: '5 Workouts',
+    description: 'Completed 5 workouts',
+    icon: '🔥',
+    earned: true,
+    dateEarned: '2023-05-15'
+  },
+  {
+    id: '3',
+    title: 'Consistency',
+    description: 'Worked out 3 days in a row',
+    icon: '⏱️',
+    earned: true,
+    dateEarned: '2023-05-20'
+  },
+  {
+    id: '4',
+    title: 'Marathoner',
+    description: 'Run a total of 26.2 miles',
+    icon: '🏃‍♂️',
+    earned: false
+  },
+  {
+    id: '5',
+    title: 'Weight Master',
+    description: 'Reached your target weight',
+    icon: '⚖️',
+    earned: false
+  },
+  {
+    id: '6',
+    title: 'Early Bird',
+    description: 'Complete 5 morning workouts',
+    icon: '🌅',
+    earned: true,
+    dateEarned: '2023-06-01'
+  }
+];
+
 const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
+  const [activities] = useState<WorkoutActivity[]>(sampleActivities);
+  const [achievements] = useState<Achievement[]>(sampleAchievements);
+  const [user, setUser] = useRecoilState(userAtom);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
-
     if (savedProfile) {
       try {
         const parsed = JSON.parse(savedProfile);
-
-        // Ensure fitnessGoals exists in parsed data
         const mergedProfile = {
           ...defaultProfile,
           ...parsed,
@@ -64,7 +178,6 @@ const ProfilePage: React.FC = () => {
             ...(parsed.fitnessGoals || {})
           }
         };
-
         setProfile(mergedProfile);
       } catch (e) {
         console.error("Error parsing profile data", e);
@@ -73,14 +186,12 @@ const ProfilePage: React.FC = () => {
     } else {
       localStorage.setItem('userProfile', JSON.stringify(defaultProfile));
     }
-
     setLoading(false);
   }, []);
+
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-
     setProfile(prev => {
-      // Handle nested fitnessGoals object
       if (name.startsWith('fitnessGoals.')) {
         const goalField = name.split('.')[1];
         const updatedProfile = {
@@ -93,7 +204,6 @@ const ProfilePage: React.FC = () => {
         localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
         return updatedProfile;
       }
-
       const updatedProfile = {
         ...prev,
         [name]: value
@@ -105,21 +215,17 @@ const ProfilePage: React.FC = () => {
 
   const handleGoalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-
     setProfile(prev => {
       let updatedGoals = [...(prev.goals || [])];
-
       if (checked) {
         updatedGoals.push(value);
       } else {
         updatedGoals = updatedGoals.filter(goal => goal !== value);
       }
-
       const updatedProfile = {
         ...prev,
         goals: updatedGoals
       };
-
       localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
       return updatedProfile;
     });
@@ -128,21 +234,37 @@ const ProfilePage: React.FC = () => {
   const handleAvailabilityChange = (day: string) => {
     setProfile(prev => {
       let updatedAvailability = [...(prev.availability || [])];
-
       if (updatedAvailability.includes(day)) {
         updatedAvailability = updatedAvailability.filter(d => d !== day);
       } else {
         updatedAvailability.push(day);
       }
-
       const updatedProfile = {
         ...prev,
         availability: updatedAvailability
       };
-
       localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
       return updatedProfile;
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/user/logout", {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        setUser(null);
+        localStorage.removeItem("user");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const tabs = [
@@ -163,13 +285,12 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // Format availability for display
   const formattedAvailability = (profile.availability || []).length > 0
     ? profile.availability?.map(day => `${day}s`).join(', ')
     : 'Not specified';
 
   return (
-    <div className="min-h-screen bg-gray-50 ">
+    <div className="pt-16 min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -233,8 +354,19 @@ const ProfilePage: React.FC = () => {
                   </button>
                 );
               })}
+
+              {/* Logout Button - styled like sidebar items */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-gray-700 hover:bg-gray-50 transition-colors mt-4"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
             </nav>
           </div>
+
+
 
           {/* Main Content */}
           <div className="flex-1">
@@ -424,24 +556,126 @@ const ProfilePage: React.FC = () => {
 
             {/* Activity Tab - Simplified for localStorage only */}
             {activeTab === 'activity' && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Recent Activity</h2>
-                <div className="text-center py-12">
-                  <Activity className="w-12 h-12 mx-auto text-gray-400" />
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">No activity yet</h3>
-                  <p className="mt-2 text-gray-600">Your workout history will appear here</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+                  <p className="text-gray-600 mt-1">Your workout history and progress</p>
+                </div>
+
+                <div className="divide-y divide-gray-200">
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">{activity.type}</h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {new Date(activity.date).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                          <div className="flex items-center mt-2 space-x-4">
+                            <span className="text-sm text-gray-600">
+                              <span className="font-medium">Duration:</span> {activity.duration}
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              <span className="font-medium">Calories:</span> {activity.caloriesBurned}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                          Completed
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 border-t border-gray-200 bg-gray-50">
+                  <h3 className="font-medium text-gray-900">Activity Summary</h3>
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500">Total Workouts</p>
+                      <p className="text-2xl font-bold mt-1">{activities.length}</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500">Total Calories</p>
+                      <p className="text-2xl font-bold mt-1">
+                        {activities.reduce((sum, activity) => sum + activity.caloriesBurned, 0)}
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500">Current Streak</p>
+                      <p className="text-2xl font-bold mt-1">{profile.streak || 0} days</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Achievements Tab - Simplified for localStorage only */}
+            {/* Achievements Tab */}
             {activeTab === 'achievements' && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Achievements</h2>
-                <div className="text-center py-12">
-                  <Award className="w-12 h-12 mx-auto text-gray-400" />
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">No achievements yet</h3>
-                  <p className="mt-2 text-gray-600">Complete workouts to unlock achievements</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-900">Your Achievements</h2>
+                  <p className="text-gray-600 mt-1">Earned badges and accomplishments</p>
+                </div>
+
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {achievements.map((achievement) => (
+                      <div
+                        key={achievement.id}
+                        className={`p-4 rounded-lg border ${achievement.earned
+                          ? 'bg-indigo-50 border-indigo-200'
+                          : 'bg-gray-50 border-gray-200 opacity-70'}`}
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className={`text-3xl p-3 rounded-full ${achievement.earned
+                            ? 'bg-indigo-100 text-indigo-600'
+                            : 'bg-gray-100 text-gray-400'}`}>
+                            {achievement.icon}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-900">{achievement.title}</h3>
+                            <p className="text-sm text-gray-600 mt-1">{achievement.description}</p>
+                            {achievement.earned && achievement.dateEarned && (
+                              <p className="text-xs text-indigo-600 mt-2">
+                                Earned on {new Date(achievement.dateEarned).toLocaleDateString()}
+                              </p>
+                            )}
+                            {!achievement.earned && (
+                              <p className="text-xs text-gray-500 mt-2">Not yet earned</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 className="font-medium text-gray-900">Progress</h3>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          Achievements earned
+                        </span>
+                        <span className="text-sm font-medium text-indigo-600">
+                          {achievements.filter(a => a.earned).length} of {achievements.length}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className="bg-indigo-600 h-2.5 rounded-full"
+                          style={{
+                            width: `${(achievements.filter(a => a.earned).length / achievements.length * 100)}%`
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

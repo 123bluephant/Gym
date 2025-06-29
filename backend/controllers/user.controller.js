@@ -3,24 +3,6 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-// controllers/user.controller.js
-export const register_gym = async (req, res) => {
-  try {
-    const { gender, dob, email, password, username, fullName } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email already exists" });
-    }
-
-    const user = new GymOwner({
-      email,
-      password: await bcrypt.hash(password, 10), 
-      username,
-      name: fullName,
-      role: "gym_owner",
-      gender,
-      dob,
-    });
 
     await user.save();
 

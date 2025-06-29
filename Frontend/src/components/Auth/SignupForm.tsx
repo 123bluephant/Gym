@@ -128,7 +128,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
         autoComplete="new-password"
         required
       />
-      
+
 
       <div className="flex items-center mb-4">
         <input

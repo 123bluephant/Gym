@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Dumbbell,
-  HeartPulse,
-  Flame,
-  Award,
   Activity as ActivityIcon,
   Flame as FlameIcon,
   HeartPulse as HeartPulseIcon,
   Award as AwardIcon
 } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
-import userAtom from '../atoms/UserAtom';
+import userAtom from '../../atoms/UserAtom';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -24,12 +21,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import MetricsCard from '../components/modal/MetricsCard';
-import FitnessCalendar from '../components/modal/FitnessCalendar';
-import ActionButton from '../components/modal/ActionButton';
-import TrackProgressModal from '../components/modal/TrackProgressModal';
-import AskCoachModal from '../components/modal/AskCoachModal';
-import Sidebar from '../components/sidebar';
+import MetricsCard from '../../components/modal/MetricsCard';
+import FitnessCalendar from '../../components/modal/FitnessCalendar';
+import ActionButton from '../../components/modal/ActionButton';
+import TrackProgressModal from '../../components/modal/TrackProgressModal';
+import AskCoachModal from '../../components/modal/AskCoachModal';
 
 // Register ChartJS components
 ChartJS.register(
