@@ -22,31 +22,43 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
+import CartPage from './pages/Shopping/CartPage';
+import { CartProvider } from './context/CartContext';
+import { ProductProvider } from './context/ProductContext';
+import SignupGymPage from './pages/OnBoaring/SignupGymPage';
 
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard';
-  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
+  const isAuthPage = ['/login', '/signup', '/signupgym'].includes(location.pathname); // Added signupgym
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Navbar at the top */}
+      {/* Header logic remains the same */}
       {user && !isAuthPage && <Header />}
-
-      {/* Header for non-authenticated users */}
       {!user && !isDashboard && <Header />}
 
-      {/* Main Content Area */}
       <main className="flex-1">
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<HomePage />} />
-          {!user && <Route path="/login" element={<LoginPage />} />}
-          {!user && <Route path="/signup" element={<SignupPage />} />}
-          {user && <Route path="/onboarding" element={<OnboardingPage />} />}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/term" element={<TermsOfService />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/contact" element={<ContactUs />} />
+          
+          {/* Authentication routes */}
+          {!user && (
+            <>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/signupgym" element={<SignupGymPage />} />
+            </>
+          )}
 
-
+          {/* Protected routes */}
           {user ? (
             <>
               <Route path="/dashboard" element={<HomeDashboard />} />
@@ -60,28 +72,17 @@ function AppContent() {
               <Route path="/Calories" element={<Calories />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
             </>
           ) : (
             <>
-              <Route path="/dashboard" element={<Navigate to="/login" />} />
-              <Route path="/workouts" element={<Navigate to="/login" />} />
-              <Route path="/workouts/:id" element={<Navigate to="/login" />} />
-              <Route path="/nutrition" element={<Navigate to="/login" />} />
-              <Route path="/tracking" element={<Navigate to="/login" />} />
-              <Route path="/shop" element={<Navigate to="/login" />} />
-              <Route path="/shop/:id" element={<Navigate to="/login" />} />
-              <Route path="/cart" element={<Navigate to="/login" />} /> {/* Add this route */}
-              <Route path="/Calories" element={<Navigate to="/login" />} />
-              <Route path="/profile" element={<Navigate to="/login" />} />
-              <Route path="/community" element={<Navigate to="/login" />} />
-              <Route path="/womens-health" element={<Navigate to="/login" />} />
+              {/* Redirect to login for protected routes when unauthenticated */}
+              <Route path="*" element={<Navigate to="/login" />} />
             </>
           )}
 
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/term" element={<TermsOfService />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/contact" element={<ContactUs />} />
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
 
