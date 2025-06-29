@@ -3,24 +3,6 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-
-    await user.save();
-
-    generateCookie(user._id, res);
-    const { password: _, ...userData } = user.toObject();
-
-    res.status(201).json({
-      message: "Registration successful",
-      user: userData,
-    });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res
-      .status(500)
-      .json({ message: "Registration failed", error: error.message });
-  }
-};
-
 export const register_user = async (req, res) => {
   try {
     const { gender, dob, email, password, username, fullName } = req.body;
