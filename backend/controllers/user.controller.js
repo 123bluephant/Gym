@@ -3,12 +3,9 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-
-export const register = async (req, res) => {
+export const register_user = async (req, res) => {
   try {
-    const { role, gender, dob, email, password, username, fullName } = req.body;
-
-    // 1. Check if user exists
+    const { gender, dob, email, password, username, fullName } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
