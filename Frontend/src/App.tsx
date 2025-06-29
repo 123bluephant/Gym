@@ -22,9 +22,7 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
-import CartPage from './pages/Shopping/CartPage';
-import { CartProvider } from './context/CartContext';
-import { ProductProvider } from './context/ProductContext';
+
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -48,9 +46,6 @@ function AppContent() {
           {!user && <Route path="/signup" element={<SignupPage />} />}
           {user && <Route path="/onboarding" element={<OnboardingPage />} />}
 
-          {user?.gender === "female" && (
-            <Route path="/womens-health" element={<WomensHealthPage />} />
-          )}
 
           {user ? (
             <>

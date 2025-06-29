@@ -4,40 +4,40 @@ import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
 
-export const register = async (req, res) => {
-  try {
-    const { role, gender, dob, email, password, username, fullName } = req.body;
+    await user.save();
 
-    // 1. Check if user exists
+    generateCookie(user._id, res);
+    const { password: _, ...userData } = user.toObject();
+
+    res.status(201).json({
+      message: "Registration successful",
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res
+      .status(500)
+      .json({ message: "Registration failed", error: error.message });
+  }
+};
+
+export const register_user = async (req, res) => {
+  try {
+    const { gender, dob, email, password, username, fullName } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    
-    let user;
-    if (role !== "gym_owner") {
-      user = new User({
-        email,
-        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
-        username,
-        name: fullName,
-        role,
-        gender,
-        dob,
-      });
-    } else {
-      user = new GymOwner({
-        email,
-        password: await bcrypt.hash(password, 10), // Make sure to hash this before saving
-        username,
-        name: fullName,
-        role, gender,
-        dob,
-      });
-    }
-
+    const user = new User({
+      email,
+      password: await bcrypt.hash(password, 10), 
+      username,
+      name: fullName,
+      role: "user",
+      gender,
+      dob,
+    });
     await user.save();
-
     generateCookie(user._id, res);
     const { password: _, ...userData } = user.toObject();
 

@@ -12,7 +12,6 @@ interface SignupFormProps {
     confirmPassword: string;
     fullName?: string;
     acceptTerms?: boolean;
-    role: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -36,8 +35,6 @@ const SignupForm: React.FC<SignupFormProps> = ({
           {error}
         </div>
       )}
-
-
 
       <Input
         label="Username"
