@@ -3,7 +3,7 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-// controllers/user.controller.js
+
 export const register = async (req, res) => {
   try {
     const { role, gender, dob, email, password, username, fullName } = req.body;
@@ -13,7 +13,7 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    // 2. Create new user
+    
     let user;
     if (role !== "gym_owner") {
       user = new User({
