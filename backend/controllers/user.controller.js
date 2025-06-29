@@ -35,12 +35,9 @@ export const register = async (req, res) => {
         dob,
       });
     }
-
     await user.save();
-
     generateCookie(user._id, res);
     const { password: _, ...userData } = user.toObject();
-
     res.status(201).json({
       message: "Registration successful",
       user: userData,
