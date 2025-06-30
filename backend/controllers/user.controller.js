@@ -2,6 +2,40 @@ import GymOwner from "../Models/GymOwner.js";
 import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
+export const register_gym = async (req, res) => {
+  try {
+    const { gender, dob, email, password, username, fullName } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    const user = new GymOwner({
+      email,
+      password: await bcrypt.hash(password, 10),
+      username,
+      name: fullName,
+      role: "gym_owner",
+      gender,
+      dob,
+    });
+
+    await user.save();
+
+    generateCookie(user._id, res);
+    const { password: _, ...userData } = user.toObject();
+
+    res.status(201).json({
+      message: "Registration successful",
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res
+      .status(500)
+      .json({ message: "Registration failed", error: error.message });
+  }
+};
 
 export const register_user = async (req, res) => {
   try {
@@ -12,7 +46,7 @@ export const register_user = async (req, res) => {
     }
     const user = new User({
       email,
-      password: await bcrypt.hash(password, 10), 
+      password: await bcrypt.hash(password, 10),
       username,
       name: fullName,
       role: "user",
