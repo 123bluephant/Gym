@@ -7,14 +7,12 @@ import HomePage from './pages/HomePage';
 import WorkoutsPage from './pages/Workout/WorkoutsPage';
 import NutritionPage from './pages/Workout/NutritionPage';
 import TrackingPage from './pages/Workout/TrackingPage';
-import WomensHealthPage from './pages/Workout/WomensHealthPage';
 import ShopPage from './pages/Shopping/ShopPage';
 import WorkoutDetailPage from './pages/Workout/WorkoutDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import LoginPage from './pages/OnBoaring/LoginPage';
 import SignupPage from './pages/OnBoaring/signupPage';
 import HomeDashboard from './pages/Dashboard/HomeDashboard';
-import OnboardingPage from './pages/OnBoaring/OnboardingPage';
 import Calories from './pages/CaloriesPage';
 import ProfilePage from './pages/OnBoaring/Profilepage1';
 import Community from './pages/Community';
@@ -26,39 +24,31 @@ import CartPage from './pages/Shopping/CartPage';
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 import SignupGymPage from './pages/OnBoaring/SignupGymPage';
-
+import ActivityPage from './pages/ActivityPage';
+import AchievementsPage from './pages/AchievementsPage';
+import SettingsPage from './pages/SettingsPage';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
-  const isDashboard = location.pathname === '/dashboard';
-  const isAuthPage = ['/login', '/signup', '/signupgym'].includes(location.pathname); // Added signupgym
+  const isDashboard  = ['/dashboard', '/activity', '/achievements', '/settings', '/profile'].includes(location.pathname);
+  const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Header logic remains the same */}
+      {/* Navbar at the top */}
       {user && !isAuthPage && <Header />}
+
+      {/* Header for non-authenticated users */}
       {!user && !isDashboard && <Header />}
 
+      {/* Main Content Area */}
       <main className="flex-1">
         <Routes>
-          {/* Public routes */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/term" element={<TermsOfService />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/contact" element={<ContactUs />} />
-          
-          {/* Authentication routes */}
-          {!user && (
-            <>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/signupgym" element={<SignupGymPage />} />
-            </>
-          )}
-
-          {/* Protected routes */}
+          {!user && <Route path="/login" element={<LoginPage />} />}
+          {!user && <Route path="/signup" element={<SignupPage />} />}
+          {!user && <Route path="/signupgym" element={<SignupGymPage />} />}
           {user ? (
             <>
               <Route path="/dashboard" element={<HomeDashboard />} />
@@ -72,20 +62,21 @@ function AppContent() {
               <Route path="/Calories" element={<Calories />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/community" element={<Community />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/activity" element={<ActivityPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </>
           ) : (
             <>
-              {/* Redirect to login for protected routes when unauthenticated */}
               <Route path="*" element={<Navigate to="/login" />} />
             </>
           )}
-
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/term" element={<TermsOfService />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/contact" element={<ContactUs />} />
         </Routes>
       </main>
-
       {/* Footer */}
       {!isDashboard && !isAuthPage && <Footer />}
     </div>
@@ -103,5 +94,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;
