@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 export const register_gym = async (req, res) => {
   try {
     const { gender, dob, email, password, username, fullName } = req.body;
-    const existingUser = await User.findOne({ email });
+    const existingUser = await GymOwner.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
@@ -42,7 +42,7 @@ export const register_gym = async (req, res) => {
 export const register_user = async (req, res) => {
   try {
     const { gender, dob, email, password, username, fullName } = req.body;
-    const existingUser = await User.findOne({ email });
+    let existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already exists" });
     }
