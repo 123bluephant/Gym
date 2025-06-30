@@ -24,9 +24,11 @@ import CartPage from './pages/Shopping/CartPage';
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 import SignupGymPage from './pages/OnBoaring/SignupGymPage';
-import ActivityPage from './pages/ActivityPage';
-import AchievementsPage from './pages/AchievementsPage';
-import SettingsPage from './pages/SettingsPage';
+import ActivityPage from './pages/Dashboard/ActivityPage';
+import AchievementsPage from './pages/Dashboard/AchievementsPage';
+import SettingsPage from './pages/Dashboard/SettingsPage';
+import WomensHealthPage from './pages/Workout/WomensHealthPage';
+import AnalyticsPage from './pages/Dashboard/AnalyticsPage';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -53,6 +55,7 @@ function AppContent() {
             <>
               <Route path="/dashboard" element={<HomeDashboard />} />
               <Route path="/workouts" element={<WorkoutsPage />} />
+              <Route path="/women-health" element={<WomensHealthPage />} />
               <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
               <Route path="/nutrition" element={<NutritionPage />} />
               <Route path="/tracking" element={<TrackingPage />} />
@@ -64,6 +67,7 @@ function AppContent() {
               <Route path="/community" element={<Community />} />
               <Route path="/activity" element={<ActivityPage />} />
               <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </>
           ) : (

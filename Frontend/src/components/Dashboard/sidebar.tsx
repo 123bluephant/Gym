@@ -5,7 +5,9 @@ import userAtom from '../../atoms/UserAtom';
 import {
   User, Settings, Activity,
   Award, Dumbbell, Home,
-  Utensils, LogOut
+  Utensils, LogOut,
+  AlignVerticalJustifyStartIcon,
+  FileBarChart
 } from 'lucide-react';
 
 interface Tab {
@@ -43,6 +45,7 @@ const Sidebar = () => {
     { id: 'profile', name: 'Profile', icon: User, path: '/profile' },
     { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'activity', name: 'Activity', icon: Activity, path: '/activity' },
+    { id: 'analytics', name: 'Analytics', icon: FileBarChart, path: '/analytics' },
     { id: 'achievements', name: 'Achievements', icon: Award, path: '/achievements' },
   ];
 

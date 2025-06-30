@@ -56,7 +56,7 @@ const Header = () => {
         { path: '/calories', label: 'Calories' },
       ];
       if (user.gender === 'female') {
-        userSpecificItems.push({ path: '/womens-health', label: 'Women\'s Health' });
+        userSpecificItems.push({ path: '/women-health', label: 'Women\'s Health' });
       }
       return [...baseItems, ...userSpecificItems];
     }

@@ -38,7 +38,7 @@ const WorkoutsPage = () => {
       description: 'Build lean muscle and increase strength with this comprehensive full-body workout.',
       equipment: ['Dumbbells', 'Resistance Bands']
     },
-    {
+     {
       id: 2,
       title: 'HIIT Fat Burn Express',
       category: 'hiit',
@@ -129,6 +129,7 @@ const WorkoutsPage = () => {
       description: 'Perfect introduction to cardio training with low-impact movements.',
       equipment: ['No Equipment']
     }
+    // ... (keep all other workout objects the same)
   ];
 
   const filteredWorkouts = workouts.filter(workout => {
@@ -150,12 +151,15 @@ const WorkoutsPage = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-600 to-pink-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Hero Section with subtle animation */}
+      <section className="relative bg-gradient-to-br from-purple-600 to-pink-600 text-white py-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1000')] bg-cover bg-center mix-blend-overlay"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">Workout Library</h1>
-            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            <h1 className="text-5xl font-bold mb-6 animate-fade-in-down">Workout Library</h1>
+            <p className="text-xl text-purple-100 max-w-3xl mx-auto animate-fade-in-up delay-100">
               Discover thousands of expert-led workout videos for every fitness level and goal. 
               From beginner-friendly sessions to advanced challenges.
             </p>
@@ -163,28 +167,30 @@ const WorkoutsPage = () => {
         </div>
       </section>
 
-      {/* Filters Section */}
-      <section className="py-8 bg-white border-b border-gray-200">
+      {/* Enhanced Filters Section with glass morphism effect */}
+      <section className="py-8 bg-white/80 backdrop-blur-sm border-b border-gray-200 relative z-10 -mt-2 rounded-t-3xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Search Bar */}
+          {/* Enhanced Search Bar */}
           <div className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
               <input
                 type="text"
                 placeholder="Search workouts or instructors..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm transition-all duration-200 hover:shadow-md focus:shadow-lg"
               />
             </div>
-            <button className="flex items-center space-x-2 px-6 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Filter className="w-5 h-5" />
-              <span>More Filters</span>
+            <button className="flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 rounded-xl bg-white/70 hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md">
+              <Filter className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-700 font-medium">More Filters</span>
             </button>
           </div>
 
-          {/* Category Filter */}
+          {/* Enhanced Category Filter */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Workout Type</h3>
             <div className="flex flex-wrap gap-2">
@@ -192,11 +198,11 @@ const WorkoutsPage = () => {
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     activeCategory === category.id
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm'
+                  } transform hover:scale-105 active:scale-95`}
                 >
                   {category.name}
                 </button>
@@ -204,7 +210,7 @@ const WorkoutsPage = () => {
             </div>
           </div>
 
-          {/* Level Filter */}
+          {/* Enhanced Level Filter */}
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Difficulty Level</h3>
             <div className="flex flex-wrap gap-2">
@@ -212,11 +218,11 @@ const WorkoutsPage = () => {
                 <button
                   key={level.id}
                   onClick={() => setActiveLevel(level.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     activeLevel === level.id
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm'
+                  } transform hover:scale-105 active:scale-95`}
                 >
                   {level.name}
                 </button>
@@ -226,70 +232,87 @@ const WorkoutsPage = () => {
         </div>
       </section>
 
-      {/* Workouts Grid */}
+      {/* Enhanced Workouts Grid */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-2xl font-bold text-gray-900">
-              {filteredWorkouts.length} Workouts Found
+              {filteredWorkouts.length} {filteredWorkouts.length === 1 ? 'Workout' : 'Workouts'} Found
             </h2>
-            <select className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-              <option>Sort by Popularity</option>
-              <option>Sort by Duration</option>
-              <option>Sort by Rating</option>
-              <option>Sort by Newest</option>
-            </select>
+            <div className="relative">
+              <select className="appearance-none pl-4 pr-10 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm hover:shadow-md transition-all">
+                <option>Sort by Popularity</option>
+                <option>Sort by Duration</option>
+                <option>Sort by Rating</option>
+                <option>Sort by Newest</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+              </div>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredWorkouts.map((workout) => (
-              <div key={workout.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-                <div className="relative">
+              <div 
+                key={workout.id} 
+                className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-100 transform hover:-translate-y-1"
+              >
+                <div className="relative overflow-hidden">
                   <img 
                     src={workout.thumbnail} 
                     alt={workout.title}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
                   />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                   <Link 
                     to={`/workouts/${workout.id}`}
                     className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   >
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-4 hover:bg-white transition-colors">
-                      <Play className="w-8 h-8 text-purple-600" />
+                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-4 hover:bg-white transition-all transform hover:scale-110">
+                      <Play className="w-8 h-8 text-purple-600 fill-current" />
                     </div>
                   </Link>
-                  <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium capitalize ${getLevelColor(workout.level)}`}>
+                  <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold capitalize ${getLevelColor(workout.level)} shadow-sm`}>
                     {workout.level}
                   </div>
-                  <div className="absolute top-3 right-3 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                  <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
                     {workout.duration}
                   </div>
                 </div>
                 
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors line-clamp-2">
-                    {workout.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-2">with {workout.instructor}</p>
-                  <p className="text-gray-500 text-sm mb-3 line-clamp-2">{workout.description}</p>
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
+                      {workout.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-purple-600 font-medium mb-3">with {workout.instructor}</p>
+                  <p className="text-gray-500 text-sm mb-4 line-clamp-2">{workout.description}</p>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                    <div className="flex items-center space-x-1">
+                  <div className="flex items-center justify-between text-sm mb-4">
+                    <div className="flex items-center space-x-1 text-gray-600">
                       <Users className="w-4 h-4" />
-                      <span>{workout.participants.toLocaleString()}</span>
+                      <span>{workout.participants.toLocaleString()} joined</span>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 text-gray-800 font-medium">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
                       <span>{workout.rating}</span>
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <p className="text-xs text-gray-500 mb-1">Equipment needed:</p>
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-500 mb-2">Equipment needed:</p>
                     <div className="flex flex-wrap gap-1">
                       {workout.equipment.map((item, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        <span 
+                          key={index} 
+                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded flex items-center"
+                        >
+                          <Target className="w-3 h-3 mr-1 text-gray-400" />
                           {item}
                         </span>
                       ))}
@@ -298,7 +321,7 @@ const WorkoutsPage = () => {
                   
                   <Link 
                     to={`/workouts/${workout.id}`}
-                    className="w-full bg-gray-50 text-gray-700 py-2 rounded-lg font-medium hover:bg-purple-50 hover:text-purple-600 transition-all group flex items-center justify-center space-x-2 text-sm"
+                    className="w-full bg-gradient-to-r from-purple-50 to-pink-50 text-gray-700 py-3 rounded-lg font-medium hover:from-purple-100 hover:to-pink-100 hover:text-purple-700 transition-all group flex items-center justify-center space-x-2 text-sm border border-gray-100 hover:border-purple-200"
                   >
                     <span>Start Workout</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -309,18 +332,24 @@ const WorkoutsPage = () => {
           </div>
 
           {filteredWorkouts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No workouts found matching your criteria.</p>
-              <button 
-                onClick={() => {
-                  setActiveCategory('all');
-                  setActiveLevel('all');
-                  setSearchTerm('');
-                }}
-                className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
-              >
-                Clear all filters
-              </button>
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Search className="w-12 h-12 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-medium text-gray-700 mb-2">No workouts found</h3>
+                <p className="text-gray-500 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+                <button 
+                  onClick={() => {
+                    setActiveCategory('all');
+                    setActiveLevel('all');
+                    setSearchTerm('');
+                  }}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+                >
+                  Clear all filters
+                </button>
+              </div>
             </div>
           )}
         </div>
