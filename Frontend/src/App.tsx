@@ -33,18 +33,13 @@ import AnalyticsPage from './pages/Dashboard/AnalyticsPage';
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
-  const isDashboard  = ['/dashboard', '/activity', '/achievements', '/settings', '/profile'].includes(location.pathname);
+  const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile', '/analytics'].includes(location.pathname);
   const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Navbar at the top */}
       {user && !isAuthPage && <Header />}
-
-      {/* Header for non-authenticated users */}
       {!user && !isDashboard && <Header />}
-
-      {/* Main Content Area */}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
