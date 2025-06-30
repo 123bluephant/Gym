@@ -3,7 +3,6 @@ import User from "../Models/User.js";
 import generateCookie from "../utils/helper/generateCookie.js";
 import bcrypt from "bcrypt";
 
-// controllers/user.controller.js
 export const register_gym = async (req, res) => {
   try {
     const { gender, dob, email, password, username, fullName } = req.body;
@@ -38,7 +37,6 @@ export const register_gym = async (req, res) => {
       .json({ message: "Registration failed", error: error.message });
   }
 };
-
 export const register_user = async (req, res) => {
   try {
     const { gender, dob, email, password, username, fullName } = req.body;

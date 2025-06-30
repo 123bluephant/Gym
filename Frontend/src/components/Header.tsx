@@ -3,12 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ShoppingCart, User, Heart } from 'lucide-react';
 import { useRecoilState } from 'recoil';
 import userAtom from '../atoms/UserAtom';
+import { useCart } from '../context/CartContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useRecoilState(userAtom);
+  const { cartItemsCount } = useCart(); // Get cart count from context
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -41,6 +43,7 @@ const Header = () => {
   // Navigation items configuration
   const getNavItems = () => {
     const baseItems = [
+      { path: '/', label: 'Home' },
       { path: '/workouts', label: 'Workouts' },
       { path: '/nutrition', label: 'Nutrition' },
       { path: '/shop', label: 'Shop' },
@@ -52,12 +55,9 @@ const Header = () => {
         { path: '/tracking', label: 'Tracking' },
         { path: '/calories', label: 'Calories' },
       ];
-
-      // Add Women's Health only for female users
       if (user.gender === 'female') {
         userSpecificItems.push({ path: '/womens-health', label: 'Women\'s Health' });
       }
-
       return [...baseItems, ...userSpecificItems];
     }
 
@@ -85,9 +85,8 @@ const Header = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`transition-colors ${
-                  isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                }`}
+                className={`transition-colors ${isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                  }`}
               >
                 {item.label}
               </Link>
@@ -97,18 +96,25 @@ const Header = () => {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {user && (
-              <Link to="/shop" className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors">
-                <ShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+              <Link to="/cart" className="relative">
+                <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-purple-600 transition-colors" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {cartItemsCount}
+                  </span>
+                )}
               </Link>
             )}
-            
+
             {user ? (
               <>
-                <Link to="/profile" className="p-2 text-gray-700 hover:text-purple-600 transition-colors">
+                <Link 
+                  to="/profile" 
+                  className="p-2 text-gray-700 hover:text-purple-600 transition-colors"
+                >
                   <User className="w-5 h-5" />
                 </Link>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
                 >
@@ -117,10 +123,13 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors">
+                <Link 
+                  to="/login" 
+                  className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
+                >
                   Login
                 </Link>
-                <button 
+                <button
                   onClick={handleGetStarted}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all"
                 >
@@ -131,7 +140,7 @@ const Header = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="md:hidden p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -148,34 +157,37 @@ const Header = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`transition-colors ${
-                    isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
-                  }`}
+                  className={`transition-colors ${isActive(item.path) ? 'text-purple-600' : 'text-gray-700 hover:text-purple-600'
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
               ))}
-              
+
               <div className="flex flex-col space-y-4 pt-4">
                 {user && (
-                  <Link to="/shop" className="flex items-center space-x-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  <Link 
+                    to="/cart" 
+                    className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <ShoppingCart className="w-5 h-5" />
-                    <span>Cart (3)</span>
+                    <span>Cart ({cartItemsCount})</span>
                   </Link>
                 )}
-                
+
                 {user ? (
                   <>
-                    <Link 
-                      to="/profile" 
-                      className="flex items-center space-x-2 text-gray-700"
+                    <Link
+                      to="/profile"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />
                       <span>Profile</span>
                     </Link>
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="text-left text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
                     >
@@ -184,16 +196,16 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Link 
-                      to="/login" 
+                    <Link
+                      to="/login"
                       className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
-                    <button 
+                    <button
                       onClick={handleGetStarted}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all"
                     >
                       Sign Up
                     </button>

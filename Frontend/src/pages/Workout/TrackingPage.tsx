@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, Award, Calendar, TrendingUp, Zap, Heart, BarChart3, Target, Clock, Flame } from 'lucide-react';
-interface TrackingPageProps {
-  isLoggedIn?: boolean;
-}
 
-const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
+const TrackingPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
 
@@ -22,7 +19,7 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
     {
       name: 'Yoga',
       icon: Heart,
-      color: 'from-green-500 to-green-600',
+      color: 'from-green-500 to-green-600', 
       sessions: 16,
       totalTime: '12h 45m',
       progress: 72,
@@ -62,45 +59,45 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
   ];
 
   const achievements = [
-    {
-      title: '30-Day Streak',
-      description: 'Consistent daily workouts',
-      unlocked: true,
+    { 
+      title: '30-Day Streak', 
+      description: 'Consistent daily workouts', 
+      unlocked: true, 
       date: '2024-03-01',
       rarity: 'Common'
     },
-    {
-      title: 'Strength Master',
-      description: 'Complete 50 strength sessions',
-      unlocked: true,
+    { 
+      title: 'Strength Master', 
+      description: 'Complete 50 strength sessions', 
+      unlocked: true, 
       date: '2024-02-15',
       rarity: 'Rare'
     },
-    {
-      title: 'Flexibility Pro',
-      description: '100 hours of yoga',
-      unlocked: false,
+    { 
+      title: 'Flexibility Pro', 
+      description: '100 hours of yoga', 
+      unlocked: false, 
       progress: 76,
       rarity: 'Epic'
     },
-    {
-      title: 'Cardio Champion',
-      description: 'Burn 10,000 calories',
-      unlocked: true,
+    { 
+      title: 'Cardio Champion', 
+      description: 'Burn 10,000 calories', 
+      unlocked: true, 
       date: '2024-01-20',
       rarity: 'Legendary'
     },
-    {
-      title: 'Early Bird',
-      description: '20 morning workouts',
-      unlocked: false,
+    { 
+      title: 'Early Bird', 
+      description: '20 morning workouts', 
+      unlocked: false, 
       progress: 15,
       rarity: 'Common'
     },
-    {
-      title: 'HIIT Hero',
-      description: '50 HIIT sessions completed',
-      unlocked: false,
+    { 
+      title: 'HIIT Hero', 
+      description: '50 HIIT sessions completed', 
+      unlocked: false, 
       progress: 36,
       rarity: 'Rare'
     }
@@ -124,20 +121,19 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${!isLoggedIn ? 'pt-16' : ''}`}>
+    <div className="pt-16 min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-purple-600 to-blue-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl font-bold mb-6">Fitness Tracking Dashboard</h1>
             <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-              Monitor your progress across all fitness disciplines. Track workouts, analyze performance,
+              Monitor your progress across all fitness disciplines. Track workouts, analyze performance, 
               and celebrate your achievements with comprehensive fitness analytics.
             </p>
           </div>
         </div>
       </section>
-
 
       {/* Stats Overview */}
       <section className="py-12 bg-white">
@@ -156,8 +152,8 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                     </span>
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {typeof stat.value === 'number' && stat.value > 1000
-                      ? stat.value.toLocaleString()
+                    {typeof stat.value === 'number' && stat.value > 1000 
+                      ? stat.value.toLocaleString() 
                       : stat.value}
                   </div>
                   <div className="text-gray-600 text-sm">{stat.label}</div>
@@ -177,10 +173,11 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 rounded-lg font-medium capitalize transition-all ${activeTab === tab
+                  className={`px-6 py-3 rounded-lg font-medium capitalize transition-all ${
+                    activeTab === tab
                       ? 'bg-white text-purple-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                  }`}
                 >
                   {tab}
                 </button>
@@ -209,9 +206,9 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                         <div className="text-sm text-gray-600">Total Sessions</div>
                       </div>
                     </div>
-
+                    
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">{type.name}</h3>
-
+                    
                     <div className="space-y-3 mb-4">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Total Time</span>
@@ -226,14 +223,14 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                         <span className="font-medium">{type.avgDuration} min</span>
                       </div>
                     </div>
-
+                    
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Monthly Goal</span>
                         <span className="font-semibold">{type.progress}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
+                        <div 
                           className={`bg-gradient-to-r ${type.color} h-2 rounded-full transition-all duration-300`}
                           style={{ width: `${type.progress}%` }}
                         ></div>
@@ -256,7 +253,7 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                       <Calendar className="w-5 h-5" />
                       <span>March 11-17, 2024</span>
                     </div>
-                    <select
+                    <select 
                       value={selectedTimeframe}
                       onChange={(e) => setSelectedTimeframe(e.target.value)}
                       className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -267,7 +264,7 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                     </select>
                   </div>
                 </div>
-
+                
                 <div className="grid grid-cols-7 gap-4 mb-8">
                   {weeklyData.map((day, index) => {
                     const total = day.strength + day.yoga + day.hiit + day.cardio;
@@ -278,28 +275,28 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                         <div className="text-xs text-gray-500 mb-2">Mar {day.date}</div>
                         <div className={`relative bg-gray-100 rounded-lg flex flex-col justify-end overflow-hidden`} style={{ height: `${maxHeight}px` }}>
                           {day.cardio > 0 && (
-                            <div
+                            <div 
                               className="bg-blue-500 w-full transition-all duration-300"
                               style={{ height: `${(day.cardio / 100) * maxHeight}px` }}
                               title={`Cardio: ${day.cardio}min`}
                             ></div>
                           )}
                           {day.hiit > 0 && (
-                            <div
+                            <div 
                               className="bg-orange-500 w-full transition-all duration-300"
                               style={{ height: `${(day.hiit / 100) * maxHeight}px` }}
                               title={`HIIT: ${day.hiit}min`}
                             ></div>
                           )}
                           {day.yoga > 0 && (
-                            <div
+                            <div 
                               className="bg-green-500 w-full transition-all duration-300"
                               style={{ height: `${(day.yoga / 100) * maxHeight}px` }}
                               title={`Yoga: ${day.yoga}min`}
                             ></div>
                           )}
                           {day.strength > 0 && (
-                            <div
+                            <div 
                               className="bg-purple-500 w-full transition-all duration-300"
                               style={{ height: `${(day.strength / 100) * maxHeight}px` }}
                               title={`Strength: ${day.strength}min`}
@@ -344,31 +341,35 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {achievements.map((achievement, index) => (
-                  <div key={index} className={`p-6 rounded-2xl border-2 transition-all ${achievement.unlocked
-                      ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'
+                  <div key={index} className={`p-6 rounded-2xl border-2 transition-all ${
+                    achievement.unlocked 
+                      ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200' 
                       : 'bg-gray-50 border-gray-200'
-                    }`}>
+                  }`}>
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${achievement.unlocked
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                        achievement.unlocked 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
                           : 'bg-gray-300'
-                        }`}>
+                      }`}>
                         <Award className={`w-8 h-8 ${achievement.unlocked ? 'text-white' : 'text-gray-500'}`} />
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${getRarityColor(achievement.rarity)}`}>
                         {achievement.rarity}
                       </span>
                     </div>
-
-                    <h4 className={`text-lg font-semibold mb-2 ${achievement.unlocked ? 'text-gray-900' : 'text-gray-500'
-                      }`}>
+                    
+                    <h4 className={`text-lg font-semibold mb-2 ${
+                      achievement.unlocked ? 'text-gray-900' : 'text-gray-500'
+                    }`}>
                       {achievement.title}
                     </h4>
-                    <p className={`text-sm mb-4 ${achievement.unlocked ? 'text-gray-600' : 'text-gray-400'
-                      }`}>
+                    <p className={`text-sm mb-4 ${
+                      achievement.unlocked ? 'text-gray-600' : 'text-gray-400'
+                    }`}>
                       {achievement.description}
                     </p>
-
+                    
                     {achievement.unlocked ? (
                       <div className="flex items-center space-x-2 text-purple-600">
                         <TrendingUp className="w-4 h-4" />
@@ -381,7 +382,7 @@ const TrackingPage: React.FC<TrackingPageProps> = ({ isLoggedIn = false }) => {
                           <span className="font-medium">{achievement.progress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
+                          <div 
                             className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${achievement.progress}%` }}
                           ></div>

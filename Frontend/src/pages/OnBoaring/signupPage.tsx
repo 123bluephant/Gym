@@ -56,7 +56,7 @@ const SignupPage: React.FC = () => {
       if (response.ok) {
         setUser(body.user);
         localStorage.setItem("user", JSON.stringify(body.user));
-        navigate("/dashboard");
+        navigate("/");
         return;
       }
 
