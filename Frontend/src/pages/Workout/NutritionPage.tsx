@@ -1,70 +1,243 @@
-import React, { useState } from 'react';
-import { Plus, Minus, ChefHat, Calendar, Target, TrendingUp, BookOpen, Clock, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Plus, 
+  Minus, 
+  ChefHat, 
+  Calendar, 
+  Target, 
+  TrendingUp, 
+  BookOpen, 
+  Clock, 
+  Users, 
+  Loader2, 
+  AlertCircle,
+  Upload,
+  X
+} from 'lucide-react';
+
+// Mock API service (in a real app, this would be in a separate file)
+const NutritionService = {
+  async getDietPlans() {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return [
+      {
+        id: 'mediterranean',
+        name: 'Mediterranean',
+        description: 'Heart-healthy, rich in omega-3s and antioxidants',
+        color: 'from-blue-500 to-green-500',
+        meals: 125,
+        followers: '2.3k',
+        benefits: ['Heart Health', 'Brain Function', 'Anti-inflammatory']
+      },
+      {
+        id: 'plant-based',
+        name: 'Plant-Based',
+        description: 'Nutrient-dense, eco-friendly whole foods',
+        color: 'from-green-500 to-emerald-500',
+        meals: 98,
+        followers: '1.8k',
+        benefits: ['Weight Loss', 'Digestive Health', 'Environmental']
+      },
+      {
+        id: 'high-protein',
+        name: 'High Protein',
+        description: 'Muscle building, strength focused nutrition',
+        color: 'from-purple-500 to-pink-500',
+        meals: 156,
+        followers: '3.1k',
+        benefits: ['Muscle Growth', 'Satiety', 'Recovery']
+      },
+      {
+        id: 'keto',
+        name: 'Keto Friendly',
+        description: 'Low carb, high fat ketogenic approach',
+        color: 'from-orange-500 to-red-500',
+        meals: 87,
+        followers: '1.5k',
+        benefits: ['Fat Loss', 'Mental Clarity', 'Energy']
+      }
+    ];
+  },
+
+  async getMeals() {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return {
+      breakfast: [
+        { id: 'b1', name: 'Greek Yogurt Bowl', calories: 320, protein: 20, carbs: 35, fat: 8, time: '5 min', difficulty: 'Easy' },
+        { id: 'b2', name: 'Avocado Toast', calories: 280, protein: 12, carbs: 25, fat: 18, time: '10 min', difficulty: 'Easy' },
+        { id: 'b3', name: 'Protein Smoothie', calories: 240, protein: 25, carbs: 20, fat: 6, time: '5 min', difficulty: 'Easy' },
+        { id: 'b4', name: 'Overnight Oats', calories: 350, protein: 15, carbs: 45, fat: 12, time: '2 min', difficulty: 'Easy' }
+      ],
+      lunch: [
+        { id: 'l1', name: 'Grilled Chicken Salad', calories: 420, protein: 35, carbs: 15, fat: 22, time: '15 min', difficulty: 'Medium' },
+        { id: 'l2', name: 'Quinoa Power Bowl', calories: 380, protein: 18, carbs: 45, fat: 12, time: '20 min', difficulty: 'Medium' },
+        { id: 'l3', name: 'Turkey Wrap', calories: 350, protein: 28, carbs: 30, fat: 14, time: '10 min', difficulty: 'Easy' },
+        { id: 'l4', name: 'Buddha Bowl', calories: 400, protein: 16, carbs: 50, fat: 15, time: '25 min', difficulty: 'Medium' }
+      ],
+      dinner: [
+        { id: 'd1', name: 'Salmon & Vegetables', calories: 450, protein: 32, carbs: 20, fat: 25, time: '30 min', difficulty: 'Medium' },
+        { id: 'd2', name: 'Lean Beef Stir Fry', calories: 380, protein: 30, carbs: 25, fat: 18, time: '20 min', difficulty: 'Medium' },
+        { id: 'd3', name: 'Vegetarian Pasta', calories: 320, protein: 15, carbs: 55, fat: 8, time: '25 min', difficulty: 'Easy' },
+        { id: 'd4', name: 'Chicken Curry', calories: 410, protein: 28, carbs: 35, fat: 20, time: '35 min', difficulty: 'Hard' }
+      ]
+    };
+  },
+
+  async updateMealPlan(planData) {
+    // Simulate API call to update meal plan
+    console.log('Updating meal plan:', planData);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  },
+
+  async uploadMealData(mealData) {
+    // Simulate admin upload
+    console.log('Uploading meal data:', mealData);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { success: true };
+  },
+
+  async deleteMeal(mealId) {
+    // Simulate delete operation
+    console.log('Deleting meal:', mealId);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  }
+};
 
 const NutritionPage = () => {
+  // State for dynamic data
+  const [dietPlans, setDietPlans] = useState([]);
+  const [meals, setMeals] = useState({ breakfast: [], lunch: [], dinner: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  
+  // User selections
   const [selectedMeal, setSelectedMeal] = useState('breakfast');
   const [calories, setCalories] = useState(1847);
   const [selectedPlan, setSelectedPlan] = useState('mediterranean');
+  
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false); // Would come from auth in real app
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadData, setUploadData] = useState({
+    mealType: 'breakfast',
+    name: '',
+    calories: '',
+    protein: '',
+    carbs: '',
+    fat: '',
+    time: '',
+    difficulty: 'Easy'
+  });
 
-  const dietPlans = [
-    {
-      id: 'mediterranean',
-      name: 'Mediterranean',
-      description: 'Heart-healthy, rich in omega-3s and antioxidants',
-      color: 'from-blue-500 to-green-500',
-      meals: 125,
-      followers: '2.3k',
-      benefits: ['Heart Health', 'Brain Function', 'Anti-inflammatory']
-    },
-    {
-      id: 'plant-based',
-      name: 'Plant-Based',
-      description: 'Nutrient-dense, eco-friendly whole foods',
-      color: 'from-green-500 to-emerald-500',
-      meals: 98,
-      followers: '1.8k',
-      benefits: ['Weight Loss', 'Digestive Health', 'Environmental']
-    },
-    {
-      id: 'high-protein',
-      name: 'High Protein',
-      description: 'Muscle building, strength focused nutrition',
-      color: 'from-purple-500 to-pink-500',
-      meals: 156,
-      followers: '3.1k',
-      benefits: ['Muscle Growth', 'Satiety', 'Recovery']
-    },
-    {
-      id: 'keto',
-      name: 'Keto Friendly',
-      description: 'Low carb, high fat ketogenic approach',
-      color: 'from-orange-500 to-red-500',
-      meals: 87,
-      followers: '1.5k',
-      benefits: ['Fat Loss', 'Mental Clarity', 'Energy']
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [plans, mealData] = await Promise.all([
+          NutritionService.getDietPlans(),
+          NutritionService.getMeals()
+        ]);
+        setDietPlans(plans);
+        setMeals(mealData);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle meal plan selection
+  const handlePlanSelect = async (planId: React.SetStateAction<string>) => {
+    try {
+      setSelectedPlan(planId);
+      // In a real app, you might update user preferences in the backend
+      await NutritionService.updateMealPlan({ planId });
+    } catch (err) {
+      console.error('Failed to update meal plan:', err);
     }
-  ];
-
-  const meals = {
-    breakfast: [
-      { name: 'Greek Yogurt Bowl', calories: 320, protein: 20, carbs: 35, fat: 8, time: '5 min', difficulty: 'Easy' },
-      { name: 'Avocado Toast', calories: 280, protein: 12, carbs: 25, fat: 18, time: '10 min', difficulty: 'Easy' },
-      { name: 'Protein Smoothie', calories: 240, protein: 25, carbs: 20, fat: 6, time: '5 min', difficulty: 'Easy' },
-      { name: 'Overnight Oats', calories: 350, protein: 15, carbs: 45, fat: 12, time: '2 min', difficulty: 'Easy' }
-    ],
-    lunch: [
-      { name: 'Grilled Chicken Salad', calories: 420, protein: 35, carbs: 15, fat: 22, time: '15 min', difficulty: 'Medium' },
-      { name: 'Quinoa Power Bowl', calories: 380, protein: 18, carbs: 45, fat: 12, time: '20 min', difficulty: 'Medium' },
-      { name: 'Turkey Wrap', calories: 350, protein: 28, carbs: 30, fat: 14, time: '10 min', difficulty: 'Easy' },
-      { name: 'Buddha Bowl', calories: 400, protein: 16, carbs: 50, fat: 15, time: '25 min', difficulty: 'Medium' }
-    ],
-    dinner: [
-      { name: 'Salmon & Vegetables', calories: 450, protein: 32, carbs: 20, fat: 25, time: '30 min', difficulty: 'Medium' },
-      { name: 'Lean Beef Stir Fry', calories: 380, protein: 30, carbs: 25, fat: 18, time: '20 min', difficulty: 'Medium' },
-      { name: 'Vegetarian Pasta', calories: 320, protein: 15, carbs: 55, fat: 8, time: '25 min', difficulty: 'Easy' },
-      { name: 'Chicken Curry', calories: 410, protein: 28, carbs: 35, fat: 20, time: '35 min', difficulty: 'Hard' }
-    ]
   };
+
+  // Handle admin upload
+  const handleUploadSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setUploading(true);
+      const response = await NutritionService.uploadMealData(uploadData);
+      if (response.success) {
+        // Refresh meals data
+        const updatedMeals = await NutritionService.getMeals();
+        setMeals(updatedMeals);
+        setShowUploadForm(false);
+        setUploadData({
+          mealType: 'breakfast',
+          name: '',
+          calories: '',
+          protein: '',
+          carbs: '',
+          fat: '',
+          time: '',
+          difficulty: 'Easy'
+        });
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle meal deletion
+  const handleDeleteMeal = async (mealId: any, mealType: string) => {
+    try {
+      const response = await NutritionService.deleteMeal(mealId);
+      if (response.success) {
+        // Optimistically update UI
+        setMeals(prev => ({
+          ...prev,
+          [mealType]: prev[mealType].filter((meal: { id: any; }) => meal.id !== mealId)
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to delete meal:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-red-50 rounded-lg">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Data</h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const mealPlanFeatures = [
     {
@@ -91,6 +264,156 @@ const NutritionPage = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
+      {/* Admin Controls */}
+      {isAdmin && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button 
+            onClick={() => setShowUploadForm(!showUploadForm)}
+            className={`p-4 rounded-full shadow-lg transition-colors flex items-center justify-center ${
+              showUploadForm ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'
+            }`}
+          >
+            {showUploadForm ? <X className="w-6 h-6" /> : <Upload className="w-6 h-6" />}
+          </button>
+          
+          {showUploadForm && (
+            <div className="absolute bottom-16 right-0 w-96 bg-white p-6 rounded-lg shadow-xl border border-gray-200">
+              <h3 className="font-bold text-lg mb-4">Add New Meal</h3>
+              <form onSubmit={handleUploadSubmit}>
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meal Type</label>
+                    <select
+                      value={uploadData.mealType}
+                      onChange={(e) => setUploadData({...uploadData, mealType: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded"
+                      required
+                    >
+                      <option value="breakfast">Breakfast</option>
+                      <option value="lunch">Lunch</option>
+                      <option value="dinner">Dinner</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meal Name</label>
+                    <input
+                      type="text"
+                      value={uploadData.name}
+                      onChange={(e) => setUploadData({...uploadData, name: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Calories</label>
+                      <input
+                        type="number"
+                        value={uploadData.calories}
+                        onChange={(e) => setUploadData({...uploadData, calories: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
+                      <input
+                        type="number"
+                        value={uploadData.protein}
+                        onChange={(e) => setUploadData({...uploadData, protein: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
+                      <input
+                        type="number"
+                        value={uploadData.carbs}
+                        onChange={(e) => setUploadData({...uploadData, carbs: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label>
+                      <input
+                        type="number"
+                        value={uploadData.fat}
+                        onChange={(e) => setUploadData({...uploadData, fat: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Prep Time</label>
+                      <input
+                        type="text"
+                        value={uploadData.time}
+                        onChange={(e) => setUploadData({...uploadData, time: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                        placeholder="e.g. 15 min"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                      <select
+                        value={uploadData.difficulty}
+                        onChange={(e) => setUploadData({...uploadData, difficulty: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        required
+                      >
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowUploadForm(false)}
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+                    disabled={uploading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center justify-center min-w-20"
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      'Upload'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,58 +460,64 @@ const NutritionPage = () => {
             <p className="text-xl text-gray-600">Find the perfect eating style that fits your goals and preferences</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {dietPlans.map((plan) => (
-              <div 
-                key={plan.id} 
-                className={`bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all border-2 cursor-pointer ${
-                  selectedPlan === plan.id ? 'border-purple-200 bg-purple-50' : 'border-gray-100 hover:border-gray-200'
-                }`}
-                onClick={() => setSelectedPlan(plan.id)}
-              >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-2xl flex items-center justify-center`}>
-                      <ChefHat className="w-8 h-8 text-white" />
+          {dietPlans.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              {dietPlans.map((plan) => (
+                <div 
+                  key={plan.id} 
+                  className={`bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all border-2 cursor-pointer ${
+                    selectedPlan === plan.id ? 'border-purple-200 bg-purple-50' : 'border-gray-100 hover:border-gray-200'
+                  }`}
+                  onClick={() => handlePlanSelect(plan.id)}
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-2xl flex items-center justify-center`}>
+                        <ChefHat className="w-8 h-8 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                        <p className="text-gray-600">{plan.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                      <p className="text-gray-600">{plan.description}</p>
+                    <div className={`w-6 h-6 rounded-full border-2 ${
+                      selectedPlan === plan.id ? 'bg-purple-600 border-purple-600' : 'border-gray-300'
+                    }`}>
+                      {selectedPlan === plan.id && (
+                        <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>
+                      )}
                     </div>
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 ${
-                    selectedPlan === plan.id ? 'bg-purple-600 border-purple-600' : 'border-gray-300'
-                  }`}>
-                    {selectedPlan === plan.id && (
-                      <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>
-                    )}
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{plan.meals}</div>
-                    <div className="text-sm text-gray-600">Recipes</div>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{plan.meals}</div>
+                      <div className="text-sm text-gray-600">Recipes</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{plan.followers}</div>
+                      <div className="text-sm text-gray-600">Followers</div>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{plan.followers}</div>
-                    <div className="text-sm text-gray-600">Followers</div>
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700">Key Benefits:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {plan.benefits.map((benefit, index) => (
-                      <span key={index} className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                        {benefit}
-                      </span>
-                    ))}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-700">Key Benefits:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {plan.benefits.map((benefit, index) => (
+                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No diet plans available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -271,7 +600,7 @@ const NutritionPage = () => {
                   <h3 className="text-xl font-semibold text-gray-900">Today's Meal Plan</h3>
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <Calendar className="w-4 h-4" />
-                    <span>March 15, 2024</span>
+                    <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                   </div>
                 </div>
                 
@@ -293,37 +622,52 @@ const NutritionPage = () => {
               </div>
 
               <div className="p-6">
-                <div className="space-y-4">
-                  {meals[selectedMeal as keyof typeof meals].map((item, index) => (
-                    <div key={index} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                        <button className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700 transition-colors">
-                          Add
-                        </button>
-                      </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-                        <span className="font-medium">{item.calories} cal</span>
-                        <span>P: {item.protein}g</span>
-                        <span>C: {item.carbs}g</span>
-                        <span>F: {item.fat}g</span>
-                      </div>
-                      <div className="flex items-center space-x-4 text-xs text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{item.time}</span>
+                {meals[selectedMeal]?.length > 0 ? (
+                  <div className="space-y-4">
+                    {meals[selectedMeal].map((item) => (
+                      <div key={item.id} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors relative">
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDeleteMeal(item.id, selectedMeal)}
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            title="Delete meal"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                          <button className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700 transition-colors">
+                            Add
+                          </button>
                         </div>
-                        <span className={`px-2 py-1 rounded ${
-                          item.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                          item.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {item.difficulty}
-                        </span>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                          <span className="font-medium">{item.calories} cal</span>
+                          <span>P: {item.protein}g</span>
+                          <span>C: {item.carbs}g</span>
+                          <span>F: {item.fat}g</span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{item.time}</span>
+                          </div>
+                          <span className={`px-2 py-1 rounded ${
+                            item.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                            item.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {item.difficulty}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No meals available for {selectedMeal}.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -347,6 +691,18 @@ const NutritionPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Admin Toggle (for demo purposes) */}
+      {/* <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setIsAdmin(!isAdmin)}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            isAdmin ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          {isAdmin ? 'Admin Mode: ON' : 'Admin Mode: OFF'}
+        </button>
+      </div> */}
     </div>
   );
 };

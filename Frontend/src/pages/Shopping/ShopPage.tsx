@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Star, Filter, Search, Heart, Eye, Grid, List } from 'lucide-react';
+import { ShoppingCart, Star, Filter, Search, Heart, Eye, Grid, List, ChevronDown } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { toast } from 'react-hot-toast';
 
@@ -37,14 +37,14 @@ const ShopPage = () => {
   ];
 
   const toggleCart = (product: Product) => {
-  if (cartItems.some(item => item.id === product.id)) {
-    removeFromCart(product.id);
-    toast.success(`${product.name} removed from cart`);
-  } else {
-    addToCart(product); // Now correctly passing the product object
-    toast.success(`${product.name} added to cart`);
-  }
-};
+    if (cartItems.some(item => item.id === product.id)) {
+      removeFromCart(product.id);
+      toast.success(`${product.name} removed from cart`);
+    } else {
+      addToCart(product);
+      toast.success(`${product.name} added to cart`);
+    }
+  };
 
   const products = [
     {
@@ -159,10 +159,9 @@ const ShopPage = () => {
       description: 'Clean energy pre-workout with natural caffeine and amino acids.',
       features: ['Natural caffeine', 'No artificial colors', 'Great taste']
     }
-    // ... (keep your existing products array)
+    
   ];
-
-  const filteredProducts = products.filter(product => {
+const filteredProducts = products.filter(product => {
     const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -192,32 +191,35 @@ const ShopPage = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-600 to-pink-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">Fitness Shop</h1>
-            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-              Everything you need for your fitness journey. Premium equipment, stylish activewear,
-              and performance supplements - all in one place.
-            </p>
-          </div>
+      {/* Enhanced Hero Section */}
+      <section className="relative bg-gradient-to-br from-purple-600 to-pink-600 text-white py-24 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1000')] bg-cover bg-center mix-blend-overlay"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+          <h1 className="text-5xl font-bold mb-6 animate-fade-in-down">Fitness Shop</h1>
+          <p className="text-xl text-purple-100 max-w-3xl mx-auto animate-fade-in-up delay-100">
+            Everything you need for your fitness journey. Premium equipment, stylish activewear,
+            and performance supplements - all in one place.
+          </p>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-64 space-y-6">
+          {/* Enhanced Sidebar Filters */}
+          <div className="lg:w-72 space-y-6">
             {/* Search */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
                 <input
                   type="text"
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm transition-all duration-200 hover:shadow-md focus:shadow-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -225,54 +227,63 @@ const ShopPage = () => {
             </div>
 
             {/* Categories */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
               <div className="space-y-2">
                 {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${activeCategory === category.id
-                        ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                        : 'hover:bg-gray-50 text-gray-700'
-                      }`}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200 ${
+                      activeCategory === category.id
+                        ? 'bg-purple-50 text-purple-700 border border-purple-200 shadow-inner'
+                        : 'hover:bg-gray-50 text-gray-700 hover:shadow-sm'
+                    }`}
                   >
                     <span>{category.name}</span>
-                    <span className="text-sm text-gray-500">({category.count})</span>
+                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      {category.count}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Price Range */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Range</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">${priceRange[0]}</span>
                   <span className="text-sm text-gray-600">${priceRange[1]}</span>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="500"
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  className="w-full"
-                />
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="0"
+                    max="500"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div 
+                    className="absolute top-0 left-0 h-2 bg-purple-500 rounded-lg"
+                    style={{ width: `${(priceRange[1] / 500) * 100}%` }}
+                  ></div>
+                </div>
                 <div className="flex space-x-2">
                   <input
                     type="number"
                     value={priceRange[0]}
                     onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm shadow-sm focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Min"
                   />
                   <input
                     type="number"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm shadow-sm focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Max"
                   />
                 </div>
@@ -280,14 +291,14 @@ const ShopPage = () => {
             </div>
 
             {/* Featured Collections */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Featured Collections</h3>
               <div className="space-y-3">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-white">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-white hover:shadow-lg transition-all transform hover:-translate-y-0.5">
                   <h4 className="font-semibold mb-1">New Arrivals</h4>
                   <p className="text-sm text-purple-100">Latest fitness gear</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-500 to-teal-500 rounded-lg p-4 text-white">
+                <div className="bg-gradient-to-r from-blue-500 to-teal-500 rounded-lg p-4 text-white hover:shadow-lg transition-all transform hover:-translate-y-0.5">
                   <h4 className="font-semibold mb-1">Best Sellers</h4>
                   <p className="text-sm text-blue-100">Most popular items</p>
                 </div>
@@ -297,25 +308,31 @@ const ShopPage = () => {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Toolbar */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+            {/* Enhanced Toolbar */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-600">
                     {sortedProducts.length} {sortedProducts.length === 1 ? 'product' : 'products'} found
                   </span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-400 hover:text-gray-600'
-                        }`}
+                      className={`p-2 rounded-lg transition-colors ${
+                        viewMode === 'grid' 
+                          ? 'bg-white text-purple-600 shadow-sm' 
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
                     >
                       <Grid className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-400 hover:text-gray-600'
-                        }`}
+                      className={`p-2 rounded-lg transition-colors ${
+                        viewMode === 'list' 
+                          ? 'bg-white text-purple-600 shadow-sm' 
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
                     >
                       <List className="w-5 h-5" />
                     </button>
@@ -323,19 +340,24 @@ const ShopPage = () => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="popularity">Sort by Popularity</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="newest">Newest First</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="appearance-none pl-4 pr-10 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm hover:shadow-md transition-all"
+                    >
+                      <option value="popularity">Sort by Popularity</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="rating">Highest Rated</option>
+                      <option value="newest">Newest First</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
                   <button
-                    className="flex items-center space-x-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
                     onClick={() => {
                       setActiveCategory('all');
                       setPriceRange([0, 500]);
@@ -349,7 +371,7 @@ const ShopPage = () => {
               </div>
             </div>
 
-            {/* Products Grid/List */}
+            {/* Enhanced Products Grid/List */}
             <div className={viewMode === 'grid'
               ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
               : "space-y-6"
@@ -360,27 +382,29 @@ const ShopPage = () => {
                 return (
                   <div
                     key={product.id}
-                    className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 ${viewMode === 'list' ? 'flex' : ''
-                      }`}
+                    className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-100 transform hover:-translate-y-1 ${
+                      viewMode === 'list' ? 'flex' : ''
+                    }`}
                   >
-                    <div className={`relative ${viewMode === 'list' ? 'w-64 flex-shrink-0' : ''}`}>
+                    <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-64 flex-shrink-0' : ''}`}>
                       <img
                         src={product.image}
                         alt={product.name}
-                        className={`object-cover group-hover:scale-105 transition-transform duration-300 ${viewMode === 'list' ? 'w-full h-full' : 'w-full h-64'
-                          }`}
+                        className={`object-cover transition-transform duration-500 ease-in-out ${
+                          viewMode === 'list' ? 'w-full h-full' : 'w-full h-64'
+                        } ${viewMode === 'grid' ? 'group-hover:scale-105' : ''}`}
                       />
 
                       {/* Badges */}
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
                         {product.isNew && (
-                          <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                          <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">
                             New
                           </span>
                         )}
                         {product.onSale && (
-                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                            Sale
+                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">
+                            {Math.round(((product.originalPrice! - product.price) / product.originalPrice! * 100))}% Off
                           </span>
                         )}
                       </div>
@@ -388,24 +412,24 @@ const ShopPage = () => {
                       {/* Action Buttons */}
                       <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button
-                          className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                          className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-md hover:shadow-lg"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             // Wishlist functionality would go here
                           }}
                         >
-                          <Heart className="w-5 h-5 text-gray-600" />
+                          <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
                         </button>
                         <button
-                          className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                          className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-md hover:shadow-lg"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             handleQuickView(product.id);
                           }}
                         >
-                          <Eye className="w-5 h-5 text-gray-600" />
+                          <Eye className="w-5 h-5 text-gray-600 hover:text-purple-600 transition-colors" />
                         </button>
                       </div>
                     </div>
@@ -424,10 +448,11 @@ const ShopPage = () => {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-4 h-4 ${i < Math.floor(product.rating)
+                              className={`w-4 h-4 ${
+                                i < Math.floor(product.rating)
                                   ? 'text-yellow-400 fill-current'
                                   : 'text-gray-300'
-                                }`}
+                              }`}
                             />
                           ))}
                         </div>
@@ -442,7 +467,7 @@ const ShopPage = () => {
                           )}
                         </div>
                         {product.onSale && product.originalPrice && (
-                          <span className="text-sm font-medium text-red-600">
+                          <span className="text-sm font-medium text-red-600 bg-red-50 px-2 py-1 rounded">
                             Save ${(product.originalPrice - product.price).toFixed(2)}
                           </span>
                         )}
@@ -467,13 +492,14 @@ const ShopPage = () => {
                           e.preventDefault();
                           toggleCart(product);
                         }}
-                        className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center space-x-2 ${cartItems.some(item => item.id === product.id)
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-50 text-gray-700 hover:bg-purple-50 hover:text-purple-600'
-                          }`}
+                        className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center space-x-2 ${
+                          isInCart
+                            ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-md'
+                            : 'bg-gray-50 text-gray-700 hover:bg-purple-50 hover:text-purple-600 border border-gray-200 hover:border-purple-200 shadow-sm hover:shadow-md'
+                        }`}
                       >
                         <ShoppingCart className="w-5 h-5" />
-                        <span>{cartItems.some(item => item.id === product.id) ? 'Added to Cart' : 'Add to Cart'}</span>
+                        <span>{isInCart ? 'Added to Cart' : 'Add to Cart'}</span>
                       </button>
                     </div>
                   </div>
@@ -482,25 +508,31 @@ const ShopPage = () => {
             </div>
 
             {sortedProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
-                <button
-                  onClick={() => {
-                    setActiveCategory('all');
-                    setPriceRange([0, 500]);
-                    setSearchQuery('');
-                  }}
-                  className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
-                >
-                  Clear all filters
-                </button>
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Search className="w-12 h-12 text-purple-500" />
+                  </div>
+                  <h3 className="text-xl font-medium text-gray-700 mb-2">No products found</h3>
+                  <p className="text-gray-500 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+                  <button
+                    onClick={() => {
+                      setActiveCategory('all');
+                      setPriceRange([0, 500]);
+                      setSearchQuery('');
+                    }}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* Load More */}
+            {/* Enhanced Load More */}
             {sortedProducts.length > 0 && (
               <div className="text-center mt-12">
-                <button className="bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                <button className="bg-white text-gray-700 border border-gray-200 px-8 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md">
                   Load More Products
                 </button>
               </div>

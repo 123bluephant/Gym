@@ -1,5 +1,8 @@
+// src/pages/TrackingPage.tsx
 import React, { useState } from 'react';
-import { Activity, Award, Calendar, TrendingUp, Zap, Heart, BarChart3, Target, Clock, Flame } from 'lucide-react';
+import { Activity, Award, Calendar, Zap, Heart, Target, Clock, Flame } from 'lucide-react';
+import { achievements, getRarityColor } from '../../components/Data/achievementData';
+import { AnalyticsSection } from '../../components/AnalyticsSection';
 
 const TrackingPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -58,51 +61,6 @@ const TrackingPage = () => {
     { day: 'Sun', strength: 0, yoga: 75, hiit: 0, cardio: 20, date: '17' }
   ];
 
-  const achievements = [
-    { 
-      title: '30-Day Streak', 
-      description: 'Consistent daily workouts', 
-      unlocked: true, 
-      date: '2024-03-01',
-      rarity: 'Common'
-    },
-    { 
-      title: 'Strength Master', 
-      description: 'Complete 50 strength sessions', 
-      unlocked: true, 
-      date: '2024-02-15',
-      rarity: 'Rare'
-    },
-    { 
-      title: 'Flexibility Pro', 
-      description: '100 hours of yoga', 
-      unlocked: false, 
-      progress: 76,
-      rarity: 'Epic'
-    },
-    { 
-      title: 'Cardio Champion', 
-      description: 'Burn 10,000 calories', 
-      unlocked: true, 
-      date: '2024-01-20',
-      rarity: 'Legendary'
-    },
-    { 
-      title: 'Early Bird', 
-      description: '20 morning workouts', 
-      unlocked: false, 
-      progress: 15,
-      rarity: 'Common'
-    },
-    { 
-      title: 'HIIT Hero', 
-      description: '50 HIIT sessions completed', 
-      unlocked: false, 
-      progress: 36,
-      rarity: 'Rare'
-    }
-  ];
-
   const monthlyStats = [
     { label: 'Total Workouts', value: 28, change: '+12%', icon: Activity },
     { label: 'Hours Trained', value: 42.5, change: '+8%', icon: Clock },
@@ -110,19 +68,8 @@ const TrackingPage = () => {
     { label: 'Current Streak', value: 12, change: '+4 days', icon: Target }
   ];
 
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'Common': return 'text-gray-600 bg-gray-100';
-      case 'Rare': return 'text-blue-600 bg-blue-100';
-      case 'Epic': return 'text-purple-600 bg-purple-100';
-      case 'Legendary': return 'text-yellow-600 bg-yellow-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
-
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-purple-600 to-blue-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -135,7 +82,6 @@ const TrackingPage = () => {
         </div>
       </section>
 
-      {/* Stats Overview */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -164,7 +110,6 @@ const TrackingPage = () => {
         </div>
       </section>
 
-      {/* Tab Navigation */}
       <section className="py-8 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
@@ -187,10 +132,8 @@ const TrackingPage = () => {
         </div>
       </section>
 
-      {/* Tab Content */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {fitnessTypes.map((type, index) => {
@@ -242,7 +185,6 @@ const TrackingPage = () => {
             </div>
           )}
 
-          {/* Weekly Tab */}
           {activeTab === 'weekly' && (
             <div className="space-y-8">
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
@@ -331,7 +273,6 @@ const TrackingPage = () => {
             </div>
           )}
 
-          {/* Achievements Tab */}
           {activeTab === 'achievements' && (
             <div className="space-y-8">
               <div className="text-center mb-8">
@@ -340,8 +281,8 @@ const TrackingPage = () => {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {achievements.map((achievement, index) => (
-                  <div key={index} className={`p-6 rounded-2xl border-2 transition-all ${
+                {achievements.map((achievement) => (
+                  <div key={achievement.id} className={`p-6 rounded-2xl border-2 transition-all ${
                     achievement.unlocked 
                       ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200' 
                       : 'bg-gray-50 border-gray-200'
@@ -352,9 +293,11 @@ const TrackingPage = () => {
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
                           : 'bg-gray-300'
                       }`}>
-                        <Award className={`w-8 h-8 ${achievement.unlocked ? 'text-white' : 'text-gray-500'}`} />
+                        {achievement.icon}
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getRarityColor(achievement.rarity)}`}>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        getRarityColor(achievement.rarity || 'Common')
+                      }`}>
                         {achievement.rarity}
                       </span>
                     </div>
@@ -372,7 +315,6 @@ const TrackingPage = () => {
                     
                     {achievement.unlocked ? (
                       <div className="flex items-center space-x-2 text-purple-600">
-                        <TrendingUp className="w-4 h-4" />
                         <span className="text-sm font-medium">Unlocked {achievement.date}</span>
                       </div>
                     ) : (
@@ -395,82 +337,12 @@ const TrackingPage = () => {
             </div>
           )}
 
-          {/* Analytics Tab */}
           {activeTab === 'analytics' && (
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Detailed Analytics</h2>
-                <p className="text-gray-600">Deep insights into your fitness journey and performance trends</p>
-              </div>
-
-              <div className="grid lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Performance Trends</h3>
-                    <BarChart3 className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-600">Average Session Duration</span>
-                      <span className="font-semibold">42 minutes</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-600">Most Active Day</span>
-                      <span className="font-semibold">Friday</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-600">Preferred Workout Time</span>
-                      <span className="font-semibold">6:00 AM</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-600">Weekly Consistency</span>
-                      <span className="font-semibold">85%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Goal Progress</h3>
-                    <Target className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Monthly Workout Goal</span>
-                        <span className="font-semibold">28/30 sessions</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '93%' }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Strength Training Goal</span>
-                        <span className="font-semibold">24/25 sessions</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: '96%' }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Cardio Minutes Goal</span>
-                        <span className="font-semibold">1,460/1,500 min</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '97%' }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AnalyticsSection monthlyStats={monthlyStats} />
           )}
         </div>
       </section>
 
-      {/* Summary Stats */}
       <section className="py-16 bg-gradient-to-r from-purple-600 to-pink-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">

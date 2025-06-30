@@ -1,4 +1,7 @@
-import Sidebar from '../components/Dashboard/sidebar';
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/Dashboard/sidebar';
 
 interface WorkoutActivity {
     id: string;
@@ -52,19 +55,33 @@ const sampleActivities: WorkoutActivity[] = [
     }
 ];
 
-
 const ActivityPage = () => {
+    const navigate = useNavigate();
+
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             <Sidebar />
 
-            {/* Main Content */}
             <main className="flex-1 pt-16 pl-64 overflow-y-auto">
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-6">Your Activity</h2>
-                    <div className="bg-white rounded-lg shadow p-6">
+                    {/* Updated header with back button */}
+                    <div className="flex items-center mb-8">
+                        <button 
+                            onClick={() => navigate(-1)} 
+                            className="mr-4 p-2 rounded-full hover:bg-gray-100"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Your Activity</h1>
+                            <p className="text-gray-600">Track your workout history and progress</p>
+                        </div>
+                    </div>
+
+                    {/* Activity List */}
+                    <div className="bg-white rounded-lg shadow mb-8">
                         {sampleActivities.map((activity) => (
-                            <div key={activity.id} className="p-6 hover:bg-gray-50 transition-colors">
+                            <div key={activity.id} className="p-6 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <h3 className="text-lg font-medium text-gray-900">{activity.type}</h3>
@@ -93,20 +110,21 @@ const ActivityPage = () => {
                         ))}
                     </div>
 
-                    <div className="p-6 border-t border-gray-200 bg-gray-50">
-                        <h3 className="font-medium text-gray-900">Activity Summary</h3>
-                        <div className="grid grid-cols-3 gap-4 mt-4">
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    {/* Activity Summary */}
+                    <div className="bg-white rounded-lg shadow p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity Summary</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-500">Total Workouts</p>
                                 <p className="text-2xl font-bold mt-1">{sampleActivities.length}</p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-500">Total Calories</p>
                                 <p className="text-2xl font-bold mt-1">
                                     {sampleActivities.reduce((sum, activity) => sum + activity.caloriesBurned, 0)}
                                 </p>
                             </div>
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-500">Current Streak</p>
                                 <p className="text-2xl font-bold mt-1">0 days</p>
                             </div>
