@@ -28,56 +28,99 @@ import ActivityPage from './pages/Dashboard/ActivityPage';
 import AchievementsPage from './pages/Dashboard/AchievementsPage';
 import SettingsPage from './pages/Dashboard/SettingsPage';
 import WomensHealthPage from './pages/Workout/WomensHealthPage';
-import AnalyticsPage from './pages/Dashboard/AnalyticsPage';
+import AnalyticsPage from './pages/gymOwner/Pages/Analytics';
+import SettingsPagegym from './pages/gymOwner/Pages/Settings';
+import Dashboardgym from './pages/gymOwner/Pages/Dashboard';
+import Meals from './pages/gymOwner/Pages/Meals/List';
+import Trainers from './pages/gymOwner/Pages/Trainers/List';
+import Members from './pages/gymOwner/Pages/Users/List';
+import Sidebar from './pages/gymOwner/components/Layout/Sidebar';
+import Navbar from './pages/gymOwner/components/Layout/Navbar';
+import GymOwnerProfile from './pages/gymOwner/Pages/ProfilePage';
+import AddEditMeal from './pages/gymOwner/Pages/Meals/AddEdits';
+import AddEditTrainer from './pages/gymOwner/Pages/Trainers/AddEdit';
+import AddList from './pages/gymOwner/Pages/Users/AddList';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
   const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile', '/analytics'].includes(location.pathname);
   const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
+  const isGymRoute = location.pathname.startsWith('/gym');
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {user && !isAuthPage && <Header />}
-      {!user && !isDashboard && <Header />}
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          {!user && <Route path="/login" element={<LoginPage />} />}
-          {!user && <Route path="/signup" element={<SignupPage />} />}
-          {!user && <Route path="/signupgym" element={<SignupGymPage />} />}
-          {user ? (
-            <>
-              <Route path="/dashboard" element={<HomeDashboard />} />
-              <Route path="/workouts" element={<WorkoutsPage />} />
-              <Route path="/women-health" element={<WomensHealthPage />} />
-              <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
-              <Route path="/nutrition" element={<NutritionPage />} />
-              <Route path="/tracking" element={<TrackingPage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/shop/:id" element={<ProductDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/Calories" element={<Calories />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/activity" element={<ActivityPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </>
-          ) : (
-            <>
+      {/* Regular Header (for non-gym routes) */}
+      {user && !isAuthPage && !isGymRoute && <Header />}
+      {!user && !isDashboard && !isGymRoute && <Header />}
+
+      {/* Gym Owner Layout (with Sidebar and Navbar) */}
+      {isGymRoute ? (
+        <div className="flex h-screen bg-gray-100">
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Navbar />
+            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+              <Routes>
+                <Route path="/gym/settings" element={<SettingsPagegym />} />
+                <Route path="/gym/analytics" element={<AnalyticsPage />} />
+                <Route path="/gym/profile" element={<GymOwnerProfile />} />
+                <Route path="/gym" element={<Dashboardgym />} />
+                <Route path="/gym/meals" element={<Meals />} />
+                <Route path="/gym/meals/add" element={<AddEditMeal />} />
+                <Route path="/gym/meals/edit/:id" element={<AddEditMeal />} />
+                {/* <Route path="/gym/meals/view/:id" element={<MealDetail />} /> You would create this component
+                <Route path="/gym/meals/import" element={<BulkImport />} /> You would create this component */}
+                <Route path="/gym/trainers" element={<Trainers />} />
+                <Route path="/gym/trainers/add" element={<AddEditTrainer />} />
+                <Route path="/gym/trainers/edit/:id" element={<AddEditTrainer />} />
+                <Route path="/gym/members" element={<Members />} />
+                <Route path="/gym/members/add" element={<AddList />} />
+                <Route path="/gym/members/edit/:id" element={<AddList />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
+      ) : (
+        /* Regular Content Layout */
+        <div className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            {!user && <Route path="/login" element={<LoginPage />} />}
+            {!user && <Route path="/signup" element={<SignupPage />} />}
+            {!user && <Route path="/signupgym" element={<SignupGymPage />} />}
+            {user ? (
+              <>
+                <Route path="/dashboard" element={<HomeDashboard />} />
+                <Route path="/workouts" element={<WorkoutsPage />} />
+                <Route path="/women-health" element={<WomensHealthPage />} />
+                <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
+                <Route path="/nutrition" element={<NutritionPage />} />
+                <Route path="/tracking" element={<TrackingPage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/shop/:id" element={<ProductDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/Calories" element={<Calories />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/activity" element={<ActivityPage />} />
+                <Route path="/achievements" element={<AchievementsPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </>
+            ) : (
               <Route path="*" element={<Navigate to="/login" />} />
-            </>
-          )}
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/term" element={<TermsOfService />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/contact" element={<ContactUs />} />
-        </Routes>
-      </main>
-      {/* Footer */}
-      {!isDashboard && !isAuthPage && <Footer />}
+            )}
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/term" element={<TermsOfService />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/contact" element={<ContactUs />} />
+          </Routes>
+        </div>
+      )}
+
+      {/* Footer (for non-gym routes) */}
+      {!isDashboard && !isAuthPage && !isGymRoute && <Footer />}
     </div>
   );
 }
@@ -93,4 +136,5 @@ function App() {
     </Router>
   );
 }
+
 export default App;
