@@ -22,6 +22,9 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
+import { ProductProvider } from './context/ProductContext';
+import { CartProvider } from './context/CartContext';
+import CartPage from './pages/Shopping/CartPage';
 
 
 function AppContent() {

@@ -20,58 +20,64 @@ function Calories() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snacks'>('breakfast');
 
-  // ✅ Load top 30 foods on first mount
   useEffect(() => {
     const fetchTopFoods = async () => {
       try {
-        const res = await fetch('/api/food/top30');
+        const res = await fetch('/api/food/top30', {
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+        );
         const data = await res.json();
+        console.log(data)
         setFoodDatabase(data);
       } catch (err) {
         console.error("❌ Failed to fetch top 30 foods:", err);
       }
     };
+    const fetchMealFoods = async () => {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!user?._id || !selectedMealType) return;
 
+      try {
+        const res = await fetch(
+          `/api/food/get-meal/${user._id}?mealType=${selectedMealType}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch meal data");
+
+        const data = await res.json();
+
+        const transformed = data.map((food: any) => ({
+          name: food.foodName,
+          category: food.category,
+          calories: food.calculated.calories,
+          protein: food.calculated.protein,
+          carbs: food.calculated.carbs,
+          fats: food.calculated.fats,
+          fiber: food.calculated.fiber,
+          sugar: food.calculated.sugar,
+          serving: food.per100g,
+          quantity: food.servings,
+          consumedAt: new Date(),
+          mealType: selectedMealType
+        }));
+
+        setConsumedFoods(transformed);
+      } catch (err) {
+        console.error("❌ Error loading meal food:", err);
+      }
+    };
     fetchTopFoods();
-  }, []);
+    fetchMealFoods();
+  }, [selectedMealType]);
 
-  useEffect(() => {
-  const fetchMealFoods = async () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (!user?._id || !selectedMealType) return;
-
-    try {
-      const res = await fetch(
-        `/api/food/get-meal/${user._id}?mealType=${selectedMealType}`
-      );
-
-      if (!res.ok) throw new Error("Failed to fetch meal data");
-
-      const data = await res.json();
-
-      const transformed = data.map((food: any) => ({
-        name: food.foodName,
-        category: food.category,
-        calories: food.calculated.calories,
-        protein: food.calculated.protein,
-        carbs: food.calculated.carbs,
-        fats: food.calculated.fats,
-        fiber: food.calculated.fiber,
-        sugar: food.calculated.sugar,
-        serving: food.per100g,
-        quantity: food.servings,
-        consumedAt: new Date(),
-        mealType: selectedMealType
-      }));
-
-      setConsumedFoods(transformed);
-    } catch (err) {
-      console.error("❌ Error loading meal food:", err);
-    }
-  };
-
-  fetchMealFoods();
-}, [selectedMealType]);
 
   // ✅ Search API when user types (with debounce)
   useEffect(() => {
@@ -475,8 +481,8 @@ function Calories() {
                       key={category.id}
                       onClick={() => setSelectedCategory(category.id)}
                       className={`flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedCategory === category.id
-                          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
-                          : 'bg-pink-50 text-gray-700 hover:bg-pink-100'
+                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
+                        : 'bg-pink-50 text-gray-700 hover:bg-pink-100'
                         }`}
                     >
                       <CategoryIcon className="w-4 h-4 mr-2" />
@@ -493,8 +499,8 @@ function Calories() {
                       key={category.id}
                       onClick={() => setSelectedCategory(category.id)}
                       className={`flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedCategory === category.id
-                          ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
-                          : 'bg-pink-50 text-gray-700 hover:bg-pink-100'
+                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
+                        : 'bg-pink-50 text-gray-700 hover:bg-pink-100'
                         }`}
                     >
                       <CategoryIcon className="w-4 h-4 mr-2" />
@@ -542,15 +548,15 @@ function Calories() {
                         </div>
                         <div className="flex items-center mt-2">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${food.category === 'fruits' ? 'bg-red-100 text-red-700' :
-                              food.category === 'vegetables' ? 'bg-green-100 text-green-700' :
-                                food.category === 'grains' ? 'bg-yellow-100 text-yellow-700' :
-                                  food.category === 'proteins' ? 'bg-blue-100 text-blue-700' :
-                                    food.category === 'dairy' ? 'bg-purple-100 text-purple-700' :
-                                      food.category === 'nuts' ? 'bg-orange-100 text-orange-700' :
-                                        food.category === 'beverages' ? 'bg-cyan-100 text-cyan-700' :
-                                          food.category === 'snacks' ? 'bg-pink-100 text-pink-700' :
-                                            food.category === 'meals' ? 'bg-indigo-100 text-indigo-700' :
-                                              'bg-gray-100 text-gray-700'
+                            food.category === 'vegetables' ? 'bg-green-100 text-green-700' :
+                              food.category === 'grains' ? 'bg-yellow-100 text-yellow-700' :
+                                food.category === 'proteins' ? 'bg-blue-100 text-blue-700' :
+                                  food.category === 'dairy' ? 'bg-purple-100 text-purple-700' :
+                                    food.category === 'nuts' ? 'bg-orange-100 text-orange-700' :
+                                      food.category === 'beverages' ? 'bg-cyan-100 text-cyan-700' :
+                                        food.category === 'snacks' ? 'bg-pink-100 text-pink-700' :
+                                          food.category === 'meals' ? 'bg-indigo-100 text-indigo-700' :
+                                            'bg-gray-100 text-gray-700'
                             }`}>
                             {food.category}
                           </span>
@@ -577,8 +583,8 @@ function Calories() {
                     key={meal.id}
                     onClick={() => setSelectedMealType(meal.id as any)}
                     className={`flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedMealType === meal.id
-                        ? 'bg-white shadow-md text-gray-800'
-                        : 'text-gray-600 hover:text-gray-800'
+                      ? 'bg-white shadow-md text-gray-800'
+                      : 'text-gray-600 hover:text-gray-800'
                       }`}
                   >
                     <MealIcon className="w-4 h-4 mr-2" />
@@ -739,8 +745,8 @@ function Calories() {
                       key={meal.id}
                       onClick={() => setSelectedMealType(meal.id as any)}
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedMealType === meal.id
-                          ? `bg-gradient-to-r ${meal.color} text-white shadow-lg`
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? `bg-gradient-to-r ${meal.color} text-white shadow-lg`
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
                       <MealIcon className="w-4 h-4 mr-2" />

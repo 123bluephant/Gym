@@ -40,8 +40,10 @@ export const searchFood = async (req, res) => {
 export const topfood = async (req, res) => {
   try {
     const foods = await FoodItem.find().limit(30);
+    console.log(foods,"food")
     res.json(foods);
   } catch (err) {
+    console.log(err)
     res.status(500).json({ error: "Failed to fetch food items" });
   }
 };
@@ -100,7 +102,7 @@ export const getMealByType = async (req, res) => {
     if (!log || !log.meals[mealType]) {
       return res.status(200).json([]); // no entries found
     }
-
+    console.log(log.meals[mealType])
     res.status(200).json(log.meals[mealType]);
   } catch (error) {
     console.error("❌ Error fetching meal:", error.message);
