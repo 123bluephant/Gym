@@ -56,7 +56,7 @@ const Header = () => {
         { path: '/calories', label: 'Calories' },
       ];
       if (user.gender === 'female') {
-        userSpecificItems.push({ path: '/womens-health', label: 'Women\'s Health' });
+        userSpecificItems.push({ path: '/women-health', label: 'Women\'s Health' });
       }
       return [...baseItems, ...userSpecificItems];
     }
@@ -108,11 +108,21 @@ const Header = () => {
 
             {user ? (
               <>
-                <Link 
-                  to="/profile" 
-                  className="p-2 text-gray-700 hover:text-purple-600 transition-colors"
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2"
                 >
-                  <User className="w-5 h-5" />
+                  {user.profilePicture ? (
+                    <img 
+                      src={user.profilePicture} 
+                      alt="Profile" 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white">
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -123,8 +133,8 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
                 >
                   Login
@@ -167,33 +177,43 @@ const Header = () => {
 
               <div className="flex flex-col space-y-4 pt-4">
                 {user && (
-                  <Link 
-                    to="/cart" 
-                    className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    <span>Cart ({cartItemsCount})</span>
-                  </Link>
-                )}
-
-                {user ? (
                   <>
+                    <Link
+                      to="/cart"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      <span>Cart ({cartItemsCount})</span>
+                    </Link>
                     <Link
                       to="/profile"
                       className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <User className="w-5 h-5" />
+                      {user.profilePicture ? (
+                        <img 
+                          src={user.profilePicture} 
+                          alt="Profile" 
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs">
+                          {user.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <span>Profile</span>
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="text-left text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
-                    >
-                      Logout
-                    </button>
                   </>
+                )}
+
+                {user ? (
+                  <button
+                    onClick={handleLogout}
+                    className="text-left text-gray-700 hover:text-purple-600 px-4 py-2 transition-colors"
+                  >
+                    Logout
+                  </button>
                 ) : (
                   <>
                     <Link
