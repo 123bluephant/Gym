@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Apple, Beef, ChefHat, Coffee, Cookie, Moon, Pizza, Salad, Scale, Sun, Wheat, Search, Activity, User, Calculator, Target, TrendingUp, Clock, Plus } from 'lucide-react';
 import { Food, ConsumedFood, UserProfile } from '../types';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import userAtom from '../atoms/UserAtom';
+import consumedFoodAtom from '../atoms/consumedFoodAtom';
 
 function Calories() {
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -12,14 +15,14 @@ function Calories() {
   });
 
   const [foodDatabase, setFoodDatabase] = useState<Food[]>([]);
-  const [consumedFoods, setConsumedFoods] = useState<ConsumedFood[]>([]);
+  const [consumedFoods, setConsumedFoods] = useRecoilState(consumedFoodAtom);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snacks'>('breakfast');
-
+  const user = useRecoilValue(userAtom);
   useEffect(() => {
     const fetchTopFoods = async () => {
       try {
@@ -37,12 +40,11 @@ function Calories() {
       }
     };
     const fetchMealFoods = async () => {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (!user?._id || !selectedMealType) return;
-
+      const today = new Date().toISOString().slice(0, 10);
       try {
         const res = await fetch(
-          `/api/food/get-meal/${user._id}?mealType=${selectedMealType}`,
+          `/api/food/get-meal/${user._id}?mealType=${selectedMealType}&date=${today}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -78,8 +80,99 @@ function Calories() {
     fetchMealFoods();
   }, [selectedMealType]);
 
+  const addFood = async () => {
+    if (!selectedFood || quantity <= 0) return;
 
-  // ✅ Search API when user types (with debounce)
+    const calculated = {
+      calories: Number((selectedFood.calories * quantity).toFixed(2)),
+      protein: Number((selectedFood.protein * quantity).toFixed(2)),
+      carbs: Number((selectedFood.carbs * quantity).toFixed(2)),
+      fats: Number((selectedFood.fats * quantity).toFixed(2)),
+      fiber: Number((selectedFood.fiber * quantity).toFixed(2)),
+      sugar: Number((selectedFood.sugar * quantity).toFixed(2)),
+    };
+
+    const body = {
+      user,
+      date: new Date().toISOString().slice(0, 10),
+      mealType: selectedMealType,
+      food: {
+        foodName: selectedFood.name,
+        category: selectedFood.category,
+        per100g: {
+          calories: selectedFood.calories,
+          protein: selectedFood.protein,
+          carbs: selectedFood.carbs,
+          fats: selectedFood.fats,
+          fiber: selectedFood.fiber,
+          sugar: selectedFood.sugar
+        },
+        servings: quantity,
+        calculated
+      }
+    };
+
+    try {
+      const res = await fetch("/api/food/add-Food", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) throw new Error("Failed to log food");
+
+      const data = await res.json();
+
+      setConsumedFoods((prev: any) => [...prev, {
+        ...selectedFood,
+        quantity,
+        mealType: selectedMealType,
+        consumedAt: new Date(),
+      }]);
+
+      setShowFoodModal(false);
+      setSelectedFood(null);
+      setQuantity(1);
+      setSearchTerm("");
+    } catch (err) {
+      console.error("❌ Failed to add food:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
+
+
+const removeFood = async (index: number) => {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const response = await fetch('/api/food/remove-food', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: user?._id,
+        date: today,
+        mealType: selectedMealType,
+        index,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to remove food');
+    }
+
+    // Update state after successful removal
+    const newFoods = consumedFoods.filter((_, i) => i !== index);
+    setConsumedFoods(newFoods);
+  } catch (error) {
+    console.error("Failed to remove food:", error);
+    alert("Something went wrong while removing food.");
+  }
+};
+
+
+
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (searchTerm.trim() === '') return;
@@ -91,7 +184,7 @@ function Calories() {
       } catch (err) {
         console.error("❌ Error searching foods:", err);
       }
-    }, 500); // debounce: 500ms
+    }, 500);
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
@@ -162,72 +255,6 @@ function Calories() {
     return matchesCategory;
   });
 
-  const addFood = async () => {
-    if (!selectedFood || quantity <= 0) return;
-
-    const calculated = {
-      calories: Number((selectedFood.calories * quantity).toFixed(2)),
-      protein: Number((selectedFood.protein * quantity).toFixed(2)),
-      carbs: Number((selectedFood.carbs * quantity).toFixed(2)),
-      fats: Number((selectedFood.fats * quantity).toFixed(2)),
-      fiber: Number((selectedFood.fiber * quantity).toFixed(2)),
-      sugar: Number((selectedFood.sugar * quantity).toFixed(2)),
-    };
-
-    const body = {
-      user: JSON.parse(localStorage.getItem("user") || "{}")?._id, // adjust as needed
-      date: new Date().toISOString().slice(0, 10), // e.g., "2025-06-24"
-      mealType: selectedMealType,
-      food: {
-        foodName: selectedFood.name,
-        category: selectedFood.category,
-        per100g: {
-          calories: selectedFood.calories,
-          protein: selectedFood.protein,
-          carbs: selectedFood.carbs,
-          fats: selectedFood.fats,
-          fiber: selectedFood.fiber,
-          sugar: selectedFood.sugar
-        },
-        servings: quantity,
-        calculated
-      }
-    };
-
-    try {
-      const res = await fetch("/api/food/add-Food", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-
-      if (!res.ok) throw new Error("Failed to log food");
-
-      const data = await res.json();
-
-      // update UI immediately
-      setConsumedFoods((prev) => [...prev, {
-        ...selectedFood,
-        quantity,
-        mealType: selectedMealType,
-        consumedAt: new Date(),
-      }]);
-
-      setShowFoodModal(false);
-      setSelectedFood(null);
-      setQuantity(1);
-      setSearchTerm("");
-    } catch (err) {
-      console.error("❌ Failed to add food:", err);
-      alert("Something went wrong. Please try again.");
-    }
-  };
-
-
-  const removeFood = (index: number) => {
-    const newFoods = consumedFoods.filter((_, i) => i !== index);
-    setConsumedFoods(newFoods);
-  };
 
   const getBMICategory = (bmi: number) => {
     if (bmi < 18.5) return { category: 'Underweight', color: 'text-blue-600', bgColor: 'bg-blue-100' };
@@ -601,32 +628,41 @@ function Calories() {
 
             {/* Food List by Meal */}
             <div className="max-h-80 overflow-y-auto space-y-3 custom-scrollbar">
-              {consumedFoods.filter(food => food.mealType === selectedMealType).length === 0 ? (
+              {consumedFoods.filter((food:any) => food.mealType === selectedMealType).length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     {mealTypes.find(m => m.id === selectedMealType)?.icon &&
-                      React.createElement(mealTypes.find(m => m.id === selectedMealType)!.icon, { className: "w-8 h-8 text-pink-500" })
-                    }
+                      React.createElement(mealTypes.find(m => m.id === selectedMealType)!.icon, {
+                        className: "w-8 h-8 text-pink-500"
+                      })}
                   </div>
                   <p className="text-lg font-medium">No {selectedMealType} items yet</p>
                   <p className="text-sm">Add some foods to track your {selectedMealType}!</p>
                 </div>
               ) : (
                 consumedFoods
-                  .filter(food => food.mealType === selectedMealType)
-                  .map((food, index) => (
-                    <div key={index} className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-200">
+                  .filter((food:any) => food.mealType === selectedMealType)
+                  .map((food:any, index:any) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-200"
+                    >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="font-semibold text-gray-800 text-lg">{food.name}</div>
+
                           <div className="text-sm text-gray-600 mt-1">
-                            Quantity: {food.quantity} × {food.serving}
+                            Quantity: {food.quantity} ×{" "}
+                            {typeof food.serving === "object"
+                              ? `${food.serving.calories} kcal / 100g`
+                              : food.serving}
                           </div>
+
                           <div className="text-sm text-gray-600 mt-1">
-                            {(food.calories * food.quantity).toFixed(0)} kcal •
-                            {' '}{(food.protein * food.quantity).toFixed(1)}g protein •
-                            {' '}{(food.carbs * food.quantity).toFixed(1)}g carbs •
-                            {' '}{(food.fats * food.quantity).toFixed(1)}g fats
+                            {(food.calories * food.quantity).toFixed(0)} kcal •{" "}
+                            {(food.protein * food.quantity).toFixed(1)}g protein •{" "}
+                            {(food.carbs * food.quantity).toFixed(1)}g carbs •{" "}
+                            {(food.fats * food.quantity).toFixed(1)}g fats
                           </div>
                         </div>
                         <button
@@ -640,6 +676,7 @@ function Calories() {
                   ))
               )}
             </div>
+
           </div>
         </div>
 
@@ -813,19 +850,19 @@ function Calories() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Calories:</span>
-                  <span className="font-bold text-rose-600">{(selectedFood.calories * quantity).toFixed(1)} kcal</span>
+                  <div className="font-bold text-rose-600">{((selectedFood.calories * quantity).toFixed(1))} kcal</div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Protein:</span>
-                  <span className="font-bold text-blue-600">{(selectedFood.protein * quantity).toFixed(1)}g</span>
+                  <div className="font-bold text-blue-600">{((selectedFood.protein * quantity).toFixed(1))}g</div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Carbs:</span>
-                  <span className="font-bold text-green-600">{(selectedFood.carbs * quantity).toFixed(1)}g</span>
+                  <div className="font-bold text-green-600">{((selectedFood.carbs * quantity).toFixed(1))}g</div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fats:</span>
-                  <span className="font-bold text-yellow-600">{(selectedFood.fats * quantity).toFixed(1)}g</span>
+                  <div className="font-bold text-yellow-600">{((selectedFood.fats * quantity).toFixed(1))}g</div>
                 </div>
               </div>
             </div>
