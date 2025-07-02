@@ -18,7 +18,7 @@ export interface Trainer {
   experience: number;
   clients: number;
   rating: number;
-  status: 'Available' | 'Busy' | 'On Leave' |'Booked';
+  status: 'Available' | 'Busy' | 'On Leave' | 'Booked';
 }
 
 export interface Meal {
@@ -40,4 +40,38 @@ export interface GymStats {
   newSignups: number;
   memberGrowth: { date: string; count: number }[];
   revenueTrend: { month: string; revenue: number }[];
+}
+export interface Exercise {
+  name: string;
+  sets: number;
+  reps: number;
+  restInterval: number; // in seconds
+  notes?: string;
+}
+
+export interface WorkoutPlan {
+  id: string;
+  name: string;
+  description: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  duration: number; // in minutes
+  targetMuscles: string[];
+  exercises: Exercise[];
+  createdBy: string; // trainer ID
+  assignedTo: string[]; // user IDs
+  createdAt: Date;
+}
+export interface Gym {
+  id: string;
+  name: string;
+  location: string;
+  imageUrl: string;
+  rating: number;
+  totalMembers: number;
+  featuredFacilities: string[];
+  membershipPlans: {
+    name: string;
+    price: number;
+    features: string[];
+  }[];
 }
