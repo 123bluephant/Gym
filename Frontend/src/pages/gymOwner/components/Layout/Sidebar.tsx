@@ -43,6 +43,14 @@ const Sidebar: React.FC = () => {
             Trainers
           </NavLink>
           <NavLink
+            to="/gym/workouts"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-2 ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`
+            }
+          >
+            Workouts
+          </NavLink>
+          <NavLink
             to="/gym/meals"
             className={({ isActive }) =>
               `flex items-center px-4 py-2 ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700'}`

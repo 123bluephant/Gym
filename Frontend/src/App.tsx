@@ -40,6 +40,10 @@ import GymOwnerProfile from './pages/gymOwner/Pages/ProfilePage';
 import AddEditMeal from './pages/gymOwner/Pages/Meals/AddEdits';
 import AddEditTrainer from './pages/gymOwner/Pages/Trainers/AddEdit';
 import AddList from './pages/gymOwner/Pages/Users/AddList';
+import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
+import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
+import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
+import GymListing from './pages/gymOwner/components/Gym/GymListing';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -77,6 +81,10 @@ function AppContent() {
                 <Route path="/gym/members" element={<Members />} />
                 <Route path="/gym/members/add" element={<AddList />} />
                 <Route path="/gym/members/edit/:id" element={<AddList />} />
+                <Route path="/gyms" element={<GymListing />} />
+                <Route path="/gym/workouts" element={<WorkoutsList />} />
+                <Route path="/gym/workouts/add" element={<AddWorkout />} />
+                <Route path="/workouts/edit/:id" element={<EditWorkout />} />
               </Routes>
             </main>
           </div>
