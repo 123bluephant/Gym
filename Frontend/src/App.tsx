@@ -20,8 +20,8 @@ import PrivacyPolicy from './pages/Privacypolicy';
 import TermsOfService from './pages/termsandconditions';
 import HelpCenter from './pages/Helpcenter';
 import ContactUs from './pages/Contactus';
-import CartPage from './pages/Shopping/CartPage';
 import { CartProvider } from './context/CartContext';
+import CartPage from './pages/Shopping/CartPage';
 import { ProductProvider } from './context/ProductContext';
 import SignupGymPage from './pages/OnBoaring/SignupGymPage';
 import ActivityPage from './pages/Dashboard/ActivityPage';
@@ -40,7 +40,6 @@ import GymOwnerProfile from './pages/gymOwner/Pages/ProfilePage';
 import AddEditMeal from './pages/gymOwner/Pages/Meals/AddEdits';
 import AddEditTrainer from './pages/gymOwner/Pages/Trainers/AddEdit';
 import AddList from './pages/gymOwner/Pages/Users/AddList';
-
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
