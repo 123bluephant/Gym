@@ -39,7 +39,7 @@ const WorkoutTrendChart: React.FC<WorkoutTrendChartProps> = ({ data }) => {
             },
             tooltip: {
                 callbacks: {
-                    label: function(context: any) {
+                    label: function (context: any) {
                         return `${context.dataset.label}: ${context.raw.toLocaleString()}`;
                     }
                 }
@@ -56,7 +56,7 @@ const WorkoutTrendChart: React.FC<WorkoutTrendChartProps> = ({ data }) => {
                     color: '#e5e7eb',
                 },
                 ticks: {
-                    callback: function(value: any) {
+                    callback: function (value: any) {
                         return value.toLocaleString();
                     }
                 }

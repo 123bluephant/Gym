@@ -79,7 +79,7 @@ const MealsList: React.FC = () => {
           </div>
           
           <button
-            onClick={() => navigate('/meals/add')}
+            onClick={() => navigate('/gym/meals/add')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2"
           >
             <FiPlus /> Add Meal
@@ -91,7 +91,7 @@ const MealsList: React.FC = () => {
         <div className="bg-gray-50 p-8 rounded-xl text-center">
           <p className="text-gray-500 mb-4">No meals found</p>
           <button
-            onClick={() => navigate('/meals/add')}
+            onClick={() => navigate('/gym/meals/add')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2"
           >
             <FiPlus /> Create Your First Meal
@@ -142,7 +142,7 @@ const MealsList: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/meals/edit/${meal.id}`);
+                        navigate(`/gym/meals/edit/${meal.id}`);
                       }}
                       className="text-gray-500 hover:text-gray-700 p-1"
                       title="Edit"
@@ -231,7 +231,7 @@ const MealsList: React.FC = () => {
               <button
                 onClick={() => {
                   setIsModalOpen(false);
-                  navigate(`/meals/edit/${selectedMeal.id}`);
+                  navigate(`/gym/meals/edit/${selectedMeal.id}`);
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center gap-2"
               >

@@ -1,60 +1,122 @@
-// src/pages/Dashboard/Overview.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import StatCard from '../components/Dashboard/StatCard';
 import MembersChart from '../components/Dashboard/MembersChart';
 import RevenueChart from '../components/Dashboard/RevenueChart';
 import WorkoutTrendChart from '../components/Dashboard/WorkoutTrendChart';
 import MemberActivityTable from '../components/Dashboard/MemberActivityTable';
-import { mockTrainers } from '../Data/mockTrainers';
-import { mockUsers } from '../Data/mockUsers';
 import { FiUsers, FiDollarSign, FiUserPlus, FiActivity, FiCalendar, FiTrendingUp } from 'react-icons/fi';
+import useMembers from '../hook/useMembers';
+import useTrainers from '../hook/useTrainers';
+import usePayments from '../hook/usePayments';
+import useWorkouts from '../hook/useWorkouts';
+import { calculateMonthlyRevenue, calculateMemberGrowth, calculateWorkoutTrends } from '../utils/dashboardCalculations';
+import { Member, Trainer } from '../types/types';
 
 const DashboardOverview: React.FC = () => {
-    // Enhanced mock stats data
-    const stats = {
-        totalMembers: mockUsers.length,
-        activeMembers: mockUsers.filter(u => u.status === 'Active').length,
-        activeTrainers: mockTrainers.filter(t => t.status === 'Available').length,
-        monthlyRevenue: 12500,
-        revenueChange: 12.5,
-        newSignups: mockUsers.filter(u => new Date(u.joinDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length,
-        signupChange: -2.3,
-        avgSessions: 3.2,
-        sessionChange: 4.1,
-        memberGrowth: [
-            { date: 'Jan', count: 120 },
-            { date: 'Feb', count: 145 },
-            { date: 'Mar', count: 180 },
-            { date: 'Apr', count: 210 },
-            { date: 'May', count: 240 },
-            { date: 'Jun', count: 275 },
-        ],
-        revenueTrend: [
-            { month: 'Jan', revenue: 8500 },
-            { month: 'Feb', revenue: 9200 },
-            { month: 'Mar', revenue: 10500 },
-            { month: 'Apr', revenue: 11500 },
-            { month: 'May', revenue: 12200 },
-            { month: 'Jun', revenue: 12500 },
-        ],
-        workoutTrends: [
-            { month: 'Jan', strength: 320, cardio: 280, yoga: 150 },
-            { month: 'Feb', strength: 350, cardio: 310, yoga: 180 },
-            { month: 'Mar', strength: 400, cardio: 340, yoga: 210 },
-            { month: 'Apr', strength: 420, cardio: 380, yoga: 240 },
-            { month: 'May', strength: 450, cardio: 410, yoga: 270 },
-            { month: 'Jun', strength: 480, cardio: 440, yoga: 300 },
-        ],
-        recentActivities: mockUsers
-            .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime())
-            .slice(0, 5)
-            .map(user => ({
-                name: user.name,
-                activity: user.lastActivityType || 'Workout',
-                time: user.lastActivity,
-                status: user.status
-            }))
-    };
+    // Fetch real data from hooks
+    const { members, loading: membersLoading } = useMembers();
+    const { trainers, loading: trainersLoading } = useTrainers();
+    const { payments, loading: paymentsLoading } = usePayments();
+    const { workouts, loading: workoutsLoading } = useWorkouts();
+    
+    const [stats, setStats] = useState({
+        totalMembers: 0,
+        activeMembers: 0,
+        activeTrainers: 0,
+        monthlyRevenue: 0,
+        revenueChange: 0,
+        newSignups: 0,
+        signupChange: 0,
+        avgSessions: 0,
+        sessionChange: 0,
+        memberGrowth: [] as { date: string; count: number }[],
+        revenueTrend: [] as { month: string; revenue: number }[],
+        workoutTrends: [] as { month: string; strength: number; cardio: number; yoga: number }[],
+        recentActivities: [] as { name: string; activity: string; time: string; status: string }[]
+    });
+
+    useEffect(() => {
+        if (!membersLoading && !trainersLoading && !paymentsLoading && !workoutsLoading) {
+            // Calculate all stats when data is loaded
+            const activeMembers = members.filter((m: Member) => m.status === 'Active').length;
+            const activeTrainers = trainers.filter((t: Trainer) => t.status === 'Active').length;
+            
+            // Calculate monthly revenue data
+            const { monthlyRevenue, revenueTrend, revenueChange } = calculateMonthlyRevenue(payments);
+            
+            // Calculate member growth - add null checks
+            const memberGrowthData = calculateMemberGrowth(members);
+            const { memberGrowth, newSignups, signupChange } = memberGrowthData || {
+                memberGrowth: [],
+                newSignups: 0,
+                signupChange: 0
+            };
+            
+            // Calculate workout trends - add null checks
+            const workoutTrendsData = calculateWorkoutTrends(workouts);
+            const { workoutTrends, avgSessions, sessionChange } = workoutTrendsData || {
+                workoutTrends: [],
+                avgSessions: 0,
+                sessionChange: 0
+            };
+            
+            // Get recent activities with null checks
+            const recentActivities = [...members]
+                .sort((a, b) => {
+                    const dateA = a.lastActivity ? new Date(a.lastActivity.date).getTime() : 0;
+                    const dateB = b.lastActivity ? new Date(b.lastActivity.date).getTime() : 0;
+                    return dateB - dateA;
+                })
+                .slice(0, 5)
+                .map((member: Member) => ({
+                    name: member.name || 'Unknown',
+                    activity: member.lastActivity || 'Workout',
+                    time: member.lastActivity || 'No activity',
+                    status: member.status || 'Inactive'
+                }));
+
+            setStats({
+                totalMembers: members.length,
+                activeMembers,
+                activeTrainers,
+                monthlyRevenue: monthlyRevenue || 0,
+                revenueChange: revenueChange || 0,
+                newSignups,
+                signupChange,
+                avgSessions,
+                sessionChange,
+                memberGrowth: memberGrowth || [],
+                revenueTrend: revenueTrend || [],
+                workoutTrends: workoutTrends || [],
+                recentActivities: recentActivities.map(activity => ({
+                    name: activity.name,
+                    activity: typeof activity.activity === 'string' ? activity.activity : activity.activity.type,
+                    time: typeof activity.time === 'string' ? activity.time : activity.time.date,
+                    status: activity.status
+                }))
+            });
+        }
+    }, [members, trainers, payments, workouts, membersLoading, trainersLoading, paymentsLoading, workoutsLoading]);
+
+    if (membersLoading || trainersLoading || paymentsLoading || workoutsLoading) {
+        return (
+            <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Calculate percentage changes safely
+    const memberGrowthPercentage = stats.memberGrowth.length > 0 && stats.memberGrowth[0].count !== 0 
+        ? Math.round((stats.totalMembers - stats.memberGrowth[0].count) / stats.memberGrowth[0].count * 100)
+        : 0;
+
+    const activeMembersPercentage = stats.totalMembers > 0
+        ? Math.round((stats.activeMembers / stats.totalMembers) * 100)
+        : 0;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
@@ -79,14 +141,14 @@ const DashboardOverview: React.FC = () => {
                 <StatCard
                     title="Total Members"
                     value={stats.totalMembers}
-                    change={5.2}
+                    change={memberGrowthPercentage}
                     icon={<FiUsers className="text-blue-500" size={24} />}
                     color="blue"
                 />
                 <StatCard
                     title="Active Members"
                     value={stats.activeMembers}
-                    change={3.8}
+                    change={activeMembersPercentage}
                     icon={<FiActivity className="text-green-500" size={24} />}
                     color="green"
                 />
@@ -111,27 +173,33 @@ const DashboardOverview: React.FC = () => {
                 <div className="bg-white p-6 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-800">Member Growth</h2>
-                        <div className="flex items-center text-sm text-green-500">
-                            <FiTrendingUp className="mr-1" />
-                            <span>12% growth this month</span>
-                        </div>
+                        {stats.signupChange !== 0 && (
+                            <div className="flex items-center text-sm text-green-500">
+                                <FiTrendingUp className="mr-1" />
+                                <span>{stats.signupChange > 0 ? '+' : ''}{stats.signupChange}% growth this month</span>
+                            </div>
+                        )}
                     </div>
-                    <MembersChart data={stats.memberGrowth.map(item => ({
-                        month: item.date,
-                        count: item.count,
-                        type: 'total' // Adding required type property
-                    }))} />
+                    {stats.memberGrowth.length > 0 && (
+                        <MembersChart data={stats.memberGrowth.map(item => ({
+                            month: item.date,
+                            count: item.count,
+                            type: 'total'
+                        }))} />
+                    )}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-800">Revenue Trend</h2>
-                        <div className="flex items-center text-sm text-green-500">
-                            <FiTrendingUp className="mr-1" />
-                            <span>{stats.revenueChange}% from last month</span>
-                        </div>
+                        {stats.revenueChange !== 0 && (
+                            <div className="flex items-center text-sm text-green-500">
+                                <FiTrendingUp className="mr-1" />
+                                <span>{stats.revenueChange > 0 ? '+' : ''}{stats.revenueChange}% from last month</span>
+                            </div>
+                        )}
                     </div>
-                    <RevenueChart data={stats.revenueTrend} />
+                    {stats.revenueTrend.length > 0 && <RevenueChart data={stats.revenueTrend} />}
                 </div>
             </div>
 
@@ -139,7 +207,7 @@ const DashboardOverview: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm lg:col-span-2">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">Workout Trends</h2>
-                    <WorkoutTrendChart data={stats.workoutTrends} />
+                    {stats.workoutTrends.length > 0 && <WorkoutTrendChart data={stats.workoutTrends} />}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -147,7 +215,7 @@ const DashboardOverview: React.FC = () => {
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600">Avg. Sessions/Member</span>
-                            <span className="font-semibold">{stats.avgSessions}</span>
+                            <span className="font-semibold">{stats.avgSessions.toFixed(1)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600">Active Trainers</span>
@@ -161,7 +229,12 @@ const DashboardOverview: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600">Member Retention</span>
-                            <span className="font-semibold text-green-500">92%</span>
+                            <span className="font-semibold text-green-500">
+                                {members.length > 0 ? 
+                                    Math.round((stats.activeMembers / members.filter((m: Member) => 
+                                        m.joinDate && new Date(m.joinDate) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length) * 100
+                                    ) + '%' : '0%'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -170,7 +243,7 @@ const DashboardOverview: React.FC = () => {
             {/* Recent Activity Table */}
             <div className="bg-white p-6 rounded-xl shadow-sm">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Member Activity</h2>
-                <MemberActivityTable data={stats.recentActivities} />
+                {stats.recentActivities.length > 0 && <MemberActivityTable data={stats.recentActivities} />}
             </div>
         </div>
     );
