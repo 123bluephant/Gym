@@ -98,7 +98,7 @@ const AddList: React.FC = () => {
             </tbody>
           </table>
           <div className="flex justify-end p-4 border-t">
-            <Button onClick={() => navigate('/users')}>
+            <Button onClick={() => navigate('/gym/members')}>
               Finish Adding Users
             </Button>
           </div>

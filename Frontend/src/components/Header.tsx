@@ -44,6 +44,7 @@ const Header = () => {
   const getNavItems = () => {
     const baseItems = [
       { path: '/', label: 'Home' },
+      { path: '/Finder', label: 'Gyms' },
       { path: '/workouts', label: 'Workouts' },
       { path: '/nutrition', label: 'Nutrition' },
       { path: '/shop', label: 'Shop' },

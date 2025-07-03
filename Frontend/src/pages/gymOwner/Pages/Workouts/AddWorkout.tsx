@@ -1,5 +1,5 @@
 // src/pages/Workouts/AddWorkout.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Ui/Modal';
 import Button from '../../components/Ui/Button';
@@ -15,7 +15,9 @@ const AddWorkout: React.FC = () => {
     duration: 30,
     targetMuscles: [],
     exercises: [],
-    createdBy: 'current-trainer-id' // In a real app, this would come from auth context
+    createdBy: 'current-trainer-id',
+    imageUrl: '',
+      videoUrl: ''
   });
   const [tempMuscle, setTempMuscle] = useState('');
   const [currentExercise, setCurrentExercise] = useState<Exercise>({
@@ -23,9 +25,15 @@ const AddWorkout: React.FC = () => {
     sets: 3,
     reps: 10,
     restInterval: 60,
-    notes: ''
+    notes: '',
+    imageUrl: '',
+    videoUrl: ''
   });
   const [showExerciseModal, setShowExerciseModal] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [exercisePreviewImage, setExercisePreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const exerciseFileInputRef = useRef<HTMLInputElement>(null);
 
   // Muscle group suggestions
   const muscleGroups = [
@@ -80,8 +88,11 @@ const AddWorkout: React.FC = () => {
         sets: 3,
         reps: 10,
         restInterval: 60,
-        notes: ''
+        notes: '',
+        imageUrl: '',
+        videoUrl: ''
       });
+      setExercisePreviewImage(null);
       setShowExerciseModal(false);
     }
   };
@@ -90,6 +101,52 @@ const AddWorkout: React.FC = () => {
     setNewWorkout(prev => ({
       ...prev,
       exercises: prev.exercises.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setPreviewImage(result);
+        setNewWorkout(prev => ({
+          ...prev,
+          imageUrl: result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleExerciseImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setExercisePreviewImage(result);
+        setCurrentExercise(prev => ({
+          ...prev,
+          imageUrl: result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewWorkout(prev => ({
+      ...prev,
+      videoUrl: e.target.value
+    }));
+  };
+
+  const handleExerciseVideoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentExercise(prev => ({
+      ...prev,
+      videoUrl: e.target.value
     }));
   };
 
@@ -109,8 +166,11 @@ const AddWorkout: React.FC = () => {
       duration: 30,
       targetMuscles: [],
       exercises: [],
-      createdBy: 'current-trainer-id'
+      createdBy: 'current-trainer-id',
+      imageUrl: '',
+      videoUrl: ''
     });
+    setPreviewImage(null);
   };
 
   const handleSaveWorkouts = () => {
@@ -179,6 +239,62 @@ const AddWorkout: React.FC = () => {
               onChange={handleWorkoutChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
+          </div>
+
+          {/* Workout Media Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Workout Image</label>
+              <div className="mt-1 flex items-center">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Upload Image
+                </button>
+                {previewImage && (
+                  <div className="ml-4 relative">
+                    <img
+                      src={previewImage}
+                      alt="Preview"
+                      className="h-16 w-16 object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewImage(null);
+                        setNewWorkout(prev => ({ ...prev, imageUrl: '' }));
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Workout Video URL</label>
+              <input
+                type="text"
+                name="videoUrl"
+                value={newWorkout.videoUrl}
+                onChange={handleVideoUrlChange}
+                placeholder="https://example.com/video.mp4 or YouTube URL"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
 
           <div>
@@ -253,6 +369,15 @@ const AddWorkout: React.FC = () => {
                         Remove
                       </button>
                     </div>
+                    {exercise.imageUrl && (
+                      <div className="mt-2">
+                        <img 
+                          src={exercise.imageUrl} 
+                          alt={exercise.name}
+                          className="h-24 w-full object-cover rounded-md"
+                        />
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
                       <div>Sets: {exercise.sets}</div>
                       <div>Reps: {exercise.reps}</div>
@@ -302,6 +427,15 @@ const AddWorkout: React.FC = () => {
                     Remove
                   </button>
                 </div>
+                {workout.imageUrl && (
+                  <div className="mt-2">
+                    <img 
+                      src={workout.imageUrl} 
+                      alt={workout.name}
+                      className="h-32 w-full object-cover rounded-md"
+                    />
+                  </div>
+                )}
                 <div className="mt-2">
                   <span className="text-sm font-medium">Targets: </span>
                   <span className="text-sm text-gray-600">
@@ -329,6 +463,7 @@ const AddWorkout: React.FC = () => {
         isOpen={showExerciseModal} 
         onClose={() => setShowExerciseModal(false)}
         title="Add Exercise"
+        size="lg"
       >
         <form className="space-y-4">
           <div>
@@ -342,6 +477,7 @@ const AddWorkout: React.FC = () => {
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Sets</label>
@@ -380,6 +516,60 @@ const AddWorkout: React.FC = () => {
               />
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Exercise Image</label>
+            <div className="mt-1 flex items-center">
+              <input
+                type="file"
+                ref={exerciseFileInputRef}
+                onChange={handleExerciseImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => exerciseFileInputRef.current?.click()}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Upload Image
+              </button>
+              {exercisePreviewImage && (
+                <div className="ml-4 relative">
+                  <img
+                    src={exercisePreviewImage}
+                    alt="Preview"
+                    className="h-16 w-16 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExercisePreviewImage(null);
+                      setCurrentExercise(prev => ({ ...prev, imageUrl: '' }));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Exercise Video URL</label>
+            <input
+              type="text"
+              name="videoUrl"
+              value={currentExercise.videoUrl}
+              onChange={handleExerciseVideoUrlChange}
+              placeholder="https://example.com/video.mp4 or YouTube URL"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
             <textarea

@@ -1,4 +1,3 @@
-// src/pages/Workouts/List.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/Ui/Button';
@@ -62,6 +61,17 @@ const WorkoutsList: React.FC = () => {
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 cursor-pointer"
             onClick={() => handleCardClick(workout)}
         >
+            {/* Workout Image */}
+            {workout.imageUrl && (
+                <div className="h-48 w-full overflow-hidden">
+                    <img 
+                        src={workout.imageUrl} 
+                        alt={workout.name}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            )}
+            
             <div className="p-4">
                 <div className="flex justify-between items-start">
                     <h3 className="text-lg font-bold text-gray-900">{workout.name}</h3>
@@ -229,10 +239,45 @@ const WorkoutsList: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={selectedWorkout?.name || 'Workout Details'}
-                size="xl"
+                size="lg"
             >
                 {selectedWorkout && (
                     <div className="space-y-6">
+                        {/* Workout Media */}
+                        {selectedWorkout.imageUrl && (
+                            <div className="rounded-md overflow-hidden bg-gray-100">
+                                <img
+                                    src={selectedWorkout.imageUrl}
+                                    alt={selectedWorkout.name}
+                                    className="w-full h-64 object-cover"
+                                />
+                            </div>
+                        )}
+                        {selectedWorkout.videoUrl && (
+                            <div className="rounded-md overflow-hidden bg-gray-100">
+                                {selectedWorkout.videoUrl.includes('youtube.com') || selectedWorkout.videoUrl.includes('youtu.be') ? (
+                                    <div className="aspect-w-16 aspect-h-9">
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${selectedWorkout.videoUrl.split('v=')[1]?.split('&')[0]}`}
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            className="w-full h-64"
+                                        ></iframe>
+                                    </div>
+                                ) : (
+                                    <video 
+                                        controls 
+                                        className="w-full h-64"
+                                        poster={selectedWorkout.imageUrl}
+                                    >
+                                        <source src={selectedWorkout.videoUrl} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
+                                )}
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <h3 className="text-sm font-medium text-gray-500">Description</h3>
@@ -274,6 +319,42 @@ const WorkoutsList: React.FC = () => {
                                 {selectedWorkout.exercises.map((exercise, index) => (
                                     <div key={index} className="bg-gray-50 p-4 rounded-md">
                                         <h4 className="font-medium">{exercise.name}</h4>
+                                        
+                                        {/* Exercise Media */}
+                                        {exercise.imageUrl && (
+                                            <div className="mt-2">
+                                                <img 
+                                                    src={exercise.imageUrl} 
+                                                    alt={exercise.name}
+                                                    className="h-32 w-full object-cover rounded-md"
+                                                />
+                                            </div>
+                                        )}
+                                        {exercise.videoUrl && (
+                                            <div className="mt-2 rounded-md overflow-hidden">
+                                                {exercise.videoUrl.includes('youtube.com') || exercise.videoUrl.includes('youtu.be') ? (
+                                                    <div className="aspect-w-16 aspect-h-9">
+                                                        <iframe
+                                                            src={`https://www.youtube.com/embed/${exercise.videoUrl.split('v=')[1]?.split('&')[0]}`}
+                                                            frameBorder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                            className="w-full h-48"
+                                                        ></iframe>
+                                                    </div>
+                                                ) : (
+                                                    <video 
+                                                        controls 
+                                                        className="w-full h-48"
+                                                        poster={exercise.imageUrl}
+                                                    >
+                                                        <source src={exercise.videoUrl} type="video/mp4" />
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
                                             <div>Sets: {exercise.sets}</div>
                                             <div>Reps: {exercise.reps}</div>

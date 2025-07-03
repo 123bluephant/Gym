@@ -9,6 +9,8 @@ interface ButtonProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   icon?: React.ReactNode;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -18,8 +20,7 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   className = '',
-  icon,
-}) => {
+  icon}) => {
   const baseClasses = 'rounded-md font-medium transition-colors flex items-center justify-center';
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',

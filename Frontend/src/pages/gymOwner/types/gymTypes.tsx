@@ -22,6 +22,7 @@ export interface Trainer {
 }
 
 export interface Meal {
+  prepTime: string;
   id: string;
   name: string;
   category: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
@@ -42,6 +43,8 @@ export interface GymStats {
   revenueTrend: { month: string; revenue: number }[];
 }
 export interface Exercise {
+  imageUrl: string;
+  videoUrl: string | number | readonly string[] | undefined;
   name: string;
   sets: number;
   reps: number;
@@ -56,10 +59,15 @@ export interface WorkoutPlan {
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   duration: number; // in minutes
   targetMuscles: string[];
-  exercises: Exercise[];
   createdBy: string; // trainer ID
   assignedTo: string[]; // user IDs
   createdAt: Date;
+  imageUrl?: string;
+    videoUrl?: string;
+    exercises: Array<Exercise & {
+        imageUrl?: string;
+        videoUrl?: string;
+    }>;
 }
 export interface Gym {
   id: string;
@@ -74,4 +82,29 @@ export interface Gym {
     price: number;
     features: string[];
   }[];
+}
+// src/types/gymTypes.ts
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: 'supplements' | 'equipment' | 'clothing' | 'membership';
+  stock: number;
+  imageUrl: string;
+  isFeatured: boolean;
+  discount?: {
+    type: 'percentage' | 'fixed';
+    amount: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+export type ProductCategory = 'supplements' | 'equipment' | 'clothing' | 'membership';
+
+export type DiscountType = 'percentage' | 'fixed';
+
+export interface Discount {
+  type: DiscountType;
+  amount: number;
 }
