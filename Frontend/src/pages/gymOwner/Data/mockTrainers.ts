@@ -1,55 +1,31 @@
-// src/Data/mockTrainers.ts
 import { Trainer } from '../types/gymTypes';
 
 export const mockTrainers: Trainer[] = [
   {
     id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    specialization: ['Weight Loss', 'Yoga'],
+    name: 'Alex Johnson',
+    email: 'alex.johnson@example.com',
+    imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     experience: 5,
-    clients: 12,
     rating: 4.8,
-    status: 'Available'
+    clients: 32,
+    status: 'Available',
+    specialization: ['Strength Training', 'Weight Loss', 'Nutrition'],
+    bio: 'Certified personal trainer with 5 years of experience helping clients achieve their fitness goals. Specializes in strength training and weight management.',
+    createdAt: new Date('2022-01-15'),
   },
   {
     id: '2',
-    name: 'Mike Thompson',
-    email: 'mike@example.com',
-    specialization: ['Strength Training', 'Bodybuilding'],
+    name: 'Maria Garcia',
+    email: 'maria.garcia@example.com',
+    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     experience: 8,
-    clients: 18,
     rating: 4.9,
-    status: 'Available'
+    clients: 45,
+    status: 'Busy',
+    specialization: ['Yoga', 'Pilates', 'Rehabilitation'],
+    bio: 'Experienced yoga and pilates instructor with a focus on rehabilitation and mobility. Helps clients recover from injuries and improve flexibility.',
+    createdAt: new Date('2021-05-20'),
   },
-  {
-    id: '3',
-    name: 'Emily Chen',
-    email: 'emily@example.com',
-    specialization: ['Pilates', 'Posture Correction'],
-    experience: 6,
-    clients: 15,
-    rating: 4.7,
-    status: 'On Leave'
-  },
-  {
-    id: '4',
-    name: 'David Wilson',
-    email: 'david@example.com',
-    specialization: ['CrossFit', 'Functional Training'],
-    experience: 7,
-    clients: 20,
-    rating: 4.8,
-    status: 'Busy'
-  },
-  {
-    id: '5',
-    name: 'Jessica Martinez',
-    email: 'jessica@example.com',
-    specialization: ['HIIT', 'Cardio'],
-    experience: 4,
-    clients: 10,
-    rating: 4.6,
-    status: 'Available'
-  }
+  // Add more trainers as needed
 ];
