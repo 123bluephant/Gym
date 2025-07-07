@@ -101,6 +101,26 @@ const loginController = async (req, res) => {
   }
 };
 
+// const updateUserController = async (req, res) => {
+//   try {
+//     const { email, fullName,username,phoneno, Age,gender,Primarygoal,height,weight,targetWeight,fitnessGoals,weeklyAvaliable } = req.body;
+
+//     let user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(401).json({ err: "User not found" });
+//     }
+
+//     return res.status(200).json({
+//       user: userWithoutPassword,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     if (!res.headersSent) {
+//       return res.status(500).json({ err: "Internal server error" });
+//     }
+//   }
+// };
+
 const logoutController = async (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 1 });

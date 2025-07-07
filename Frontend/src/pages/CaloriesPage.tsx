@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Apple, Beef, ChefHat, Coffee, Cookie, Moon, Pizza, Salad, Scale, Sun, Wheat, Search, Activity, User, Calculator, Target, TrendingUp, Clock, Plus } from 'lucide-react';
-import { Food, ConsumedFood, UserProfile } from '../types';
+import { Food, UserProfile } from '../types';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import userAtom from '../atoms/UserAtom';
 import consumedFoodAtom from '../atoms/consumedFoodAtom';

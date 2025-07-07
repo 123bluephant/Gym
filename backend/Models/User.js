@@ -13,10 +13,15 @@ const UserSchema = new mongoose.Schema(
     location: { type: String},
     fitnessGoals: { type: [String]},
     periodTrackingOptIn: { type: Boolean, default: false },
+    Primarygoal:{ type: String},
     role: {
       type: String,
       default: "user",
     },
+    weeklyAvaliable:{
+      type:String
+    },
+    targetWeight:{ type: String},
     membershipPlan: { type: String },
     streak: { type: Number, default: 0 },
     joinDate: { type: Date },
