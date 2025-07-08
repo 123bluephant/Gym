@@ -1,13 +1,31 @@
 // src/types/gymTypes.ts
+export interface Meal {
+  id: string;
+  date: string;
+  mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
+  description: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
+
+export interface MealSummary {
+  todayCalories: number;
+  todayMeals: number;
+  lastMealDate?: string;
+}
+
 export interface User {
-  [x: string]: string;
   id: string;
   name: string;
   email: string;
-  phone: string;
-  joinDate: string;
-  membershipType: 'Basic' | 'Premium' | 'VIP';
+  membershipType: string;
   status: 'Active' | 'Inactive' | 'Pending';
+  joinDate: string;
+  lastCheckIn?: string;
+  mealSummary?: MealSummary;
+  meals?: Meal[];
 }
 
 export interface Trainer {
@@ -26,7 +44,6 @@ export interface Trainer {
 }
 
 export interface Meal {
-  prepTime: string;
   id: string;
   name: string;
   category: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
@@ -36,6 +53,8 @@ export interface Meal {
   fat: number;
   description: string;
   ingredients: string[];
+  date: string;
+  fats: number;
 }
 
 export interface GymStats {
@@ -67,11 +86,11 @@ export interface WorkoutPlan {
   assignedTo: string[]; // user IDs
   createdAt: Date;
   imageUrl?: string;
+  videoUrl?: string;
+  exercises: Array<Exercise & {
+    imageUrl?: string;
     videoUrl?: string;
-    exercises: Array<Exercise & {
-        imageUrl?: string;
-        videoUrl?: string;
-    }>;
+  }>;
 }
 export interface Gym {
   id: string;

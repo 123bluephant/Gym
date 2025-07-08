@@ -1,4 +1,3 @@
-// src/pages/Workouts/List.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/Ui/Button';
@@ -6,6 +5,7 @@ import DataTable from '../../components/Ui/DataTable';
 import Modal from '../../components/Ui/Modal';
 import { mockWorkouts } from '../../Data/MockWorkouts';
 import { WorkoutPlan } from '../../types/gymTypes';
+import { motion } from 'framer-motion';
 
 const WorkoutsList: React.FC = () => {
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
@@ -24,10 +24,30 @@ const WorkoutsList: React.FC = () => {
     // Table columns configuration
     const columns = [
         { header: 'Name', accessor: 'name' },
-        { header: 'Difficulty', accessor: 'difficulty' },
+        { 
+            header: 'Difficulty', 
+            accessor: 'difficulty',
+            cell: (value: string) => (
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                    value === 'Beginner' ? 'bg-green-100 text-green-800' :
+                    value === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                }`}>
+                    {value}
+                </span>
+            )
+        },
         { header: 'Duration', accessor: 'duration' },
         { header: 'Exercises', accessor: 'exerciseCount' },
-        { header: 'Actions', accessor: 'actions' }
+        { 
+            header: 'Actions', 
+            accessor: 'actions',
+            cell: (value: React.ReactNode) => (
+                <div className="flex space-x-2 justify-center">
+                    {value}
+                </div>
+            )
+        }
     ];
 
     // Prepare table data
@@ -36,17 +56,17 @@ const WorkoutsList: React.FC = () => {
         duration: `${workout.duration} min`,
         exerciseCount: workout.exercises.length,
         actions: (
-            <div className="flex space-x-2">
+            <>
                 <Link
                     to={`/gym/workouts/edit/${workout.id}`}
-                    className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                    className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
                 >
                     Edit
                 </Link>
-                <button className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200">
+                <button className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors">
                     Delete
                 </button>
-            </div>
+            </>
         )
     }));
 
@@ -58,119 +78,138 @@ const WorkoutsList: React.FC = () => {
 
     // Workout card component
     const WorkoutCard = ({ workout }: { workout: WorkoutPlan }) => (
-        <div
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 cursor-pointer"
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer h-full flex flex-col"
             onClick={() => handleCardClick(workout)}
+            whileHover={{ y: -5 }}
         >
             {/* Workout Image */}
             {workout.imageUrl && (
-                <div className="h-48 w-full overflow-hidden">
+                <div className="h-48 w-full overflow-hidden relative">
                     <img 
                         src={workout.imageUrl} 
                         alt={workout.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
-                </div>
-            )}
-            
-            <div className="p-4">
-                <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-gray-900">{workout.name}</h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${workout.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                            workout.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-red-100 text-red-800'
-                        }`}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <span className={`absolute top-3 right-3 px-2 py-1 text-xs rounded-full ${
+                        workout.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                        workout.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                    }`}>
                         {workout.difficulty}
                     </span>
                 </div>
-
-                <p className="mt-2 text-sm text-gray-600 line-clamp-2">{workout.description}</p>
-
-                <div className="mt-3">
-                    <div className="flex items-center text-sm text-gray-600">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{workout.duration} minutes</span>
+            )}
+            
+            <div className="p-5 flex-1 flex flex-col">
+                <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                        <h3 className="text-lg font-bold text-gray-900 line-clamp-2">{workout.name}</h3>
                     </div>
-                    <div className="flex items-center mt-1 text-sm text-gray-600">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <span>{workout.exercises.length} exercises</span>
+
+                    <p className="mt-2 text-sm text-gray-600 line-clamp-3">{workout.description}</p>
+
+                    <div className="mt-4 space-y-2">
+                        <div className="flex items-center text-sm text-gray-600">
+                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{workout.duration} minutes</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span>{workout.exercises.length} exercises</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">Target Muscles</h4>
+                        <div className="flex flex-wrap gap-1">
+                            {workout.targetMuscles.slice(0, 3).map((muscle, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                >
+                                    {muscle}
+                                </span>
+                            ))}
+                            {workout.targetMuscles.length > 3 && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    +{workout.targetMuscles.length - 3} more
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                <div className="mt-3">
-                    <h4 className="text-sm font-medium text-gray-900">Target Muscles</h4>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                        {workout.targetMuscles.slice(0, 3).map((muscle, index) => (
-                            <span
-                                key={index}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
-                            >
-                                {muscle}
-                            </span>
-                        ))}
-                        {workout.targetMuscles.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                +{workout.targetMuscles.length - 3} more
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                <div className="mt-4 flex space-x-2">
+                <div className="mt-6 grid grid-cols-2 gap-2">
                     <Link
                         to={`/gym/workouts/edit/${workout.id}`}
-                        className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-300 text-sm"
+                        className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-300 text-sm flex items-center justify-center"
                         onClick={(e) => e.stopPropagation()}
                     >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                         Edit
                     </Link>
                     <button
-                        className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md transition-colors duration-300 text-sm"
+                        className="text-center bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition-colors duration-300 text-sm flex items-center justify-center"
                         onClick={(e) => {
                             e.stopPropagation();
                             // Handle delete
                         }}
                     >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                         Delete
                     </button>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 
     return (
-        <div className="p-6">
+        <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold">Workout Plans</h1>
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Workout Plans</h1>
+                    <p className="text-sm text-gray-500 mt-1">Manage and track your workout routines</p>
+                </motion.div>
 
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <div className="relative flex-1 sm:w-64">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                         <input
                             type="text"
                             placeholder="Search workouts..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                         />
-                        <svg
-                            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button
                             variant={viewMode === 'table' ? 'primary' : 'outline'}
                             onClick={() => setViewMode('table')}
                             size="sm"
+                            className="flex-1 sm:flex-none"
                         >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -181,14 +220,15 @@ const WorkoutsList: React.FC = () => {
                             variant={viewMode === 'cards' ? 'primary' : 'outline'}
                             onClick={() => setViewMode('cards')}
                             size="sm"
+                            className="flex-1 sm:flex-none"
                         >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             Cards
                         </Button>
-                        <Link to="/gym/workouts/add" className="ml-2">
-                            <Button size="sm">
+                        <Link to="/gym/workouts/add" className="flex-1 sm:flex-none">
+                            <Button size="sm" className="w-full">
                                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
@@ -200,7 +240,11 @@ const WorkoutsList: React.FC = () => {
             </div>
 
             {filteredWorkouts.length === 0 ? (
-                <div className="bg-white rounded-lg shadow p-8 text-center">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-200"
+                >
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -218,17 +262,19 @@ const WorkoutsList: React.FC = () => {
                             </Button>
                         </Link>
                     </div>
-                </div>
+                </motion.div>
             ) : viewMode === 'table' ? (
-                <DataTable
-                    columns={columns}
-                    data={tableData}
-                    className="border border-gray-200"
-                    rowClassName="hover:bg-gray-50"
-                    headerClassName="bg-gray-100"
-                />
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                    <DataTable
+                        columns={columns}
+                        data={tableData as any}
+                        className="border-none"
+                        rowClassName="hover:bg-gray-50 border-b border-gray-200 last:border-0"
+                        headerClassName="bg-gray-50 border-b border-gray-200"
+                    />
+                </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredWorkouts.map(workout => (
                         <WorkoutCard key={workout.id} workout={workout} />
                     ))}
@@ -245,143 +291,153 @@ const WorkoutsList: React.FC = () => {
                 {selectedWorkout && (
                     <div className="space-y-6">
                         {/* Workout Media */}
-                        {selectedWorkout.imageUrl && (
-                            <div className="rounded-md overflow-hidden bg-gray-100">
+                        <div className="relative rounded-xl overflow-hidden bg-gray-100">
+                            {selectedWorkout.imageUrl && (
                                 <img
                                     src={selectedWorkout.imageUrl}
                                     alt={selectedWorkout.name}
                                     className="w-full h-64 object-cover"
                                 />
-                            </div>
-                        )}
-                        {selectedWorkout.videoUrl && (
-                            <div className="rounded-md overflow-hidden bg-gray-100">
-                                {selectedWorkout.videoUrl.includes('youtube.com') || selectedWorkout.videoUrl.includes('youtu.be') ? (
-                                    <div className="aspect-w-16 aspect-h-9">
-                                        <iframe
-                                            src={`https://www.youtube.com/embed/${selectedWorkout.videoUrl.split('v=')[1]?.split('&')[0]}`}
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                            className="w-full h-64"
-                                        ></iframe>
-                                    </div>
-                                ) : (
-                                    <video 
-                                        controls 
-                                        className="w-full h-64"
-                                        poster={selectedWorkout.imageUrl}
-                                    >
-                                        <source src={selectedWorkout.videoUrl} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                                <p className="mt-1 text-sm text-gray-900">{selectedWorkout.description}</p>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Difficulty</h3>
-                                    <p className="mt-1 text-sm text-gray-900">{selectedWorkout.difficulty}</p>
+                            )}
+                            {selectedWorkout.videoUrl && (
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                    <button className="bg-white/90 hover:bg-white text-indigo-600 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Duration</h3>
-                                    <p className="mt-1 text-sm text-gray-900">{selectedWorkout.duration} minutes</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Exercises</h3>
-                                    <p className="mt-1 text-sm text-gray-900">{selectedWorkout.exercises.length}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-sm font-medium text-gray-500">Target Muscles</h3>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {selectedWorkout.targetMuscles.map((muscle, index) => (
-                                    <span
-                                        key={index}
-                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                                    >
-                                        {muscle}
+                            )}
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                                <div className="flex items-center space-x-3">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        selectedWorkout.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                                        selectedWorkout.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                    }`}>
+                                        {selectedWorkout.difficulty}
                                     </span>
-                                ))}
+                                    <span className="text-white text-sm flex items-center">
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {selectedWorkout.duration} min
+                                    </span>
+                                    <span className="text-white text-sm flex items-center">
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        {selectedWorkout.exercises.length} exercises
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="md:col-span-2">
+                                <h3 className="text-sm font-medium text-gray-500">Description</h3>
+                                <p className="mt-1 text-gray-700">{selectedWorkout.description}</p>
+                            </div>
+                            
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-2">Target Muscles</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedWorkout.targetMuscles.map((muscle, index) => (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                        >
+                                            {muscle}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
                         <div>
-                            <h3 className="text-sm font-medium text-gray-500">Exercises</h3>
-                            <div className="mt-2 space-y-4">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">Exercises</h3>
+                            <div className="space-y-4">
                                 {selectedWorkout.exercises.map((exercise, index) => (
-                                    <div key={index} className="bg-gray-50 p-4 rounded-md">
-                                        <h4 className="font-medium">{exercise.name}</h4>
-                                        
-                                        {/* Exercise Media */}
-                                        {exercise.imageUrl && (
-                                            <div className="mt-2">
-                                                <img 
-                                                    src={exercise.imageUrl} 
-                                                    alt={exercise.name}
-                                                    className="h-32 w-full object-cover rounded-md"
-                                                />
+                                    <motion.div 
+                                        key={index}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                                    >
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="font-medium text-lg text-gray-900">{exercise.name}</h4>
+                                                <div className="flex space-x-3 text-sm text-gray-500">
+                                                    <span>{exercise.sets} sets</span>
+                                                    <span>{exercise.reps} reps</span>
+                                                    <span>{exercise.restInterval}s rest</span>
+                                                </div>
                                             </div>
-                                        )}
-                                        {exercise.videoUrl && (
-                                            <div className="mt-2 rounded-md overflow-hidden">
-                                                {exercise.videoUrl.includes('youtube.com') || exercise.videoUrl.includes('youtu.be') ? (
-                                                    <div className="aspect-w-16 aspect-h-9">
-                                                        <iframe
-                                                            src={`https://www.youtube.com/embed/${exercise.videoUrl.split('v=')[1]?.split('&')[0]}`}
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            className="w-full h-48"
-                                                        ></iframe>
+                                            
+                                            {exercise.notes && (
+                                                <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                                                    <span className="font-medium">Notes: </span>
+                                                    {exercise.notes}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {(exercise.imageUrl || exercise.videoUrl) && (
+                                            <div className="border-t border-gray-200">
+                                                {exercise.imageUrl && (
+                                                    <img 
+                                                        src={exercise.imageUrl} 
+                                                        alt={exercise.name}
+                                                        className="w-full h-48 object-cover"
+                                                    />
+                                                )}
+                                                {exercise.videoUrl && (
+                                                    <div className="relative">
+                                                        <div className="aspect-w-16 aspect-h-9">
+                                                            {exercise.videoUrl.includes('youtube.com') || exercise.videoUrl.includes('youtu.be') ? (
+                                                                <iframe
+                                                                    src={`https://www.youtube.com/embed/${exercise.videoUrl.split('v=')[1]?.split('&')[0]}`}
+                                                                    frameBorder="0"
+                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                    allowFullScreen
+                                                                    className="w-full h-48"
+                                                                ></iframe>
+                                                            ) : (
+                                                                <video 
+                                                                    controls 
+                                                                    className="w-full h-48"
+                                                                    poster={exercise.imageUrl}
+                                                                >
+                                                                    <source src={exercise.videoUrl} type="video/mp4" />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                ) : (
-                                                    <video 
-                                                        controls 
-                                                        className="w-full h-48"
-                                                        poster={exercise.imageUrl}
-                                                    >
-                                                        <source src={exercise.videoUrl} type="video/mp4" />
-                                                        Your browser does not support the video tag.
-                                                    </video>
                                                 )}
                                             </div>
                                         )}
-
-                                        <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
-                                            <div>Sets: {exercise.sets}</div>
-                                            <div>Reps: {exercise.reps}</div>
-                                            <div>Rest: {exercise.restInterval}s</div>
-                                        </div>
-                                        {exercise.notes && (
-                                            <div className="mt-2 text-sm text-gray-600">
-                                                <span className="font-medium">Notes: </span>
-                                                {exercise.notes}
-                                            </div>
-                                        )}
-                                    </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="flex justify-end space-x-3 pt-4">
+                        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
                             <Link
                                 to={`/gym/workouts/edit/${selectedWorkout.id}`}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center"
                             >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
                                 Edit Workout
                             </Link>
                             <Button
                                 variant="outline"
                                 onClick={() => setIsModalOpen(false)}
+                                className="flex items-center justify-center"
                             >
                                 Close
                             </Button>
