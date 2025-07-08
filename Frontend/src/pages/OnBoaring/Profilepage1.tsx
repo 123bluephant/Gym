@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Edit2, AlertTriangle } from 'lucide-react';
-import Sidebar from '../../components/Dashboard/sidebar'; // Import the Sidebar component
+import ResponsivePageLayout from '../../components/Dashboard/PageLayout';
 
 interface FitnessGoals {
   primaryGoal: string;
@@ -168,13 +168,10 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
+    <ResponsivePageLayout>
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Fixed Sidebar */}
-      <Sidebar />
-
-      {/* Scrollable Main Content */}
       <div
-        className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}
+        className={`flex-1 overflow-y-auto transition-all duration-300 `}
         style={{ maxHeight: '100vh' }}
       >
         {/* Header */}
@@ -418,6 +415,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
     </div>
+    </ResponsivePageLayout>
   );
 };
 

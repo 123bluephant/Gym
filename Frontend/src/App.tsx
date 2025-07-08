@@ -13,6 +13,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import LoginPage from './pages/OnBoaring/LoginPage';
 import SignupPage from './pages/OnBoaring/signupPage';
 import HomeDashboard from './pages/Dashboard/HomeDashboard';
+import AnalyticsPage1 from './pages/Dashboard/AnalyticsPage';
 import Calories from './pages/CaloriesPage';
 import ProfilePage from './pages/OnBoaring/Profilepage1';
 import Community from './pages/Community';
@@ -39,6 +40,8 @@ import GymOwnerProfile from './pages/gymOwner/Pages/ProfilePage';
 import AddEditMeal from './pages/gymOwner/Pages/Meals/AddEdits';
 import AddEditTrainer from './pages/gymOwner/Pages/Trainers/AddEdit';
 import AddList from './pages/gymOwner/Pages/Users/AddList';
+import EditList from './pages/gymOwner/Pages/Users/Edit';
+import ViewList from './pages/gymOwner/Pages/Users/ViewUser';
 import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
 import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
 import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
@@ -63,13 +66,16 @@ import { Staff } from './pages/Admin/Pages/Staff';
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
-  const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile', '/analytics'].includes(location.pathname);
+  
+  // Route classification
   const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
+  const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile'].includes(location.pathname);
   const isGymRoute = location.pathname.startsWith('/gym');
-  const isGymOwner = user && user.role === 'gym_owner';
+  const isAdminRoute = location.pathname.startsWith('/admin');
+ const isGymOwner = user && user.role === 'gym_owner';
 
   if (isGymRoute && (!user || !isGymOwner)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -78,7 +84,7 @@ function AppContent() {
       {!user && !isDashboard && !isGymRoute && <Header />}
 
       {/* Gym Owner Layout (with Sidebar and Navbar) */}
-      {(isGymRoute && isGymOwner) ? (
+      {(isGymRoute && isGymOwner)  ? (
         <div className="flex h-screen bg-gray-100">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -92,25 +98,46 @@ function AppContent() {
                 <Route path="/gym/meals" element={<Meals />} />
                 <Route path="/gym/meals/add" element={<AddEditMeal />} />
                 <Route path="/gym/meals/edit/:id" element={<AddEditMeal />} />
-
-                {/* Updated Trainer Routes */}
                 <Route path="/gym/trainers" element={<TrainersList />} />
                 <Route path="/gym/trainers/add" element={<AddEditTrainer />} />
                 <Route path="/gym/trainers/edit/:id" element={<EditTrainer />} />
                 <Route path="/gym/trainers/view/:id" element={<ViewTrainer />} />
-
                 <Route path="/gym/members" element={<Members />} />
                 <Route path="/gym/members/add" element={<AddList />} />
-                <Route path="/gym/members/edit/:id" element={<AddList />} />
+                <Route path="/gym/members/edit/:id" element={<EditList />} />
+                <Route path="/gym/members/view/:id" element={<ViewList />} />
                 <Route path="/gyms/List" element={<GymListing />} />
-
-                {/* Workout Routes */}
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
                 <Route path="/gym/workouts/edit/:id" element={<EditWorkout />} />
-
                 <Route path="/gym/shop/manage" element={<ManageProducts />} />
-
+              </Routes>
+            </main>
+          </div>
+        </div>
+      ) : isAdminRoute ? (
+        /* Admin Layout */
+        <div className="flex h-screen bg-gray-100">
+          <AdminSidebar 
+            sidebarOpen={false} 
+            setSidebarOpen={() => {}} 
+          />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <AdminHeader 
+              sidebarOpen={false} 
+              setSidebarOpen={() => {}} 
+            />
+            <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+              <Routes>
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/admin/members" element={<AdminMembers />} />
+                <Route path="/admin/classes" element={<Classes />} />
+                <Route path="/admin/equipment" element={<Equipment />} />
+                <Route path="/admin/payments" element={<Payments />} />
+                <Route path="/admin/reports" element={<Reports />} />
+                <Route path="/admin/website" element={<Website />} />
+                <Route path="/admin/settings" element={<Settings />} />
+                <Route path="/admin/staff" element={<Staff />} />
               </Routes>
             </main>
           </div>
@@ -123,16 +150,14 @@ function AppContent() {
             {!user && <Route path="/login" element={<LoginPage />} />}
             {!user && <Route path="/signup" element={<SignupPage />} />}
             {!user && <Route path="/signupgym" element={<SignupGymPage />} />}
+            
             {user ? (
               <>
                 <Route path="/dashboard" element={<HomeDashboard />} />
                 <Route path="/workouts" element={<WorkoutsPage />} />
                 <Route path="/women-health" element={<WomensHealthPage />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
-                <Route
-                  path="/Finder"
-                  element={<GymFinder />} />
-
+                <Route path="/Finder" element={<GymFinder />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
                 <Route path="/tracking" element={<TrackingPage />} />
                 <Route path="/shop" element={<ShopPage />} />
@@ -142,37 +167,12 @@ function AppContent() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/activity" element={<ActivityPage />} />
+                <Route path="/analytic" element={<AnalyticsPage1  />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </>
-            ) : (
-              <div className="flex h-screen bg-gray-100">
-                <AdminSidebar sidebarOpen={false} setSidebarOpen={function (_open: boolean): void {
-                  throw new Error('Function not implemented.');
-                }} />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <AdminHeader sidebarOpen={false} setSidebarOpen={function (open: boolean): void {
-                    throw new Error('Function not implemented.');
-                  }} />
-                  <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
-                    <Routes>
-                      <Route path="/admin" element={<Dashboard />} />
-                      <Route path="/members" element={<AdminMembers />} />
-                      <Route path="/classes" element={<Classes />} />
-                      <Route path="/equipment" element={<Equipment />} />
-                      <Route path="/payments" element={<Payments />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/website" element={<Website />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/staff" element={<Staff />} />
-                      <Route path="*" element={<Navigate to="/" />} />
-                    </Routes>
-                  </main>
-                </div>
-              </div>
-            )
-            }
+            ) : <Route path="*" element={<LoginPage />} />}
+            
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/term" element={<TermsOfService />} />
             <Route path="/help" element={<HelpCenter />} />
@@ -181,8 +181,8 @@ function AppContent() {
         </div>
       )}
 
-      {/* Footer (for non-gym routes) */}
-      {!isDashboard && !isAuthPage && !isGymRoute && <Footer />}
+      {/* Footer (for non-gym and non-admin routes) */}
+      {!isDashboard && !isAuthPage && !isGymRoute && !isAdminRoute && <Footer />}
     </div>
   );
 }

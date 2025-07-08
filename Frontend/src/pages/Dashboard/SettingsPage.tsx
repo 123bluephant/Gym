@@ -1,17 +1,15 @@
 import Sidebar from '../../components/Dashboard/sidebar';
 import { Lock, CreditCard, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ResponsivePageLayout from '../../components/Dashboard/PageLayout';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
 
   return (
+    <ResponsivePageLayout>
     <div className="flex">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <main className="flex-1 pt-16 pl-64 overflow-y-auto">
+      <main className="flex-1 pt-16 overflow-y-auto">
         <div className="p-6">
           {/* Updated header with back button */}
           <div className="flex items-center mb-8">
@@ -68,6 +66,7 @@ const SettingsPage = () => {
         </div>
       </main>
     </div>
+    </ResponsivePageLayout>
   );
 };
 

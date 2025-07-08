@@ -19,81 +19,87 @@ type SidebarProps = {
 
 export const AdminSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const navItems = [
-    { name: 'Dashboard', icon: FiHome, path: '/' },
+    { name: 'Dashboard', icon: FiHome, path: '/admin' },
     { 
       name: 'Members', 
       icon: FiUsers, 
-      path: '/members',
+      path: '/admin/members',
       subItems: [
-        { name: 'All Members', path: '/members' },
-        { name: 'New Members', path: '/members/new' },
-        { name: 'Attendance', path: '/members/attendance' },
-        { name: 'Progress', path: '/members/progress' },
+        { name: 'All Members', path: '/admin/members' },
+        { name: 'New Members', path: '/admin/members/new' },
+        { name: 'Attendance', path: '/admin/members/attendance' },
+        { name: 'Progress', path: '/admin/members/progress' },
       ]
     },
     { 
       name: 'Staff', 
       icon: FiUserPlus, 
-      path: '/staff',
+      path: '/admin/staff',
       subItems: [
-        { name: 'Directory', path: '/staff' },
-        { name: 'Roles', path: '/staff/roles' },
-        { name: 'Schedules', path: '/staff/schedules' },
-        { name: 'Payroll', path: '/staff/payroll' },
+        { name: 'Directory', path: '/admin/staff' },
+        { name: 'Roles', path: '/admin/staff/roles' },
+        { name: 'Schedules', path: '/admin/staff/schedules' },
+        { name: 'Payroll', path: '/admin/staff/payroll' },
       ]
     },
     { 
       name: 'Classes', 
       icon: FiCalendar, 
-      path: '/classes',
+      path: '/admin/classes',
       subItems: [
-        { name: 'Schedule', path: '/classes' },
-        { name: 'Bookings', path: '/classes/bookings' },
-        { name: 'Waitlist', path: '/classes/waitlist' },
+        { name: 'Schedule', path: '/admin/classes' },
+        { name: 'Bookings', path: '/admin/classes/bookings' },
+        { name: 'Waitlist', path: '/admin/classes/waitlist' },
       ]
     },
     { 
       name: 'Equipment', 
       icon: FiTool, 
-      path: '/equipment',
+      path: '/admin/equipment',
       subItems: [
-        { name: 'Inventory', path: '/equipment' },
-        { name: 'Maintenance', path: '/equipment/maintenance' },
+        { name: 'Inventory', path: '/admin/equipment' },
+        { name: 'Maintenance', path: '/admin/equipment/maintenance' },
       ]
     },
     { 
       name: 'Payments', 
       icon: FiDollarSign, 
-      path: '/payments',
+      path: 'admin/payments',
       subItems: [
-        { name: 'Transactions', path: '/payments' },
-        { name: 'Invoices', path: '/payments/invoices' },
-        { name: 'Revenue', path: '/payments/revenue' },
+        { name: 'Transactions', path: '/admin/payments' },
+        { name: 'Invoices', path: '/admin/payments/invoices' },
+        { name: 'Revenue', path: '/admin/payments/revenue' },
       ]
     },
     { 
       name: 'Reports', 
       icon: FiPieChart, 
-      path: '/reports' 
+      path: '/admin/reports',
+      subItems: [
+        { name: 'Member Activity', path: '/admin/reports/member-activity' },
+        { name: 'Class Attendance', path: '/admin/reports/class-attendance' },
+        { name: 'Staff Performance', path: '/admin/reports/staff-performance' },
+        { name: 'Financial Reports', path: '/admin/reports/financial' },
+      ]
     },
     { 
       name: 'Website', 
       icon: FiFileText, 
-      path: '/website',
+      path: '/admin/website',
       subItems: [
-        { name: 'Content', path: '/website/content' },
-        { name: 'Blog', path: '/website/blog' },
-        { name: 'Media', path: '/website/media' },
+        { name: 'Content', path: '/admin/website/content' },
+        { name: 'Blog', path: '/admin/website/blog' },
+        { name: 'Media', path: '/admin/website/media' },
       ]
     },
     { 
       name: 'Settings', 
       icon: FiSettings, 
-      path: '/settings',
+      path: '/admin/settings',
       subItems: [
-        { name: 'General', path: '/settings' },
-        { name: 'Memberships', path: '/settings/memberships' },
-        { name: 'System', path: '/settings/system' },
+        { name: 'General', path: '/admin/settings/general' },
+        { name: 'Memberships', path: '/admin/settings/memberships' },
+        { name: 'System', path: '/admin/settings/system' },
       ]
     },
   ];
