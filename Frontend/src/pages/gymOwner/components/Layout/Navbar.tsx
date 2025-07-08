@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
             onClick={() => navigate('/gym/profile')}
              className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                <span className="text-gray-600">A</span>
+                <span className="text-gray-600">{user?.username[0]}</span>
               </div>
               <span className="text-gray-700">{user?.username}</span>
             </button>
