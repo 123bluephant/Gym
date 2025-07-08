@@ -66,13 +66,13 @@ import { Staff } from './pages/Admin/Pages/Staff';
 function AppContent() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
-  
+
   // Route classification
   const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
   const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile'].includes(location.pathname);
   const isGymRoute = location.pathname.startsWith('/gym');
   const isAdminRoute = location.pathname.startsWith('/admin');
- const isGymOwner = user && user.role === 'gym_owner';
+  const isGymOwner = user && user.role === 'gym_owner';
 
   if (isGymRoute && (!user || !isGymOwner)) {
     return <Navigate to="/" replace />;
@@ -83,8 +83,7 @@ function AppContent() {
       {user && !isAuthPage && !isGymRoute && <Header />}
       {!user && !isDashboard && !isGymRoute && <Header />}
 
-      {/* Gym Owner Layout (with Sidebar and Navbar) */}
-      {(isGymRoute && isGymOwner)  ? (
+      {(isGymRoute && isGymOwner) ? (
         <div className="flex h-screen bg-gray-100">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -116,16 +115,15 @@ function AppContent() {
           </div>
         </div>
       ) : isAdminRoute ? (
-        /* Admin Layout */
         <div className="flex h-screen bg-gray-100">
-          <AdminSidebar 
-            sidebarOpen={false} 
-            setSidebarOpen={() => {}} 
+          <AdminSidebar
+            sidebarOpen={false}
+            setSidebarOpen={() => { }}
           />
           <div className="flex-1 flex flex-col overflow-hidden">
-            <AdminHeader 
-              sidebarOpen={false} 
-              setSidebarOpen={() => {}} 
+            <AdminHeader
+              sidebarOpen={false}
+              setSidebarOpen={() => { }}
             />
             <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
               <Routes>
@@ -143,16 +141,15 @@ function AppContent() {
           </div>
         </div>
       ) : (
-        /* Regular Content Layout */
         <div className="flex-1">
           <Routes>
-            <Route path="/" element={<HomePage />} />
             {!user && <Route path="/login" element={<LoginPage />} />}
             {!user && <Route path="/signup" element={<SignupPage />} />}
             {!user && <Route path="/signupgym" element={<SignupGymPage />} />}
-            
-            {user ? (
+
+            {user && user?.role === "user" ? (
               <>
+                <Route path="/" element={<HomePage />} />
                 <Route path="/dashboard" element={<HomeDashboard />} />
                 <Route path="/workouts" element={<WorkoutsPage />} />
                 <Route path="/women-health" element={<WomensHealthPage />} />
@@ -167,12 +164,19 @@ function AppContent() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/activity" element={<ActivityPage />} />
-                <Route path="/analytic" element={<AnalyticsPage1  />} />
+                <Route path="/analytic" element={<AnalyticsPage1 />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </>
-            ) : <Route path="*" element={<LoginPage />} />}
-            
+            ) : user && user?.role === "gym_owner" ? (
+              <>
+                <Route path="/" element={<Navigate to="/gym" replace />} />
+                <Route path="/gym/*" element={<Dashboardgym />} />
+              </>
+            ) : (
+              <Route path="*" element={<LoginPage />} />
+            )}
+
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/term" element={<TermsOfService />} />
             <Route path="/help" element={<HelpCenter />} />
