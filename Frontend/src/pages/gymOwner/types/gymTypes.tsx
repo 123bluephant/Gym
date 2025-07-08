@@ -14,11 +14,15 @@ export interface Trainer {
   id: string;
   name: string;
   email: string;
-  specialization: string[];
+  imageUrl?: string;
   experience: number;
-  clients: number;
   rating: number;
-  status: 'Available' | 'Busy' | 'On Leave' | 'Booked';
+  clients: number;
+  status: string;
+  specialization: string[];
+  bio?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Meal {

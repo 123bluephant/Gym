@@ -32,7 +32,6 @@ import AnalyticsPage from './pages/gymOwner/Pages/Analytics';
 import SettingsPagegym from './pages/gymOwner/Pages/Settings';
 import Dashboardgym from './pages/gymOwner/Pages/Dashboard';
 import Meals from './pages/gymOwner/Pages/Meals/List';
-import Trainers from './pages/gymOwner/Pages/Trainers/List';
 import Members from './pages/gymOwner/Pages/Users/List';
 import Sidebar from './pages/gymOwner/components/Layout/Sidebar';
 import Navbar from './pages/gymOwner/components/Layout/Navbar';
@@ -40,12 +39,26 @@ import GymOwnerProfile from './pages/gymOwner/Pages/ProfilePage';
 import AddEditMeal from './pages/gymOwner/Pages/Meals/AddEdits';
 import AddEditTrainer from './pages/gymOwner/Pages/Trainers/AddEdit';
 import AddList from './pages/gymOwner/Pages/Users/AddList';
-import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
 import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
 import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
 import GymFinder from './pages/GymFinder';
 import ManageProducts from './pages/gymOwner/Pages/Shop/ManageProducts';
+import GymListing from './pages/gymOwner/components/Gym/GymListing';
+import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
+import ViewTrainer from './pages/gymOwner/Pages/Trainers/ViewTrainner';
+import TrainersList from './pages/gymOwner/Pages/Trainers/List';
+import { AdminSidebar } from './pages/Admin/components/layout/Sidebar';
+import { AdminHeader } from './pages/Admin/components/layout/Header';
+import { Dashboard } from './pages/Admin/Pages/Dashboard';
+import { AdminMembers } from './pages/Admin/Pages/Members';
+import { Classes } from './pages/Admin/Pages/Classes';
+import { Equipment } from './pages/Admin/Pages/Equipment';
+import { Payments } from './pages/Admin/Pages/Payments';
+import { Reports } from './pages/Admin/Pages/Reports';
+import { Website } from './pages/Admin/Pages/Website';
+import { Settings } from './pages/Admin/Pages/Settings';
+import { Staff } from './pages/Admin/Pages/Staff';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -75,18 +88,23 @@ function AppContent() {
                 <Route path="/gym/meals" element={<Meals />} />
                 <Route path="/gym/meals/add" element={<AddEditMeal />} />
                 <Route path="/gym/meals/edit/:id" element={<AddEditMeal />} />
-                {/* <Route path="/gym/meals/view/:id" element={<MealDetail />} /> You would create this component
-                <Route path="/gym/meals/import" element={<BulkImport />} /> You would create this component */}
-                <Route path="/gym/trainers" element={<Trainers />} />
+
+                {/* Updated Trainer Routes */}
+                <Route path="/gym/trainers" element={<TrainersList />} />
                 <Route path="/gym/trainers/add" element={<AddEditTrainer />} />
-                <Route path="/gym/trainers/edit/:id" element={<AddEditTrainer />} />
+                <Route path="/gym/trainers/edit/:id" element={<EditTrainer />} />
+                <Route path="/gym/trainers/view/:id" element={<ViewTrainer />} />
+
                 <Route path="/gym/members" element={<Members />} />
                 <Route path="/gym/members/add" element={<AddList />} />
                 <Route path="/gym/members/edit/:id" element={<AddList />} />
                 <Route path="/gyms/List" element={<GymListing />} />
+
+                {/* Workout Routes */}
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
                 <Route path="/gym/workouts/edit/:id" element={<EditWorkout />} />
+
                 <Route path="/gym/shop/manage" element={<ManageProducts />} />
 
               </Routes>
@@ -125,8 +143,32 @@ function AppContent() {
                 <Route path="/settings" element={<SettingsPage />} />
               </>
             ) : (
-              <Route path="*" element={<Navigate to="/login" />} />
-            )}
+              <div className="flex h-screen bg-gray-100">
+                <AdminSidebar sidebarOpen={false} setSidebarOpen={function (_open: boolean): void {
+                  throw new Error('Function not implemented.');
+                }} />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <AdminHeader sidebarOpen={false} setSidebarOpen={function (open: boolean): void {
+                    throw new Error('Function not implemented.');
+                  }} />
+                  <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                    <Routes>
+                      <Route path="/admin" element={<Dashboard />} />
+                      <Route path="/members" element={<AdminMembers />} />
+                      <Route path="/classes" element={<Classes />} />
+                      <Route path="/equipment" element={<Equipment />} />
+                      <Route path="/payments" element={<Payments />} />
+                      <Route path="/reports" element={<Reports />} />
+                      <Route path="/website" element={<Website />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/staff" element={<Staff />} />
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </main>
+                </div>
+              </div>
+            )
+            }
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/term" element={<TermsOfService />} />
             <Route path="/help" element={<HelpCenter />} />
