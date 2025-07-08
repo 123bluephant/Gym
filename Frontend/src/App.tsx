@@ -48,6 +48,17 @@ import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
 import ViewTrainer from './pages/gymOwner/Pages/Trainers/ViewTrainner';
 import TrainersList from './pages/gymOwner/Pages/Trainers/List';
+import { AdminSidebar } from './pages/Admin/components/layout/Sidebar';
+import { AdminHeader } from './pages/Admin/components/layout/Header';
+import { Dashboard } from './pages/Admin/Pages/Dashboard';
+import { AdminMembers } from './pages/Admin/Pages/Members';
+import { Classes } from './pages/Admin/Pages/Classes';
+import { Equipment } from './pages/Admin/Pages/Equipment';
+import { Payments } from './pages/Admin/Pages/Payments';
+import { Reports } from './pages/Admin/Pages/Reports';
+import { Website } from './pages/Admin/Pages/Website';
+import { Settings } from './pages/Admin/Pages/Settings';
+import { Staff } from './pages/Admin/Pages/Staff';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -132,8 +143,32 @@ function AppContent() {
                 <Route path="/settings" element={<SettingsPage />} />
               </>
             ) : (
-              <Route path="*" element={<Navigate to="/login" />} />
-            )}
+              <div className="flex h-screen bg-gray-100">
+                <AdminSidebar sidebarOpen={false} setSidebarOpen={function (_open: boolean): void {
+                  throw new Error('Function not implemented.');
+                }} />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <AdminHeader sidebarOpen={false} setSidebarOpen={function (open: boolean): void {
+                    throw new Error('Function not implemented.');
+                  }} />
+                  <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                    <Routes>
+                      <Route path="/admin" element={<Dashboard />} />
+                      <Route path="/members" element={<AdminMembers />} />
+                      <Route path="/classes" element={<Classes />} />
+                      <Route path="/equipment" element={<Equipment />} />
+                      <Route path="/payments" element={<Payments />} />
+                      <Route path="/reports" element={<Reports />} />
+                      <Route path="/website" element={<Website />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/staff" element={<Staff />} />
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </main>
+                </div>
+              </div>
+            )
+            }
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/term" element={<TermsOfService />} />
             <Route path="/help" element={<HelpCenter />} />
