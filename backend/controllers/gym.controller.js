@@ -35,6 +35,7 @@ export const updateGymController = async (req, res) => {
     );
 
     if (!updatedOwner) {
+      console.log("Gym Owner not found");
       return res.status(404).json({ message: "Gym Owner not found" });
     }
     generateCookie(user._id, res);

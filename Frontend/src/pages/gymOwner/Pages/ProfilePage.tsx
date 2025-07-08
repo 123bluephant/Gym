@@ -1,9 +1,10 @@
 // src/pages/gymOwner/Profile.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiClock, FiEdit, FiSave, FiLock, FiCalendar } from 'react-icons/fi';
 import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 import userAtom from '../../../atoms/UserAtom';
 import { useRecoilValue } from 'recoil';
+import { Navigate } from 'react-router-dom';
 
 type MembershipPlan = {
   name: string;
@@ -45,6 +46,12 @@ const GymOwnerProfile = () => {
       ? user.socialMedia
       : { facebook: '', instagram: '', twitter: '' },
   });
+
+  useEffect(()=>{
+    if(user && user.role!=="gym_owner"){
+      <Navigate to="/dashboard" replace />; 
+    }
+  },[])
   const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
   const handleAddFeature = () => {
     setNewPlan(prev => ({ ...prev, features: [...prev.features, ''] }));

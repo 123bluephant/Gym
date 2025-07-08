@@ -72,6 +72,9 @@ function AppContent() {
   const isGymRoute = location.pathname.startsWith('/gym');
   const isAdminRoute = location.pathname.startsWith('/admin');
 
+  if (isGymRoute && (!user || !isGymOwner)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Header (for non-gym and non-admin routes) */}
