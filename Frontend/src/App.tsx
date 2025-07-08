@@ -66,7 +66,11 @@ function AppContent() {
   const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile', '/analytics'].includes(location.pathname);
   const isAuthPage = ['/login', '/signup', '/signupgym', '/onboarding'].includes(location.pathname);
   const isGymRoute = location.pathname.startsWith('/gym');
+  const isGymOwner = user && user.role === 'gym_owner';
 
+  if (isGymRoute && (!user || !isGymOwner)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Regular Header (for non-gym routes) */}
@@ -74,7 +78,7 @@ function AppContent() {
       {!user && !isDashboard && !isGymRoute && <Header />}
 
       {/* Gym Owner Layout (with Sidebar and Navbar) */}
-      {isGymRoute ? (
+      {(isGymRoute && isGymOwner) ? (
         <div className="flex h-screen bg-gray-100">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">

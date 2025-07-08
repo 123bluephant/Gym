@@ -1,14 +1,30 @@
 // src/components/Layout/Sidebar.tsx
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
+import userAtom from '../../../../atoms/UserAtom';
 
 const Sidebar: React.FC = () => {
-  const handleLogout = () => {
-    // Add your logout logic here
-    console.log('Logging out...');
-    // Typically you would:
-    // 1. Clear user session/token
-    // 2. Redirect to login page
+  const navigate = useNavigate();
+  const setUser = useSetRecoilState(userAtom);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/user/logout", {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        setUser(null);
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
