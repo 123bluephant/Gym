@@ -191,7 +191,7 @@ const TrainersList: React.FC = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/gym/trainers/edit/${trainer.id}`);
+                handleActionClick(e, 'edit');
               }}
               className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-300 text-sm flex items-center justify-center gap-1"
             >
