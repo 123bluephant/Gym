@@ -47,11 +47,11 @@ const GymOwnerProfile = () => {
       : { facebook: '', instagram: '', twitter: '' },
   });
 
-  useEffect(()=>{
-    if(user && user.role!=="gym_owner"){
-      <Navigate to="/dashboard" replace />; 
+  useEffect(() => {
+    if (user && user.role !== "gym_owner") {
+      <Navigate to="/dashboard" replace />;
     }
-  },[])
+  }, [])
   const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
   const handleAddFeature = () => {
     setNewPlan(prev => ({ ...prev, features: [...prev.features, ''] }));
@@ -78,50 +78,51 @@ const GymOwnerProfile = () => {
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
- const handleSave = async () => {
-  try {
-    const response = await fetch('http://localhost:5000/api/gym/update', {
-      method: 'POST',  
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify(profileData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update profile');
-    }
-
-    const result = await response.json();
-    console.log('Update successful:', result);
-
-    if (result.updatedOwner) {
-      setProfileData({
-        name: result.updatedOwner.name || '',
-        email: result.updatedOwner.email || '',
-        phone: result.updatedOwner.phone || '',
-        bio: result.updatedOwner.bio || '',
-        gymName: result.updatedOwner.gymName || '',
-        location: result.updatedOwner.location || '',
-        established: result.updatedOwner.established || '',
-        hours: result.updatedOwner.hours || '',
-        membershipPlans: Array.isArray(result.updatedOwner.membershipPlans)
-          ? result.updatedOwner.membershipPlans
-          : [],
-        socialMedia:
-          typeof result.updatedOwner.socialMedia === 'object' && result.updatedOwner.socialMedia !== null
-            ? result.updatedOwner.socialMedia
-            : { facebook: '', instagram: '', twitter: '' },
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/gym/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(profileData)
       });
-    }
 
-    setIsEditing(false);
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    alert('Failed to save profile. Please try again.');
-  }
-};
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const result = await response.json();
+      console.log('Update successful:', result);
+
+      if (result.updatedOwner) {
+        setProfileData({
+          name: result.updatedOwner.name || '',
+          email: result.updatedOwner.email || '',
+          phone: result.updatedOwner.phone || '',
+          bio: result.updatedOwner.bio || '',
+          gymName: result.updatedOwner.gymName || '',
+          location: result.updatedOwner.location || '',
+          established: result.updatedOwner.established || '',
+          hours: result.updatedOwner.hours || '',
+          membershipPlans: Array.isArray(result.updatedOwner.membershipPlans)
+            ? result.updatedOwner.membershipPlans
+            : [],
+          socialMedia:
+            typeof result.updatedOwner.socialMedia === 'object' && result.updatedOwner.socialMedia !== null
+              ? result.updatedOwner.socialMedia
+              : { facebook: '', instagram: '', twitter: '' },
+        });
+        localStorage.setItem('user', JSON.stringify(result.updatedOwner));
+      }
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to save profile. Please try again.');
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen p-6">
