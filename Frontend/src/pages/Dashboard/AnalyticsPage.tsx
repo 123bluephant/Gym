@@ -3,6 +3,7 @@ import React from 'react';
 import { BarChart3, Target, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Dashboard/sidebar'; // Import your sidebar component
+import ResponsivePageLayout from '../../components/Dashboard/PageLayout';
 
 interface MonthlyStat {
   label: string;
@@ -31,12 +32,9 @@ const AnalyticsPage = () => {
   ];
 
   return (
+    <ResponsivePageLayout>
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 ml-64 mt-16"> {/* Adjust ml-64 to match your sidebar width */}
+      <div className="flex-1 mt-16"> {/* Adjust ml-64 to match your sidebar width */}
         <div className="container mx-auto px-4 py-8">
           {/* Header with back button */}
           <div className="flex items-center mb-8">
@@ -166,6 +164,7 @@ const AnalyticsPage = () => {
         </div>
       </div>
     </div>
+    </ResponsivePageLayout>
   );
 };
 

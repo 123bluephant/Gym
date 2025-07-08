@@ -13,6 +13,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import LoginPage from './pages/OnBoaring/LoginPage';
 import SignupPage from './pages/OnBoaring/signupPage';
 import HomeDashboard from './pages/Dashboard/HomeDashboard';
+import AnalyticsPage1 from './pages/Dashboard/AnalyticsPage';
 import Calories from './pages/CaloriesPage';
 import ProfilePage from './pages/OnBoaring/Profilepage1';
 import Community from './pages/Community';
@@ -71,18 +72,19 @@ function AppContent() {
   const isDashboard = ['/dashboard', '/activity', '/achievements', '/settings', '/profile'].includes(location.pathname);
   const isGymRoute = location.pathname.startsWith('/gym');
   const isAdminRoute = location.pathname.startsWith('/admin');
+ const isGymOwner = user && user.role === 'gym_owner';
 
   if (isGymRoute && (!user || !isGymOwner)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Header (for non-gym and non-admin routes) */}
-      {user && !isAuthPage && !isGymRoute && !isAdminRoute && <Header />}
-      {!user && !isDashboard && !isGymRoute && !isAdminRoute && <Header />}
+      {/* Regular Header (for non-gym routes) */}
+      {user && !isAuthPage && !isGymRoute && <Header />}
+      {!user && !isDashboard && !isGymRoute && <Header />}
 
-      {/* Gym Owner Layout */}
-      {isGymRoute ? (
+      {/* Gym Owner Layout (with Sidebar and Navbar) */}
+      {(isGymRoute && isGymOwner)  ? (
         <div className="flex h-screen bg-gray-100">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -165,6 +167,7 @@ function AppContent() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/activity" element={<ActivityPage />} />
+                <Route path="/analytic" element={<AnalyticsPage1  />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </>

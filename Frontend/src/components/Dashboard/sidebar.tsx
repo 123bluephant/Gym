@@ -5,8 +5,7 @@ import userAtom from '../../atoms/UserAtom';
 import {
   User, Settings, Activity,
   Award, Dumbbell, Home,
-  Utensils, LogOut, Menu, X,
-  FileBarChart
+  FileBarChart, LogOut, Menu, X
 } from 'lucide-react';
 
 interface Tab {
@@ -20,24 +19,20 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const setUser = useSetRecoilState(userAtom);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      // Auto-close sidebar when resizing to mobile if it was open
-      if (window.innerWidth >= 768) {
-        setIsOpen(true);
-      } else {
-        setIsOpen(false);
-      }
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // On mobile, start collapsed; on desktop, start expanded
+      setIsCollapsed(mobile);
     };
 
-    window.addEventListener('resize', handleResize);
-    // Initialize based on current screen size
+    // Set initial state
     handleResize();
-    
+    window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -65,7 +60,7 @@ const Sidebar = () => {
     { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'workouts', name: 'Workouts', icon: Dumbbell, path: '/workouts' },
     { id: 'activity', name: 'Activity', icon: Activity, path: '/activity' },
-    { id: 'analytics', name: 'Analytics', icon: FileBarChart, path: '/analytics' },
+    { id: 'analytics', name: 'Analytics', icon: FileBarChart, path: '/analytic' },
     { id: 'achievements', name: 'Achievements', icon: Award, path: '/achievements' },
   ];
 
@@ -73,92 +68,70 @@ const Sidebar = () => {
     { id: 'settings', name: 'Settings', icon: Settings, path: '/settings' },
   ];
 
-  // Close sidebar when a link is clicked on mobile
-  const handleLinkClick = () => {
-    if (isMobile) {
-      setIsOpen(false);
-    }
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   return (
-    <>
-      {/* Mobile menu button */}
-      {isMobile && (
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-md bg-indigo-700 text-white"
+    <div className={`fixed h-full ${isCollapsed ? 'w-16' : 'w-64'} bg-indigo-700 text-white flex flex-col z-10 transition-all duration-300 ease-in-out`}>
+      <div className={`p-4 border-b border-indigo-600 flex ${isCollapsed ? 'justify-center' : 'justify-between'} items-center`}>
+        {!isCollapsed && <h1 className="text-xl font-bold">FitTrack</h1>}
+        <button 
+          onClick={toggleCollapse} 
+          className="text-white hover:text-indigo-200 focus:outline-none"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {isCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
         </button>
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={`fixed h-full w-64 bg-indigo-700 text-white flex flex-col z-40 transition-all duration-300 ease-in-out
-          ${isMobile ? (isOpen ? 'left-0' : '-left-64') : 'left-0'}`}
-      >
-        <div className="p-4 border-b border-indigo-600">
-          <h1 className="text-xl font-bold">FitTrack</h1>
-        </div>
-        
-        <nav className="flex-1 flex flex-col p-2 overflow-y-auto">
-          <div className="flex-1">
-            {mainTabs.map((tab) => (
-              <Link
-                key={tab.id}
-                to={tab.path}
-                onClick={handleLinkClick}
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  location.pathname === tab.path
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span className="ml-3">{tab.name}</span>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-auto">
-            {bottomTabs.map((tab) => (
-              <Link
-                key={tab.id}
-                to={tab.path}
-                onClick={handleLinkClick}
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  location.pathname === tab.path
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span className="ml-3">{tab.name}</span>
-              </Link>
-            ))}
-            
-            <button
-              onClick={() => {
-                handleLogout();
-                handleLinkClick();
-              }}
-              className="w-full flex items-center p-3 rounded-md text-indigo-200 hover:bg-indigo-600 hover:text-white transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="ml-3">Logout</span>
-            </button>
-          </div>
-        </nav>
       </div>
+      
+      <nav className="flex-1 flex flex-col p-2 overflow-y-auto">
+        <div className="flex-1">
+          {mainTabs.map((tab) => (
+            <Link
+              key={tab.id}
+              to={tab.path}
+              className={`flex items-center p-3 rounded-md transition-colors ${
+                location.pathname === tab.path
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'
+              } ${isCollapsed ? 'justify-center' : ''}`}
+              title={isCollapsed ? tab.name : undefined}
+            >
+              <tab.icon className="w-5 h-5" />
+              {!isCollapsed && <span className="ml-3">{tab.name}</span>}
+            </Link>
+          ))}
+        </div>
 
-      {/* Overlay for mobile */}
-      {isMobile && isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </>
+        <div className="mt-auto">
+          {bottomTabs.map((tab) => (
+            <Link
+              key={tab.id}
+              to={tab.path}
+              className={`flex items-center p-3 rounded-md transition-colors ${
+                location.pathname === tab.path
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'
+              } ${isCollapsed ? 'justify-center' : ''}`}
+              title={isCollapsed ? tab.name : undefined}
+            >
+              <tab.icon className="w-5 h-5" />
+              {!isCollapsed && <span className="ml-3">{tab.name}</span>}
+            </Link>
+          ))}
+          
+          <button
+            onClick={handleLogout}
+            className={`w-full flex items-center p-3 rounded-md text-indigo-200 hover:bg-indigo-600 hover:text-white transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+            title={isCollapsed ? "Logout" : undefined}
+          >
+            <LogOut className="w-5 h-5" />
+            {!isCollapsed && <span className="ml-3">Logout</span>}
+          </button>
+        </div>
+      </nav>
+    </div>
   );
 };
 

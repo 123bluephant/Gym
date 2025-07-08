@@ -1,16 +1,15 @@
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/Dashboard/sidebar';
 import { achievements, getRarityColor } from '../../components/Data/achievementData';
+import ResponsivePageLayout from '../../components/Dashboard/PageLayout';
 
 const AchievementsPage = () => {
   const navigate = useNavigate();
 
   return (
+    <ResponsivePageLayout>
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar />
-
-      <main className="flex-1 pt-16 pl-64 overflow-y-auto">
+    <main className="flex-1 pt-16 overflow-y-auto">
         <div className="p-6">
           {/* Header with back button - matching the AnalyticsPage style */}
           <div className="flex items-center mb-8">
@@ -102,6 +101,7 @@ const AchievementsPage = () => {
         </div>
       </main>
     </div>
+    </ResponsivePageLayout>
   );
 };
 
