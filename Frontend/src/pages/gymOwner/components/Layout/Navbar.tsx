@@ -1,14 +1,18 @@
 // src/components/Layout/Navbar.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import userAtom from '../../../../atoms/UserAtom';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const [user] = useRecoilState(userAtom);
+  console.log("User in Navbar:", user);
   return (
     <header className="bg-white shadow-sm">
       <div className="flex justify-between items-center px-6 py-4">
         <div>
-          <h2 className="text-xl font-semibold text-gray-800">Welcome back, Admin</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Welcome back, {user?.username}</h2>
         </div>
         <div className="flex items-center space-x-4">
           <button className="p-2 rounded-full hover:bg-gray-100">
@@ -23,7 +27,7 @@ const Navbar: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
                 <span className="text-gray-600">A</span>
               </div>
-              <span className="text-gray-700">Admin</span>
+              <span className="text-gray-700">{user?.username}</span>
             </button>
           </div>
         </div>
