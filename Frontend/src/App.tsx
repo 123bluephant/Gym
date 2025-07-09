@@ -65,6 +65,7 @@ import { Staff } from './pages/Admin/Pages/Staff';
 import AddWorkoutPage from './pages/Workout/AddWorkoutPage';
 import UserMeals from './pages/gymOwner/Pages/Users/Meals';
 import MealForm from './pages/gymOwner/Pages/Users/MealForm';
+import EditMeal from './pages/gymOwner/Pages/Users/EditMeal';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -108,9 +109,10 @@ function AppContent() {
                 <Route path="/gym/members/add" element={<AddList />} />
                 <Route path="/gym/members/edit/:id" element={<EditList />} />
                 <Route path="/gym/members/view/:id" element={<ViewList />} />
-                <Route path="/gym/members/meals/:userId" element={<UserMeals />} />
-                <Route path="/gym/members/meals/:userId/add" element={<MealForm />} />
-                <Route path="/gym/members/meals/:userId/edit/:mealId" element={<MealForm />} />
+                <Route path="/gym/members/meals/:id" element={<UserMeals />} />
+                <Route path="/gym/members/meals/:id/add" element={<MealForm />} />
+                <Route path="/gym/members/meals/:id/edit/:mealId" element={<MealForm />} />
+                <Route path='/gym/members/meals/:userId/edit/:mealId' element= {<EditMeal />} />
                 <Route path="/gyms/List" element={<GymListing />} />
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
