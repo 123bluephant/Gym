@@ -1,78 +1,85 @@
 // src/types/gymTypes.ts
-export interface Meal {
-  id: string;
-  date: string;
-  mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
-  description: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-}
 
-export interface MealSummary {
-  todayCalories: number;
-  todayMeals: number;
-  lastMealDate?: string;
-}
-
+// Core User Types
 export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   membershipType: string;
-  status: 'Active' | 'Inactive' | 'Pending';
+  status: 'Active' | 'Inactive' | 'Pending' | 'Expired' | 'Cancelled';
   joinDate: string;
   lastCheckIn?: string;
+  notes?: string;
+  visits?: string[];
   mealSummary?: MealSummary;
   meals?: Meal[];
+  trainerId?: string; // Reference to assigned trainer
 }
 
 export interface Trainer {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   imageUrl?: string;
-  experience: number;
-  rating: number;
+  experience: number; // in years
+  rating: number; // 1-5
   clients: number;
-  status: string;
-  specialization: string[];
+  status: 'Active' | 'On Leave' | 'Inactive';
+  specializations: string[];
   bio?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  certifications?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
+// Nutrition Types
 export interface Meal {
   id: string;
+  userId: string; // Reference to user
+  date: string;
+  mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
   name: string;
-  category: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
+  description: string;
   calories: number;
   protein: number;
   carbs: number;
-  fat: number;
-  description: string;
-  ingredients: string[];
-  date: string;
   fats: number;
+  ingredients: string[];
+  imageUrl?: string;
+  notes?: string;
 }
 
-export interface GymStats {
-  totalMembers: number;
-  activeTrainers: number;
-  monthlyRevenue: number;
-  newSignups: number;
-  memberGrowth: { date: string; count: number }[];
-  revenueTrend: { month: string; revenue: number }[];
+export interface MealSummary {
+  todayCalories: number;
+  todayMeals: number;
+  lastMealDate?: string;
+  macros?: {
+    protein: number;
+    carbs: number;
+    fats: number;
+  };
 }
+
+// Workout Types
 export interface Exercise {
-  imageUrl: string;
-  videoUrl: string | number | readonly string[] | undefined;
+  id: string;
   name: string;
+  description: string;
+  muscleGroups: string[];
+  equipment?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+}
+
+export interface WorkoutExercise extends Exercise {
   sets: number;
-  reps: number;
+  reps: number | string; // Could be "8-12" for range
   restInterval: number; // in seconds
   notes?: string;
+  completed?: boolean;
 }
 
 export interface WorkoutPlan {
@@ -85,49 +92,123 @@ export interface WorkoutPlan {
   createdBy: string; // trainer ID
   assignedTo: string[]; // user IDs
   createdAt: Date;
+  updatedAt: Date;
   imageUrl?: string;
   videoUrl?: string;
-  exercises: Array<Exercise & {
-    imageUrl?: string;
-    videoUrl?: string;
-  }>;
+  exercises: WorkoutExercise[];
 }
+
+// Gym Management Types
 export interface Gym {
   id: string;
   name: string;
   location: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  contact: {
+    phone: string;
+    email: string;
+  };
   imageUrl: string;
   rating: number;
   totalMembers: number;
-  featuredFacilities: string[];
-  membershipPlans: {
-    name: string;
-    price: number;
-    features: string[];
+  facilities: string[];
+  operatingHours: {
+    day: string;
+    open: string;
+    close: string;
   }[];
+  membershipPlans: MembershipPlan[];
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+  };
 }
-// src/types/gymTypes.ts
+
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  price: number;
+  duration: number; // in months
+  features: string[];
+  isFeatured?: boolean;
+  discount?: Discount;
+}
+
+// Product Types
+export type ProductCategory = 'supplements' | 'equipment' | 'clothing' | 'membership' | 'other';
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: 'supplements' | 'equipment' | 'clothing' | 'membership';
+  category: ProductCategory;
   stock: number;
   imageUrl: string;
   isFeatured: boolean;
-  discount?: {
-    type: 'percentage' | 'fixed';
-    amount: number;
-  };
+  discount?: Discount;
   createdAt: Date;
   updatedAt: Date;
+  specifications?: Record<string, string>;
 }
-export type ProductCategory = 'supplements' | 'equipment' | 'clothing' | 'membership';
 
 export type DiscountType = 'percentage' | 'fixed';
 
 export interface Discount {
   type: DiscountType;
   amount: number;
+  validUntil?: Date;
+  code?: string;
+}
+
+// Analytics Types
+export interface GymStats {
+  totalMembers: number;
+  activeMembers: number;
+  activeTrainers: number;
+  monthlyRevenue: number;
+  newSignups: number;
+  memberGrowth: { date: string; count: number }[];
+  revenueTrend: { month: string; revenue: number }[];
+  attendanceTrend: { date: string; count: number }[];
+  popularClasses?: { name: string; attendance: number }[];
+}
+
+// Event/Class Types
+export interface GymClass {
+  id: string;
+  name: string;
+  description: string;
+  trainerId: string;
+  schedule: {
+    day: string;
+    startTime: string;
+    endTime: string;
+    recurring: boolean;
+  };
+  maxParticipants: number;
+  currentParticipants: number;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  category: 'Yoga' | 'HIIT' | 'Strength' | 'Cardio' | 'Other';
+  imageUrl?: string;
+  price?: number;
+}
+
+// Payment Types
+export interface Payment {
+  id: string;
+  userId: string;
+  amount: number;
+  date: Date;
+  type: 'membership' | 'product' | 'class' | 'other';
+  status: 'completed' | 'pending' | 'failed' | 'refunded';
+  invoiceUrl?: string;
+  paymentMethod: string;
 }
