@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Apple, Beef, ChefHat, Coffee, Cookie, Moon, Pizza, Salad, Scale, Sun, Wheat, Search, Activity, User, Calculator, Target, TrendingUp, Clock, Plus } from 'lucide-react';
-import { Food, UserProfile } from '../types';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import userAtom from '../atoms/UserAtom';
 import consumedFoodAtom from '../atoms/consumedFoodAtom';
 
 function Calories() {
-  const [userProfile, setUserProfile] = useState<UserProfile>({
+  const [userProfile, setUserProfile] = useState({
     height: 170,
     weight: 70,
     age: 25,
@@ -14,10 +13,23 @@ function Calories() {
     activityLevel: 'moderate',
   });
 
-  const [foodDatabase, setFoodDatabase] = useState<Food[]>([]);
+  type FoodItem = {
+    id: string;
+    name: string;
+    category: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fats: number;
+    fiber: number;
+    sugar: number;
+    serving: string;
+  };
+
+  const [foodDatabase, setFoodDatabase] = useState<FoodItem[]>([]);
   const [consumedFoods, setConsumedFoods] = useRecoilState(consumedFoodAtom);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [selectedFood, setSelectedFood] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -25,6 +37,13 @@ function Calories() {
   const user = useRecoilValue(userAtom);
   const [mealStats, setMealStats] = useState<any>(null);
   const [mealCalories, setMealCalories] = useState<any>(null);
+  const [mealTotals, setMealTotals] = useState({
+    breakfast: { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 },
+    lunch: { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 },
+    dinner: { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 },
+    snacks: { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 },
+  });
+  const [allmeals, setAllMeals] = useState<any>(null);
   const fetchMealFoods = async () => {
     if (!user?._id || !selectedMealType) return;
     const today = new Date().toISOString().slice(0, 10);
@@ -44,6 +63,7 @@ function Calories() {
       console.log("Meal data:", data);
       const {
         meal,
+        allmeals,
         totalCalories,
         totalProtein,
         totalCarbs,
@@ -73,7 +93,7 @@ function Calories() {
         consumedAt: new Date(),
         mealType: selectedMealType
       }));
-
+      setAllMeals(allmeals);
       // Update UI state
       setConsumedFoods(transformed);
 
@@ -119,7 +139,6 @@ function Calories() {
     fetchTopFoods();
     fetchMealFoods();
   }, [selectedMealType]);
-
 
   const addFood = async () => {
     if (!selectedFood || quantity <= 0) return;
@@ -178,6 +197,7 @@ function Calories() {
       alert("Something went wrong. Please try again.");
     } finally {
       fetchMealFoods();
+      calculateMealTotals();
     }
   };
 
@@ -202,19 +222,44 @@ function Calories() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to remove food');
       }
-
-      // Update state after successful removal
-      const newFoods = consumedFoods.filter((_, i) => i !== index);
+      const newFoods = consumedFoods.filter((_: any, i: any) => i !== index);
       setConsumedFoods(newFoods);
     } catch (error) {
       console.error("Failed to remove food:", error);
       alert("Something went wrong while removing food.");
-    }  finally {
+    } finally {
       fetchMealFoods();
+      calculateMealTotals();
     }
   };
+  const calculateMealTotals = () => {
+    if (!allmeals) return;
+    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snacks'];
+    const totals: any = {};
 
+    mealTypes.forEach((meal) => {
+      const foods = allmeals[meal] || [];
+      totals[meal] = foods.reduce(
+        (acc: any, item: any) => {
+          const calc = item.calculated || {};
+          return {
+            calories: acc.calories + (calc.calories || 0),
+            protein: acc.protein + (calc.protein || 0),
+            carbs: acc.carbs + (calc.carbs || 0),
+            fats: acc.fats + (calc.fats || 0),
+            fiber: acc.fiber + (calc.fiber || 0),
+            sugar: acc.sugar + (calc.sugar || 0),
+          };
+        },
+        { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 }
+      );
+    });
 
+    setMealTotals(totals);
+  }
+  useEffect(() => {
+    calculateMealTotals();
+  }, [allmeals]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
@@ -247,7 +292,7 @@ function Calories() {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
-    const activityMultipliers = {
+    const activityMultipliers: any = {
       sedentary: 1.2,
       light: 1.375,
       moderate: 1.55,
@@ -256,21 +301,6 @@ function Calories() {
     };
 
     return Math.round(bmr * activityMultipliers[activityLevel]);
-  };
-
-  const calculateMealTotals = (mealType: string) => {
-    const mealFoods = consumedFoods.filter((food: { mealType: string; }) => food.mealType === mealType);
-    return mealFoods.reduce(
-      (totals: { calories: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }, food: { calories: number; quantity: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }) => ({
-        calories: totals.calories + food.calories * food.quantity,
-        protein: totals.protein + food.protein * food.quantity,
-        carbs: totals.carbs + food.carbs * food.quantity,
-        fats: totals.fats + food.fats * food.quantity,
-        fiber: totals.fiber + food.fiber * food.quantity,
-        sugar: totals.sugar + food.sugar * food.quantity,
-      }),
-      { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 }
-    );
   };
 
   const calculateTotals = () => {
@@ -289,8 +319,8 @@ function Calories() {
 
   const totals = calculateTotals();
 
-  const filteredFoods = foodDatabase.filter((food) => {
-    const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory;
+  const filteredFoods = foodDatabase.filter((food: any) => {
+    const matchesCategory = selectedCategory === 'all' || food?.category === selectedCategory;
     return matchesCategory;
   });
 
@@ -516,7 +546,7 @@ function Calories() {
                 </div>
                 <div className="text-sm opacity-90">kcal</div>
                 <div className="text-xs opacity-75">
-                  P: {calculateMealTotals('breakfast').protein.toFixed(1)}g | C: {calculateMealTotals('breakfast').carbs.toFixed(1)}g | F: {calculateMealTotals('breakfast').fats.toFixed(1)}g
+                  P: {mealTotals.breakfast.protein}g | C: {mealTotals.breakfast.calories}g | F: {mealTotals.breakfast.fats}g
                 </div>
               </div>
             </div>
@@ -532,7 +562,7 @@ function Calories() {
                 </div>
                 <div className="text-sm opacity-90">kcal</div>
                 <div className="text-xs opacity-75">
-                  P: {calculateMealTotals('lunch').protein.toFixed(1)}g | C: {calculateMealTotals('lunch').carbs.toFixed(1)}g | F: {calculateMealTotals('lunch').fats.toFixed(1)}g
+                  P: {mealTotals.lunch.protein}g | C: {mealTotals.lunch.calories}g | F: {mealTotals.lunch.fats}g
                 </div>
               </div>
             </div>
@@ -548,7 +578,7 @@ function Calories() {
                 </div>
                 <div className="text-sm opacity-90">kcal</div>
                 <div className="text-xs opacity-75">
-                  P: {calculateMealTotals('dinner').protein.toFixed(1)}g | C: {calculateMealTotals('dinner').carbs.toFixed(1)}g | F: {calculateMealTotals('dinner').fats.toFixed(1)}g
+                  P: {mealTotals.dinner.protein}g | C: {mealTotals.dinner.calories}g | F: {mealTotals.dinner.fats}g
                 </div>
               </div>
             </div>
@@ -564,7 +594,7 @@ function Calories() {
                 </div>
                 <div className="text-sm opacity-90">kcal</div>
                 <div className="text-xs opacity-75">
-                  P: {calculateMealTotals('snacks').protein.toFixed(1)}g | C: {calculateMealTotals('snacks').carbs.toFixed(1)}g | F: {calculateMealTotals('snacks').fats.toFixed(1)}g
+                  P: {mealTotals.snacks.protein}g | C: {mealTotals.snacks.calories}g | F: {mealTotals.snacks.fats}g
                 </div>
               </div>
             </div>
@@ -644,7 +674,7 @@ function Calories() {
               ) : (
                 filteredFoods.map((food) => (
                   <div
-                    key={food.id}
+                    key={food?.id}
                     onClick={() => {
                       setSelectedFood(food);
                       setShowFoodModal(true);
@@ -688,7 +718,7 @@ function Calories() {
             <div className="flex space-x-2 mb-6 bg-pink-50 p-2 rounded-xl">
               {mealTypes.map((meal) => {
                 const MealIcon = meal.icon;
-                const mealFoods = consumedFoods.filter(food => food.mealType === meal.id);
+                const mealFoods = consumedFoods.filter((food: any) => food.mealType === meal.id);
                 return (
                   <button
                     key={meal.id}
