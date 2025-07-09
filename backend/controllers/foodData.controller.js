@@ -54,7 +54,7 @@ export const topfood = async (req, res) => {
 
 export const addFoodToMeal = async (req, res) => {
   try {
-    const { user, date, mealType, food } = req.body;
+    const { user, date, mealType, food, totalGoalCalories, bmi } = req.body;
 
     let log = await DailyFoodLog.findOne({ user, date });
 
@@ -63,19 +63,22 @@ export const addFoodToMeal = async (req, res) => {
         user,
         date,
         meals: { breakfast: [], lunch: [], dinner: [], snacks: [] },
+        totalGoalCalories: totalGoalCalories || 0,
+        bmi: bmi || 0,
       });
     }
 
     log.meals[mealType].push(food);
 
-    // Update totals
     log.totalCalories += food.calculated.calories || 0;
     log.totalProtein += food.calculated.protein || 0;
     log.totalCarbs += food.calculated.carbs || 0;
     log.totalFats += food.calculated.fats || 0;
 
-    await log.save();
+    if (totalGoalCalories) log.totalGoalCalories = totalGoalCalories;
+    if (bmi) log.bmi = bmi;
 
+    await log.save();
     res.status(200).json({ message: "Food added", log });
   } catch (err) {
     console.error("❌ Error adding food", err);
@@ -88,14 +91,13 @@ export const getMealByType = async (req, res) => {
     const { userId } = req.params;
     const { date, mealType } = req.query;
 
-    // Validate mealType
     const validMeals = ["breakfast", "lunch", "dinner", "snacks"];
     if (!validMeals.includes(mealType)) {
       return res.status(400).json({ message: "Invalid meal type" });
     }
 
     const logDate = date ? new Date(date) : new Date();
-    logDate.setHours(0, 0, 0, 0); // normalize to start of the day
+    logDate.setHours(0, 0, 0, 0);
 
     const nextDay = new Date(logDate);
     nextDay.setDate(logDate.getDate() + 1);
@@ -104,11 +106,50 @@ export const getMealByType = async (req, res) => {
       user: userId,
       date: { $gte: logDate, $lt: nextDay },
     });
-    if (!log || !log.meals[mealType]) {
-      return res.status(200).json([]); // no entries found
+
+    if (!log) {
+      return res.status(200).json({
+        meal: [],
+        totalCalories: 0,
+        totalProtein: 0,
+        totalCarbs: 0,
+        totalFats: 0,
+        totalFiber: 0,
+        totalSugar: 0,
+        totalGoalCalories: 0,
+        bmi: 0,
+        breakfastCalories: 0,
+        lunchCalories: 0,
+        dinnerCalories: 0,
+        snacksCalories: 0,
+      });
     }
-    console.log(log.meals[mealType]);
-    res.status(200).json(log.meals[mealType]);
+    const calculateMealCalories = (mealArray) =>
+      mealArray.reduce(
+        (sum, item) => sum + (item?.calculated?.calories || 0),
+        0
+      );
+
+    const breakfastCalories = calculateMealCalories(log.meals.breakfast);
+    const lunchCalories = calculateMealCalories(log.meals.lunch);
+    const dinnerCalories = calculateMealCalories(log.meals.dinner);
+    const snacksCalories = calculateMealCalories(log.meals.snacks);
+
+    res.status(200).json({
+      meal: log.meals[mealType],
+      totalCalories: log.totalCalories || 0,
+      totalProtein: log.totalProtein || 0,
+      totalCarbs: log.totalCarbs || 0,
+      totalFats: log.totalFats || 0,
+      totalFiber: log.totalFiber || 0,
+      totalSugar: log.totalSugar || 0,
+      totalGoalCalories: log.totalGoalCalories || 0,
+      bmi: log.bmi || 0,
+      breakfastCalories,
+      lunchCalories,
+      dinnerCalories,
+      snacksCalories,
+    });
   } catch (error) {
     console.error("❌ Error fetching meal:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -119,23 +160,26 @@ export const removeFoodFromMeal = async (req, res) => {
   try {
     const { user, date, mealType, index } = req.body;
 
-    // Validate mealType
     const validMeals = ["breakfast", "lunch", "dinner", "snacks"];
     if (!validMeals.includes(mealType)) {
       return res.status(400).json({ message: "Invalid meal type" });
     }
 
-    // Get log for the specific date and user
     const log = await DailyFoodLog.findOne({ user, date });
 
-    if (!log || !log.meals[mealType] || index < 0 || index >= log.meals[mealType].length) {
-      return res.status(400).json({ message: "Invalid index or log not found" });
+    if (
+      !log ||
+      !log.meals[mealType] ||
+      index < 0 ||
+      index >= log.meals[mealType].length
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid index or log not found" });
     }
 
-    // Remove food item at the given index
     const removedFood = log.meals[mealType].splice(index, 1)[0];
 
-    // Adjust total nutrients
     if (removedFood?.calculated) {
       log.totalCalories -= removedFood.calculated.calories || 0;
       log.totalProtein -= removedFood.calculated.protein || 0;
@@ -144,10 +188,11 @@ export const removeFoodFromMeal = async (req, res) => {
     }
 
     await log.save();
-
     res.status(200).json({ message: "Food removed successfully", log });
   } catch (error) {
     console.error("❌ Error removing food:", error.message);
-    res.status(500).json({ message: "Failed to remove food", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to remove food", error: error.message });
   }
 };
