@@ -29,7 +29,6 @@ import ActivityPage from './pages/Dashboard/ActivityPage';
 import AchievementsPage from './pages/Dashboard/AchievementsPage';
 import SettingsPage from './pages/Dashboard/SettingsPage';
 import WomensHealthPage from './pages/Workout/WomensHealthPage';
-import AnalyticsPage from './pages/gymOwner/Pages/Analytics';
 import SettingsPagegym from './pages/gymOwner/Pages/Settings';
 import Dashboardgym from './pages/gymOwner/Pages/Dashboard';
 import Meals from './pages/gymOwner/Pages/Meals/List';
@@ -95,7 +94,6 @@ function AppContent() {
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
               <Routes>
                 <Route path="/gym/settings" element={<SettingsPagegym />} />
-                <Route path="/gym/analytics" element={<AnalyticsPage />} />
                 <Route path="/gym/profile" element={<GymOwnerProfile />} />
                 <Route path="/gym" element={<Dashboardgym />} />
                 <Route path="/gym/meals" element={<Meals />} />
