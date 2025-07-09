@@ -259,10 +259,10 @@ function Calories() {
   };
 
   const calculateMealTotals = (mealType: string) => {
-    const mealFoods = consumedFoods.filter((food) => food.mealType === mealType);
+    const mealFoods = consumedFoods.filter((food: { mealType: string; }) => food.mealType === mealType);
     return mealFoods.reduce(
-      (totals, food) => ({
-        calories: mealStats?.totalCalories + food.calories * food.quantity,
+      (totals: { calories: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }, food: { calories: number; quantity: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }) => ({
+        calories: totals.calories + food.calories * food.quantity,
         protein: totals.protein + food.protein * food.quantity,
         carbs: totals.carbs + food.carbs * food.quantity,
         fats: totals.fats + food.fats * food.quantity,
@@ -275,8 +275,8 @@ function Calories() {
 
   const calculateTotals = () => {
     return consumedFoods.reduce(
-      (totals, food) => ({
-        calories: mealStats?.totalCalories + food.calories * food.quantity,
+      (totals: { calories: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }, food: { calories: number; quantity: number; protein: number; carbs: number; fats: number; fiber: number; sugar: number; }) => ({
+        calories: totals.calories + food.calories * food.quantity,
         protein: totals.protein + food.protein * food.quantity,
         carbs: totals.carbs + food.carbs * food.quantity,
         fats: totals.fats + food.fats * food.quantity,

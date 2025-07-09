@@ -8,59 +8,15 @@ import {
   TrendingUp, 
   BookOpen, 
   Clock, 
-  Users, 
   Loader2, 
   AlertCircle,
   Upload,
-  X
+  X,
+  Check
 } from 'lucide-react';
 
 // Mock API service (in a real app, this would be in a separate file)
 const NutritionService = {
-  async getDietPlans() {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return [
-      {
-        id: 'mediterranean',
-        name: 'Mediterranean',
-        description: 'Heart-healthy, rich in omega-3s and antioxidants',
-        color: 'from-blue-500 to-green-500',
-        meals: 125,
-        followers: '2.3k',
-        benefits: ['Heart Health', 'Brain Function', 'Anti-inflammatory']
-      },
-      {
-        id: 'plant-based',
-        name: 'Plant-Based',
-        description: 'Nutrient-dense, eco-friendly whole foods',
-        color: 'from-green-500 to-emerald-500',
-        meals: 98,
-        followers: '1.8k',
-        benefits: ['Weight Loss', 'Digestive Health', 'Environmental']
-      },
-      {
-        id: 'high-protein',
-        name: 'High Protein',
-        description: 'Muscle building, strength focused nutrition',
-        color: 'from-purple-500 to-pink-500',
-        meals: 156,
-        followers: '3.1k',
-        benefits: ['Muscle Growth', 'Satiety', 'Recovery']
-      },
-      {
-        id: 'keto',
-        name: 'Keto Friendly',
-        description: 'Low carb, high fat ketogenic approach',
-        color: 'from-orange-500 to-red-500',
-        meals: 87,
-        followers: '1.5k',
-        benefits: ['Fat Loss', 'Mental Clarity', 'Energy']
-      }
-    ];
-  },
-
   async getMeals() {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -87,9 +43,16 @@ const NutritionService = {
     };
   },
 
-  async updateMealPlan(planData) {
-    // Simulate API call to update meal plan
-    console.log('Updating meal plan:', planData);
+  async addMealToUserDiet(mealId: any, mealType: string, day: string) {
+    // Simulate API call to add meal to user's diet
+    console.log('Adding meal to user diet:', { mealId, mealType, day });
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  },
+
+  async removeMealFromUserDiet(mealId, day) {
+    // Simulate API call to remove meal from user's diet
+    console.log('Removing meal from user diet:', { mealId, day });
     await new Promise(resolve => setTimeout(resolve, 300));
     return { success: true };
   },
@@ -111,19 +74,24 @@ const NutritionService = {
 
 const NutritionPage = () => {
   // State for dynamic data
-  const [dietPlans, setDietPlans] = useState([]);
   const [meals, setMeals] = useState({ breakfast: [], lunch: [], dinner: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
   
-  // User selections
-  const [selectedMeal, setSelectedMeal] = useState('breakfast');
-  const [calories, setCalories] = useState(1847);
-  const [selectedPlan, setSelectedPlan] = useState('mediterranean');
+  // User diet state
+  const [userDiet, setUserDiet] = useState({
+    monday: { breakfast: [], lunch: [], dinner: [] },
+    tuesday: { breakfast: [], lunch: [], dinner: [] },
+    wednesday: { breakfast: [], lunch: [], dinner: [] },
+    thursday: { breakfast: [], lunch: [], dinner: [] },
+    friday: { breakfast: [], lunch: [], dinner: [] },
+    saturday: { breakfast: [], lunch: [], dinner: [] },
+    sunday: { breakfast: [], lunch: [], dinner: [] }
+  });
   
   // Admin state
-  const [isAdmin, setIsAdmin] = useState(false); // Would come from auth in real app
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadData, setUploadData] = useState({
     mealType: 'breakfast',
@@ -136,16 +104,23 @@ const NutritionPage = () => {
     difficulty: 'Easy'
   });
 
+  // Days of the week
+  const daysOfWeek = [
+    { key: 'monday', label: 'Monday', short: 'Mon' },
+    { key: 'tuesday', label: 'Tuesday', short: 'Tue' },
+    { key: 'wednesday', label: 'Wednesday', short: 'Wed' },
+    { key: 'thursday', label: 'Thursday', short: 'Thu' },
+    { key: 'friday', label: 'Friday', short: 'Fri' },
+    { key: 'saturday', label: 'Saturday', short: 'Sat' },
+    { key: 'sunday', label: 'Sunday', short: 'Sun' }
+  ];
+
   // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [plans, mealData] = await Promise.all([
-          NutritionService.getDietPlans(),
-          NutritionService.getMeals()
-        ]);
-        setDietPlans(plans);
+        const mealData = await NutritionService.getMeals();
         setMeals(mealData);
         setLoading(false);
       } catch (err) {
@@ -157,15 +132,45 @@ const NutritionPage = () => {
     fetchData();
   }, []);
 
-  // Handle meal plan selection
-  const handlePlanSelect = async (planId: React.SetStateAction<string>) => {
+  // Handle adding meal to user diet
+  const handleAddMealToUserDiet = async (meal: { id: any; }, mealType: string, day: string) => {
     try {
-      setSelectedPlan(planId);
-      // In a real app, you might update user preferences in the backend
-      await NutritionService.updateMealPlan({ planId });
+      const response = await NutritionService.addMealToUserDiet(meal.id, mealType, day);
+      if (response.success) {
+        setUserDiet(prev => ({
+          ...prev,
+          [day]: {
+            ...prev[day],
+            [mealType]: [...prev[day][mealType], meal]
+          }
+        }));
+      }
     } catch (err) {
-      console.error('Failed to update meal plan:', err);
+      console.error('Failed to add meal to user diet:', err);
     }
+  };
+
+  // Handle removing meal from user diet
+  const handleRemoveMealFromUserDiet = async (mealId, mealType, day) => {
+    try {
+      const response = await NutritionService.removeMealFromUserDiet(mealId, day);
+      if (response.success) {
+        setUserDiet(prev => ({
+          ...prev,
+          [day]: {
+            ...prev[day],
+            [mealType]: prev[day][mealType].filter(meal => meal.id !== mealId)
+          }
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to remove meal from user diet:', err);
+    }
+  };
+
+  // Check if meal is in user diet for specific day
+  const isMealInUserDiet = (mealId, mealType, day) => {
+    return userDiet[day][mealType].some(meal => meal.id === mealId);
   };
 
   // Handle admin upload
@@ -198,19 +203,32 @@ const NutritionPage = () => {
   };
 
   // Handle meal deletion
-  const handleDeleteMeal = async (mealId: any, mealType: string) => {
+  const handleDeleteMeal = async (mealId, mealType) => {
     try {
       const response = await NutritionService.deleteMeal(mealId);
       if (response.success) {
         // Optimistically update UI
         setMeals(prev => ({
           ...prev,
-          [mealType]: prev[mealType].filter((meal: { id: any; }) => meal.id !== mealId)
+          [mealType]: prev[mealType].filter(meal => meal.id !== mealId)
         }));
       }
     } catch (err) {
       console.error('Failed to delete meal:', err);
     }
+  };
+
+  // Calculate daily totals for a specific day
+  const calculateDayTotals = (day) => {
+    const dayMeals = userDiet[day];
+    const allMeals = [...dayMeals.breakfast, ...dayMeals.lunch, ...dayMeals.dinner];
+    
+    return allMeals.reduce((totals, meal) => ({
+      calories: totals.calories + meal.calories,
+      protein: totals.protein + meal.protein,
+      carbs: totals.carbs + meal.carbs,
+      fat: totals.fat + meal.fat
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
   if (loading) {
@@ -415,15 +433,97 @@ const NutritionPage = () => {
       )}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-20">
+      <section className="relative bg-gradient-to-br from-green-600 via-emerald-600 to-blue-600 text-white py-20 overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          <div className="absolute top-20 right-10 w-72 h-72 bg-yellow-300/20 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300/20 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
+        
+        {/* Floating Icons */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
+            <ChefHat className="w-8 h-8 text-white/30" />
+          </div>
+          <div className="absolute top-1/3 right-1/4 animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}>
+            <Target className="w-6 h-6 text-white/30" />
+          </div>
+          <div className="absolute bottom-1/4 left-1/3 animate-bounce" style={{ animationDelay: '2s', animationDuration: '3.5s' }}>
+            <BookOpen className="w-7 h-7 text-white/30" />
+          </div>
+          <div className="absolute top-1/2 right-1/3 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '4.5s' }}>
+            <TrendingUp className="w-6 h-6 text-white/30" />
+          </div>
+        </div>
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">Nutrition & Meal Planning</h1>
-            <p className="text-xl text-green-100 max-w-3xl mx-auto">
+          <div className="text-center relative z-10">
+            <div className="inline-block mb-6">
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-green-100 to-blue-100 bg-clip-text text-transparent animate-pulse">
+                Nutrition & Meal Planning
+              </h1>
+              <div className="h-1 bg-gradient-to-r from-transparent via-white to-transparent mt-4 animate-pulse"></div>
+            </div>
+            <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed">
               Fuel your fitness journey with personalized meal plans, flexible diet options, 
               and smart nutrition tracking designed for your lifestyle.
             </p>
+            
+            {/* Animated CTA Buttons */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="group bg-white text-green-600 px-8 py-4 rounded-xl font-semibold hover:bg-green-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                <span className="flex items-center justify-center">
+                  Start Your Journey
+                  <div className="ml-2 transform group-hover:translate-x-1 transition-transform">
+                    →
+                  </div>
+                </span>
+              </button>
+              <button className="group border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                <span className="flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
+                  Explore Recipes
+                </span>
+              </button>
+            </div>
           </div>
+        </div>
+        
+        {/* Bottom Wave Animation */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+          <svg className="relative block w-full h-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="currentColor" className="text-white">
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                values="0 0; -100 0; 0 0"
+                dur="10s"
+                repeatCount="indefinite"
+              />
+            </path>
+            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="currentColor" className="text-white">
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                values="0 0; 100 0; 0 0"
+                dur="8s"
+                repeatCount="indefinite"
+              />
+            </path>
+            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="currentColor" className="text-white">
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                values="0 0; -50 0; 0 0"
+                dur="6s"
+                repeatCount="indefinite"
+              />
+            </path>
+          </svg>
         </div>
       </section>
 
@@ -452,223 +552,252 @@ const NutritionPage = () => {
         </div>
       </section>
 
-      {/* Diet Plans */}
+      {/* Weekly Meal Planner Table */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Diet Plan</h2>
-            <p className="text-xl text-gray-600">Find the perfect eating style that fits your goals and preferences</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Weekly Meal Planner</h2>
+            <p className="text-xl text-gray-600">Plan your meals for the entire week and track your nutrition goals</p>
           </div>
 
-          {dietPlans.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6 mb-12">
-              {dietPlans.map((plan) => (
-                <div 
-                  key={plan.id} 
-                  className={`bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all border-2 cursor-pointer ${
-                    selectedPlan === plan.id ? 'border-purple-200 bg-purple-50' : 'border-gray-100 hover:border-gray-200'
-                  }`}
-                  onClick={() => handlePlanSelect(plan.id)}
-                >
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-2xl flex items-center justify-center`}>
-                        <ChefHat className="w-8 h-8 text-white" />
+          {/* Weekly Meal Table */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-8">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 w-40 bg-white border-r border-gray-200">
+                      <div className="flex items-center">
+                        <ChefHat className="w-5 h-5 mr-2 text-purple-600" />
+                        Meal Type
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                        <p className="text-gray-600">{plan.description}</p>
-                      </div>
-                    </div>
-                    <div className={`w-6 h-6 rounded-full border-2 ${
-                      selectedPlan === plan.id ? 'bg-purple-600 border-purple-600' : 'border-gray-300'
-                    }`}>
-                      {selectedPlan === plan.id && (
-                        <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{plan.meals}</div>
-                      <div className="text-sm text-gray-600">Recipes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{plan.followers}</div>
-                      <div className="text-sm text-gray-600">Followers</div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Key Benefits:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {plan.benefits.map((benefit, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                          {benefit}
-                        </span>
+                    </th>
+                    {daysOfWeek.map((day) => (
+                      <th key={day.key} className="px-3 py-4 text-center text-sm font-semibold text-gray-900 min-w-44 border-r border-gray-200 last:border-r-0">
+                        <div className="flex flex-col items-center space-y-1">
+                          <span className="hidden sm:inline font-bold">{day.label}</span>
+                          <span className="sm:hidden font-bold">{day.short}</span>
+                          <div className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                            {calculateDayTotals(day.key).calories} cal
+                          </div>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {['breakfast', 'lunch', 'dinner'].map((mealType) => (
+                    <tr key={mealType} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-8 text-sm font-medium text-gray-900 capitalize bg-gradient-to-r from-gray-50 to-gray-100 border-r border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            mealType === 'breakfast' ? 'bg-yellow-400' :
+                            mealType === 'lunch' ? 'bg-orange-400' : 'bg-blue-400'
+                          }`}></div>
+                          {mealType}
+                        </div>
+                      </td>
+                      {daysOfWeek.map((day) => (
+                        <td key={`${mealType}-${day.key}`} className="px-3 py-8 text-sm border-r border-gray-200 last:border-r-0 align-top">
+                          <div className="space-y-2 min-h-28">
+                            {userDiet[day.key][mealType].length > 0 ? (
+                              userDiet[day.key][mealType].map((meal) => (
+                                <div key={meal.id} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 relative group hover:shadow-sm transition-all">
+                                  <button
+                                    onClick={() => handleRemoveMealFromUserDiet(meal.id, mealType, day.key)}
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 shadow-lg"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                  <div className="font-semibold text-gray-900 text-xs mb-1 pr-4">{meal.name}</div>
+                                  <div className="text-xs text-gray-600 font-medium">
+                                    <span className="text-green-700">{meal.calories} cal</span>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center text-gray-400 text-xs py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                                <div className="flex flex-col items-center space-y-1">
+                                  <Plus className="w-4 h-4 text-gray-300" />
+                                  <span>No meal planned</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                       ))}
-                    </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Available Meals Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900">Available Meals</h3>
+              <p className="text-sm text-gray-600 mt-1">Click "Add to Day" to add meals to your weekly plan</p>
+            </div>
+
+            <div className="p-6">
+              <div className="grid lg:grid-cols-3 gap-8">
+                {['breakfast', 'lunch', 'dinner'].map((mealType) => (
+                  <div key={mealType} className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900 capitalize flex items-center">
+                      <ChefHat className="w-5 h-5 mr-2 text-blue-600" />
+                      {mealType}
+                    </h4>
+                    
+                    {meals[mealType]?.length > 0 ? (
+                      <div className="space-y-3">
+                        {meals[mealType].map((meal) => (
+                          <div key={meal.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors relative">
+                            {isAdmin && (
+                              <button
+                                onClick={() => handleDeleteMeal(meal.id, mealType)}
+                                className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                title="Delete meal"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                            <div className="mb-3">
+                              <h5 className="font-medium text-gray-900 mb-1">{meal.name}</h5>
+                              <div className="text-sm text-gray-600">
+                                {meal.calories} cal • P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
+                              </div>
+                              <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{meal.time}</span>
+                                </div>
+                                <span className={`px-2 py-1 rounded ${
+                                  meal.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                                  meal.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-red-100 text-red-700'
+                                }`}>
+                                  {meal.difficulty}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {/* Add to Day Buttons */}
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium text-gray-700 mb-2">Add to:</div>
+                              <div className="grid grid-cols-4 gap-1">
+                                {daysOfWeek.slice(0, 4).map((day) => (
+                                  <button
+                                    key={day.key}
+                                    onClick={() => handleAddMealToUserDiet(meal, mealType, day.key)}
+                                    disabled={isMealInUserDiet(meal.id, mealType, day.key)}
+                                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                                      isMealInUserDiet(meal.id, mealType, day.key)
+                                        ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                                    }`}
+                                  >
+                                    {isMealInUserDiet(meal.id, mealType, day.key) ? (
+                                      <Check className="w-3 h-3 mx-auto" />
+                                    ) : (
+                                      day.short
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="grid grid-cols-3 gap-1 mt-1">
+                                {daysOfWeek.slice(4).map((day) => (
+                                  <button
+                                    key={day.key}
+                                    onClick={() => handleAddMealToUserDiet(meal, mealType, day.key)}
+                                    disabled={isMealInUserDiet(meal.id, mealType, day.key)}
+                                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                                      isMealInUserDiet(meal.id, mealType, day.key)
+                                        ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                                    }`}
+                                  >
+                                    {isMealInUserDiet(meal.id, mealType, day.key) ? (
+                                      <Check className="w-3 h-3 mx-auto" />
+                                    ) : (
+                                      day.short
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                        No meals available for {mealType}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No diet plans available at the moment.</p>
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* Meal Planner */}
-      <section className="py-16 bg-white">
+      {/* Nutrition Analytics */}
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Nutrition Goals */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-gray-900">Daily Nutrition Goals</h3>
-              
-              <div className="bg-gray-50 rounded-2xl p-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700 font-medium">Daily Calories</span>
-                    <div className="flex items-center space-x-3">
-                      <button 
-                        onClick={() => setCalories(Math.max(1200, calories - 50))}
-                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm"
-                      >
-                        <Minus className="w-5 h-5" />
-                      </button>
-                      <span className="font-bold text-xl w-20 text-center">{calories}</span>
-                      <button 
-                        onClick={() => setCalories(Math.min(3000, calories + 50))}
-                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center bg-white rounded-xl p-4">
-                      <div className="text-2xl font-bold text-purple-600">40%</div>
-                      <div className="text-sm text-gray-600">Carbs</div>
-                      <div className="text-xs text-gray-500">{Math.round(calories * 0.4 / 4)}g</div>
-                    </div>
-                    <div className="text-center bg-white rounded-xl p-4">
-                      <div className="text-2xl font-bold text-blue-600">30%</div>
-                      <div className="text-sm text-gray-600">Protein</div>
-                      <div className="text-xs text-gray-500">{Math.round(calories * 0.3 / 4)}g</div>
-                    </div>
-                    <div className="text-center bg-white rounded-xl p-4">
-                      <div className="text-2xl font-bold text-green-600">30%</div>
-                      <div className="text-sm text-gray-600">Fat</div>
-                      <div className="text-xs text-gray-500">{Math.round(calories * 0.3 / 9)}g</div>
-                    </div>
-                  </div>
-                </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 border border-pink-100">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mr-4">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
-
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-6 h-6 text-purple-600" />
-                    <span className="font-semibold text-gray-900">Today's Progress</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-purple-600">
-                    <TrendingUp className="w-5 h-5" />
-                    <span className="font-bold">1,247 / {calories} cal</span>
-                  </div>
-                </div>
-                <div className="w-full bg-white rounded-full h-3">
-                  <div 
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min(100, (1247 / calories) * 100)}%` }}
-                  ></div>
-                </div>
-                <div className="mt-2 text-sm text-gray-600">
-                  {calories - 1247} calories remaining
-                </div>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-800">Nutrition Analytics</h2>
             </div>
 
-            {/* Meal Planner */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Today's Meal Plan</h3>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2">
-                  {['breakfast', 'lunch', 'dinner'].map((meal) => (
-                    <button
-                      key={meal}
-                      onClick={() => setSelectedMeal(meal)}
-                      className={`px-4 py-2 rounded-lg font-medium capitalize transition-colors ${
-                        selectedMeal === meal
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {meal}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+              {(() => {
+                // Calculate totals from all selected meals across all days
+                const totals = Object.values(userDiet).reduce((acc, dayMeals) => {
+                  const allDayMeals = [...dayMeals.breakfast, ...dayMeals.lunch, ...dayMeals.dinner];
+                  return allDayMeals.reduce((dayAcc, meal) => ({
+                    calories: dayAcc.calories + meal.calories,
+                    protein: dayAcc.protein + meal.protein,
+                    carbs: dayAcc.carbs + meal.carbs,
+                    fats: dayAcc.fats + meal.fat,
+                    fiber: dayAcc.fiber + (meal.fiber || Math.round(meal.carbs * 0.1)), // Estimated fiber
+                    sugar: dayAcc.sugar + (meal.sugar || Math.round(meal.carbs * 0.3)) // Estimated sugar
+                  }), acc);
+                }, { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0 });
 
-              <div className="p-6">
-                {meals[selectedMeal]?.length > 0 ? (
-                  <div className="space-y-4">
-                    {meals[selectedMeal].map((item) => (
-                      <div key={item.id} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors relative">
-                        {isAdmin && (
-                          <button
-                            onClick={() => handleDeleteMeal(item.id, selectedMeal)}
-                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                            title="Delete meal"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                          <button className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700 transition-colors">
-                            Add
-                          </button>
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-                          <span className="font-medium">{item.calories} cal</span>
-                          <span>P: {item.protein}g</span>
-                          <span>C: {item.carbs}g</span>
-                          <span>F: {item.fat}g</span>
-                        </div>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{item.time}</span>
-                          </div>
-                          <span className={`px-2 py-1 rounded ${
-                            item.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                            item.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {item.difficulty}
-                          </span>
-                        </div>
+                const dailyCaloriesGoal = 2000; // This could be dynamic based on user settings
+
+                return [
+                  { name: 'Calories', value: totals.calories, unit: 'kcal', color: 'from-rose-400 to-pink-500', target: dailyCaloriesGoal },
+                  { name: 'Protein', value: totals.protein, unit: 'g', color: 'from-blue-400 to-indigo-500', target: dailyCaloriesGoal * 0.15 / 4 },
+                  { name: 'Carbs', value: totals.carbs, unit: 'g', color: 'from-green-400 to-emerald-500', target: dailyCaloriesGoal * 0.55 / 4 },
+                  { name: 'Fats', value: totals.fats, unit: 'g', color: 'from-yellow-400 to-orange-500', target: dailyCaloriesGoal * 0.30 / 9 },
+                  { name: 'Fiber', value: totals.fiber, unit: 'g', color: 'from-purple-400 to-violet-500', target: 25 },
+                  { name: 'Sugar', value: totals.sugar, unit: 'g', color: 'from-pink-400 to-rose-500', target: 50 }
+                ].map((macro) => {
+                  const percentage = (macro.value / macro.target) * 100;
+                  return (
+                    <div key={macro.name} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                      <div className={`w-4 h-4 bg-gradient-to-r ${macro.color} rounded-full mb-3`}></div>
+                      <div className="text-2xl font-bold text-gray-800 mb-1">{macro.value.toFixed(1)}</div>
+                      <div className="text-sm font-medium text-gray-600 mb-1">{macro.name}</div>
+                      <div className="text-xs text-gray-500 mb-2">{macro.unit}</div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`bg-gradient-to-r ${macro.color} h-2 rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                        ></div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    No meals available for {selectedMeal}.
-                  </div>
-                )}
-              </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {percentage.toFixed(0)}% of target
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
@@ -693,16 +822,7 @@ const NutritionPage = () => {
       </section>
 
       {/* Admin Toggle (for demo purposes) */}
-      {/* <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setIsAdmin(!isAdmin)}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            isAdmin ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'
-          }`}
-        >
-          {isAdmin ? 'Admin Mode: ON' : 'Admin Mode: OFF'}
-        </button>
-      </div> */}
+      
     </div>
   );
 };

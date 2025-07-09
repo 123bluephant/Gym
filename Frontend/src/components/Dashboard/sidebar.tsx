@@ -58,7 +58,7 @@ const Sidebar = () => {
   const mainTabs: Tab[] = [
     { id: 'profile', name: 'Profile', icon: User, path: '/profile' },
     { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/dashboard' },
-    { id: 'workouts', name: 'Workouts', icon: Dumbbell, path: '/workouts' },
+    { id: 'workouts', name: 'Add Workouts', icon: Dumbbell, path: '/workouts/add' },
     { id: 'activity', name: 'Activity', icon: Activity, path: '/activity' },
     { id: 'analytics', name: 'Analytics', icon: FileBarChart, path: '/analytic' },
     { id: 'achievements', name: 'Achievements', icon: Award, path: '/achievements' },

@@ -62,6 +62,9 @@ import { Reports } from './pages/Admin/Pages/Reports';
 import { Website } from './pages/Admin/Pages/Website';
 import { Settings } from './pages/Admin/Pages/Settings';
 import { Staff } from './pages/Admin/Pages/Staff';
+import AddWorkoutPage from './pages/Workout/AddWorkoutPage';
+import UserMeals from './pages/gymOwner/Pages/Users/Meals';
+import MealForm from './pages/gymOwner/Pages/Users/MealForm';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -105,6 +108,9 @@ function AppContent() {
                 <Route path="/gym/members/add" element={<AddList />} />
                 <Route path="/gym/members/edit/:id" element={<EditList />} />
                 <Route path="/gym/members/view/:id" element={<ViewList />} />
+                <Route path="/gym/members/meals/:userId" element={<UserMeals />} />
+                <Route path="/gym/members/meals/:userId/add" element={<MealForm />} />
+                <Route path="/gym/members/meals/:userId/edit/:mealId" element={<MealForm />} />
                 <Route path="/gyms/List" element={<GymListing />} />
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
@@ -154,6 +160,7 @@ function AppContent() {
                 <Route path="/workouts" element={<WorkoutsPage />} />
                 <Route path="/women-health" element={<WomensHealthPage />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
+                <Route path="/workouts/Add" element={<AddWorkoutPage />} />
                 <Route path="/Finder" element={<GymFinder />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
                 <Route path="/tracking" element={<TrackingPage />} />

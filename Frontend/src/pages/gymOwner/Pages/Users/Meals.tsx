@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockUsers } from '../../Data/mockUsers';
 import { FiEdit2, FiTrash2, FiPlus, FiUser, FiCoffee } from 'react-icons/fi';
-import { User } from '../../types/gymTypes';
+import { User, Meal } from '../../types/gymTypes';
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -11,25 +11,49 @@ const UsersList: React.FC = () => {
   const [filter, setFilter] = useState<string>('all');
   const navigate = useNavigate();
 
+  // Calculate meal summary for a user
+  const calculateMealSummary = (userMeals: Meal[] = []) => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMeals = userMeals.filter(meal => meal.date === today);
+    
+    return {
+      todayCalories: todayMeals.reduce((sum, meal) => sum + (meal.calories || 0), 0),
+      todayMeals: todayMeals.length,
+      lastMealDate: userMeals.length > 0 
+        ? new Date(Math.max(...userMeals.map(m => new Date(m.date).getTime())))
+          .toLocaleDateString() 
+        : undefined
+    };
+  };
+
+  // Load users with meal summaries
   useEffect(() => {
     const loadUsers = () => {
       try {
-        // For testing - clear localStorage first
-        // localStorage.removeItem('gymUsers');
-
         const savedUsers = localStorage.getItem('gymUsers');
-        console.log('Loaded from localStorage:', savedUsers);
-
+        
         if (savedUsers && JSON.parse(savedUsers).length > 0) {
-          setUsers(JSON.parse(savedUsers));
+          const usersWithMeals: User[] = JSON.parse(savedUsers);
+          const usersWithSummaries = usersWithMeals.map(user => ({
+            ...user,
+            mealSummary: calculateMealSummary(user.meals)
+          }));
+          setUsers(usersWithSummaries);
         } else {
-          console.log('Initializing with mock data:', mockUsers);
-          setUsers(mockUsers);
-          localStorage.setItem('gymUsers', JSON.stringify(mockUsers));
+          const mockUsersWithSummaries = mockUsers.map(user => ({
+            ...user,
+            mealSummary: calculateMealSummary(user.meals)
+          }));
+          setUsers(mockUsersWithSummaries);
+          localStorage.setItem('gymUsers', JSON.stringify(mockUsersWithSummaries));
         }
       } catch (error) {
         console.error('Error loading users:', error);
-        setUsers(mockUsers);
+        const mockUsersWithSummaries = mockUsers.map(user => ({
+          ...user,
+          mealSummary: calculateMealSummary(user.meals)
+        }));
+        setUsers(mockUsersWithSummaries);
       } finally {
         setLoading(false);
       }
@@ -46,8 +70,8 @@ const UsersList: React.FC = () => {
     }
   };
 
-  const filteredUsers = filter === 'all'
-    ? users
+  const filteredUsers = filter === 'all' 
+    ? users 
     : users.filter(user => user.membershipType.toLowerCase() === filter);
 
   const membershipTypes = ['all', ...new Set(users.map(user => user.membershipType.toLowerCase()))];
@@ -60,7 +84,7 @@ const UsersList: React.FC = () => {
     <div className="p-4 md:p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
-
+        
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2">
           <div className="relative flex-1">
             <select
@@ -75,7 +99,7 @@ const UsersList: React.FC = () => {
               ))}
             </select>
           </div>
-
+          
           <button
             onClick={() => navigate('/gym/members/add')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2"
@@ -90,9 +114,12 @@ const UsersList: React.FC = () => {
           <p className="text-gray-500 mb-4">No users found</p>
           <button
             onClick={() => {
-              // Force load mock data
-              setUsers(mockUsers);
-              localStorage.setItem('gymUsers', JSON.stringify(mockUsers));
+              const mockUsersWithSummaries = mockUsers.map(user => ({
+                ...user,
+                mealSummary: calculateMealSummary(user.meals)
+              }));
+              setUsers(mockUsersWithSummaries);
+              localStorage.setItem('gymUsers', JSON.stringify(mockUsersWithSummaries));
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2"
           >
@@ -102,8 +129,8 @@ const UsersList: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredUsers.map(user => (
-            <div
-              key={user.id}
+            <div 
+              key={user.id} 
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="p-4">
@@ -116,7 +143,38 @@ const UsersList: React.FC = () => {
                     <p className="text-sm text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
-
+                
+                {/* Meal Summary Card */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                      <FiCoffee size={14} /> Meals Today
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      user.mealSummary?.todayMeals 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {user.mealSummary?.todayMeals || 0}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-gray-500">Calories</p>
+                      <p className="font-medium">
+                        {user.mealSummary?.todayCalories || 0} kcal
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Last Meal</p>
+                      <p className="font-medium truncate">
+                        {user.mealSummary?.lastMealDate || 'Never'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* User Details */}
                 <div className="grid grid-cols-2 gap-2 my-3 text-sm">
                   <div>
                     <p className="text-gray-500">Membership</p>
@@ -125,7 +183,7 @@ const UsersList: React.FC = () => {
                   <div>
                     <p className="text-gray-500">Status</p>
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${user.status === 'Active' ? 'bg-green-100 text-green-800' :
+                      ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 
                         user.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                       {user.status}
                     </span>
@@ -141,7 +199,8 @@ const UsersList: React.FC = () => {
                     </p>
                   </div>
                 </div>
-
+                
+                {/* Action Buttons */}
                 <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
                   <button
                     onClick={() => navigate(`/gym/members/view/${user.id}`)}
@@ -149,47 +208,51 @@ const UsersList: React.FC = () => {
                   >
                     View Details
                   </button>
-
+                  
                   <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/gym/members/meals/${user.id}`);
-                        }}
-                        className="text-green-600 hover:text-green-800 p-1"
-                        title="Manage Meals"
-                      >
-                        <FiCoffee size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/gym/members/edit/${user.id}`);
-                        }}
-                        className="text-gray-500 hover:text-gray-700 p-1"
-                        title="Edit"
-                      >
-                        <FiEdit2 size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(user.id);
-                        }}
-                        className="text-red-500 hover:text-red-700 p-1"
-                        title="Delete"
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/gym/members/meals/${user.id}`);
+                      }}
+                      className={`p-1 ${
+                        user.mealSummary?.todayMeals 
+                          ? 'text-green-600 hover:text-green-800' 
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                      title="Manage Meals"
+                    >
+                      <FiCoffee size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/gym/members/edit/${user.id}`);
+                      }}
+                      className="text-gray-500 hover:text-gray-700 p-1"
+                      title="Edit"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(user.id);
+                      }}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      title="Delete"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
                   </div>
                 </div>
               </div>
-          ))}
             </div>
-          )}
+          ))}
         </div>
-      );
+      )}
+    </div>
+  );
 };
 
-      export default UsersList;
+export default UsersList;
