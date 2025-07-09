@@ -23,6 +23,83 @@ function Calories() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snacks'>('breakfast');
   const user = useRecoilValue(userAtom);
+  const [mealStats, setMealStats] = useState<any>(null);
+  const [mealCalories, setMealCalories] = useState<any>(null);
+  const fetchMealFoods = async () => {
+    if (!user?._id || !selectedMealType) return;
+    const today = new Date().toISOString().slice(0, 10);
+    try {
+      const res = await fetch(
+        `/api/food/get-meal/${user._id}?mealType=${selectedMealType}&date=${today}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch meal data");
+
+      const data = await res.json();
+      console.log("Meal data:", data);
+      const {
+        meal,
+        totalCalories,
+        totalProtein,
+        totalCarbs,
+        totalFats,
+        totalFiber,
+        totalSugar,
+        totalGoalCalories,
+        bmi,
+        breakfastCalories,
+        lunchCalories,
+        dinnerCalories,
+        snacksCalories
+      } = data;
+
+      // Transform meal for display
+      const transformed = meal.map((food: any) => ({
+        name: food.foodName,
+        category: food.category,
+        calories: food.calculated.calories,
+        protein: food.calculated.protein,
+        carbs: food.calculated.carbs,
+        fats: food.calculated.fats,
+        fiber: food.calculated.fiber,
+        sugar: food.calculated.sugar,
+        serving: food.per100g,
+        quantity: food.servings,
+        consumedAt: new Date(),
+        mealType: selectedMealType
+      }));
+
+      // Update UI state
+      setConsumedFoods(transformed);
+
+      // Optional: store other stats
+      setMealStats({
+        totalCalories,
+        totalProtein,
+        totalCarbs,
+        totalFats,
+        totalFiber,
+        totalSugar,
+        totalGoalCalories,
+        bmi
+      });
+
+      setMealCalories({
+        breakfastCalories,
+        lunchCalories,
+        dinnerCalories,
+        snacksCalories
+      });
+
+    } catch (err) {
+      console.error("❌ Error loading meal food:", err);
+    }
+  };
   useEffect(() => {
     const fetchTopFoods = async () => {
       try {
@@ -39,46 +116,10 @@ function Calories() {
         console.error("❌ Failed to fetch top 30 foods:", err);
       }
     };
-    const fetchMealFoods = async () => {
-      if (!user?._id || !selectedMealType) return;
-      const today = new Date().toISOString().slice(0, 10);
-      try {
-        const res = await fetch(
-          `/api/food/get-meal/${user._id}?mealType=${selectedMealType}&date=${today}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch meal data");
-
-        const data = await res.json();
-
-        const transformed = data.map((food: any) => ({
-          name: food.foodName,
-          category: food.category,
-          calories: food.calculated.calories,
-          protein: food.calculated.protein,
-          carbs: food.calculated.carbs,
-          fats: food.calculated.fats,
-          fiber: food.calculated.fiber,
-          sugar: food.calculated.sugar,
-          serving: food.per100g,
-          quantity: food.servings,
-          consumedAt: new Date(),
-          mealType: selectedMealType
-        }));
-
-        setConsumedFoods(transformed);
-      } catch (err) {
-        console.error("❌ Error loading meal food:", err);
-      }
-    };
     fetchTopFoods();
     fetchMealFoods();
   }, [selectedMealType]);
+
 
   const addFood = async () => {
     if (!selectedFood || quantity <= 0) return;
@@ -121,8 +162,6 @@ function Calories() {
 
       if (!res.ok) throw new Error("Failed to log food");
 
-      const data = await res.json();
-
       setConsumedFoods((prev: any) => [...prev, {
         ...selectedFood,
         quantity,
@@ -137,39 +176,43 @@ function Calories() {
     } catch (err) {
       console.error("❌ Failed to add food:", err);
       alert("Something went wrong. Please try again.");
+    } finally {
+      fetchMealFoods();
     }
   };
 
 
-const removeFood = async (index: number) => {
-  const today = new Date().toISOString().slice(0, 10);
-  try {
-    const response = await fetch('/api/food/remove-food', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user: user?._id,
-        date: today,
-        mealType: selectedMealType,
-        index,
-      }),
-    });
+  const removeFood = async (index: number) => {
+    const today = new Date().toISOString().slice(0, 10);
+    try {
+      const response = await fetch('/api/food/remove-food', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: user?._id,
+          date: today,
+          mealType: selectedMealType,
+          index,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to remove food');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to remove food');
+      }
+
+      // Update state after successful removal
+      const newFoods = consumedFoods.filter((_, i) => i !== index);
+      setConsumedFoods(newFoods);
+    } catch (error) {
+      console.error("Failed to remove food:", error);
+      alert("Something went wrong while removing food.");
+    }  finally {
+      fetchMealFoods();
     }
-
-    // Update state after successful removal
-    const newFoods = consumedFoods.filter((_, i) => i !== index);
-    setConsumedFoods(newFoods);
-  } catch (error) {
-    console.error("Failed to remove food:", error);
-    alert("Something went wrong while removing food.");
-  }
-};
+  };
 
 
 
@@ -219,7 +262,7 @@ const removeFood = async (index: number) => {
     const mealFoods = consumedFoods.filter((food) => food.mealType === mealType);
     return mealFoods.reduce(
       (totals, food) => ({
-        calories: totals.calories + food.calories * food.quantity,
+        calories: mealStats?.totalCalories + food.calories * food.quantity,
         protein: totals.protein + food.protein * food.quantity,
         carbs: totals.carbs + food.carbs * food.quantity,
         fats: totals.fats + food.fats * food.quantity,
@@ -233,7 +276,7 @@ const removeFood = async (index: number) => {
   const calculateTotals = () => {
     return consumedFoods.reduce(
       (totals, food) => ({
-        calories: totals.calories + food.calories * food.quantity,
+        calories: mealStats?.totalCalories + food.calories * food.quantity,
         protein: totals.protein + food.protein * food.quantity,
         carbs: totals.carbs + food.carbs * food.quantity,
         fats: totals.fats + food.fats * food.quantity,
@@ -245,10 +288,6 @@ const removeFood = async (index: number) => {
   };
 
   const totals = calculateTotals();
-  const breakfastTotals = calculateMealTotals('breakfast');
-  const lunchTotals = calculateMealTotals('lunch');
-  const dinnerTotals = calculateMealTotals('dinner');
-  const snacksTotals = calculateMealTotals('snacks');
 
   const filteredFoods = foodDatabase.filter((food) => {
     const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory;
@@ -266,7 +305,7 @@ const removeFood = async (index: number) => {
   const bmi = calculateBMI();
   const dailyCaloriesGoal = calculateDailyCalories();
   const bmiInfo = getBMICategory(bmi);
-  const calorieProgress = (totals.calories / dailyCaloriesGoal) * 100;
+  const calorieProgress = (mealStats?.totalCalories / dailyCaloriesGoal) * 100;
 
   const categories = [
     { id: 'all', name: 'All Foods', icon: ChefHat },
@@ -423,7 +462,7 @@ const removeFood = async (index: number) => {
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xl font-semibold text-gray-700">Calories Consumed</span>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-gray-800">{totals.calories.toFixed(0)}</span>
+                  <span className="text-2xl font-bold text-gray-800">{mealStats?.totalCalories.toFixed(0)}</span>
                   <span className="text-lg text-gray-600"> / {dailyCaloriesGoal} kcal</span>
                 </div>
               </div>
@@ -447,7 +486,7 @@ const removeFood = async (index: number) => {
               {calorieProgress > 100 && (
                 <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-700">
-                    ⚠️ You've exceeded your daily calorie goal by {(totals.calories - dailyCaloriesGoal).toFixed(0)} kcal
+                    ⚠️ You've exceeded your daily calorie goal by {(mealStats?.totalCalories - dailyCaloriesGoal).toFixed(0)} kcal
                   </p>
                 </div>
               )}
@@ -465,25 +504,70 @@ const removeFood = async (index: number) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mealTypes.map((meal) => {
-              const mealTotals = calculateMealTotals(meal.id);
-              const MealIcon = meal.icon;
-              return (
-                <div key={meal.id} className={`bg-gradient-to-br ${meal.color} rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-200`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <MealIcon className="w-8 h-8" />
-                    <span className="text-lg font-bold">{meal.name}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-3xl font-bold">{mealTotals.calories.toFixed(0)}</div>
-                    <div className="text-sm opacity-90">kcal</div>
-                    <div className="text-xs opacity-75">
-                      P: {mealTotals.protein.toFixed(1)}g | C: {mealTotals.carbs.toFixed(1)}g | F: {mealTotals.fats.toFixed(1)}g
-                    </div>
-                  </div>
+            {/* Breakfast */}
+            <div className="bg-gradient-to-br from-orange-400 to-yellow-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <Coffee className="w-8 h-8" />
+                <span className="text-lg font-bold">Breakfast</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold">
+                  {(mealCalories?.breakfastCalories || 0).toFixed(0)}
                 </div>
-              );
-            })}
+                <div className="text-sm opacity-90">kcal</div>
+                <div className="text-xs opacity-75">
+                  P: {calculateMealTotals('breakfast').protein.toFixed(1)}g | C: {calculateMealTotals('breakfast').carbs.toFixed(1)}g | F: {calculateMealTotals('breakfast').fats.toFixed(1)}g
+                </div>
+              </div>
+            </div>
+            {/* Lunch */}
+            <div className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <Sun className="w-8 h-8" />
+                <span className="text-lg font-bold">Lunch</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold">
+                  {(mealCalories?.lunchCalories || 0).toFixed(0)}
+                </div>
+                <div className="text-sm opacity-90">kcal</div>
+                <div className="text-xs opacity-75">
+                  P: {calculateMealTotals('lunch').protein.toFixed(1)}g | C: {calculateMealTotals('lunch').carbs.toFixed(1)}g | F: {calculateMealTotals('lunch').fats.toFixed(1)}g
+                </div>
+              </div>
+            </div>
+            {/* Dinner */}
+            <div className="bg-gradient-to-br from-purple-400 to-indigo-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <Moon className="w-8 h-8" />
+                <span className="text-lg font-bold">Dinner</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold">
+                  {(mealCalories?.dinnerCalories || 0).toFixed(0)}
+                </div>
+                <div className="text-sm opacity-90">kcal</div>
+                <div className="text-xs opacity-75">
+                  P: {calculateMealTotals('dinner').protein.toFixed(1)}g | C: {calculateMealTotals('dinner').carbs.toFixed(1)}g | F: {calculateMealTotals('dinner').fats.toFixed(1)}g
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <Cookie className="w-8 h-8" />
+                <span className="text-lg font-bold">Snacks</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold">
+                  {(mealCalories?.snacksCalories || 0).toFixed(0)}
+                </div>
+                <div className="text-sm opacity-90">kcal</div>
+                <div className="text-xs opacity-75">
+                  P: {calculateMealTotals('snacks').protein.toFixed(1)}g | C: {calculateMealTotals('snacks').carbs.toFixed(1)}g | F: {calculateMealTotals('snacks').fats.toFixed(1)}g
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -628,7 +712,7 @@ const removeFood = async (index: number) => {
 
             {/* Food List by Meal */}
             <div className="max-h-80 overflow-y-auto space-y-3 custom-scrollbar">
-              {consumedFoods.filter((food:any) => food.mealType === selectedMealType).length === 0 ? (
+              {consumedFoods.filter((food: any) => food.mealType === selectedMealType).length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     {mealTypes.find(m => m.id === selectedMealType)?.icon &&
@@ -641,8 +725,8 @@ const removeFood = async (index: number) => {
                 </div>
               ) : (
                 consumedFoods
-                  .filter((food:any) => food.mealType === selectedMealType)
-                  .map((food:any, index:any) => (
+                  .filter((food: any) => food.mealType === selectedMealType)
+                  .map((food: any, index: any) => (
                     <div
                       key={index}
                       className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-200"
@@ -722,10 +806,10 @@ const removeFood = async (index: number) => {
           {/* Macronutrient Distribution */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{totals.protein.toFixed(1)}g</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{mealStats?.totalProtein.toFixed(1)}g</div>
               <div className="text-lg font-semibold text-blue-700 mb-1">Protein</div>
               <div className="text-sm text-blue-600">
-                {((totals.protein * 4 / totals.calories) * 100 || 0).toFixed(1)}% of total calories
+                {((mealStats?.totalProtein * 4 / mealStats?.totalCalories) * 100 || 0).toFixed(1)}% of total calories
               </div>
               <div className="text-xs text-blue-500 mt-2">
                 Target: 15-25% of calories
@@ -733,10 +817,10 @@ const removeFood = async (index: number) => {
             </div>
 
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
-              <div className="text-3xl font-bold text-green-600 mb-2">{totals.carbs.toFixed(1)}g</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{mealStats?.totalCarbs.toFixed(1)}g</div>
               <div className="text-lg font-semibold text-green-700 mb-1">Carbohydrates</div>
               <div className="text-sm text-green-600">
-                {((totals.carbs * 4 / totals.calories) * 100 || 0).toFixed(1)}% of total calories
+                {((mealStats?.totalCarbs * 4 / mealStats?.totalCalories) * 100 || 0).toFixed(1)}% of total calories
               </div>
               <div className="text-xs text-green-500 mt-2">
                 Target: 45-65% of calories
@@ -744,10 +828,10 @@ const removeFood = async (index: number) => {
             </div>
 
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
-              <div className="text-3xl font-bold text-yellow-600 mb-2">{totals.fats.toFixed(1)}g</div>
+              <div className="text-3xl font-bold text-yellow-600 mb-2">{mealStats?.totalFats.toFixed(1)}g</div>
               <div className="text-lg font-semibold text-yellow-700 mb-1">Fats</div>
               <div className="text-sm text-yellow-600">
-                {((totals.fats * 9 / totals.calories) * 100 || 0).toFixed(1)}% of total calories
+                {((mealStats?.totalFats * 9 / mealStats?.totalCalories) * 100 || 0).toFixed(1)}% of total calories
               </div>
               <div className="text-xs text-yellow-500 mt-2">
                 Target: 20-35% of calories
