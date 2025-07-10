@@ -1,4 +1,5 @@
 // src/pages/Trainers/EditTrainer.tsx
+// src/pages/Trainers/EditTrainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Button from '../../components/Ui/Button';
@@ -6,74 +7,130 @@ import { FiArrowLeft, FiUpload, FiUser, FiX } from 'react-icons/fi';
 import { Trainer } from '../../types/gymTypes';
 import { toast } from 'react-toastify';
 
+interface TrainerForm extends Trainer {
+  id: string;
+  name: string;
+  email: string;
+  experience: number;
+  rating: number;
+  clients: number;
+  status: 'Active' | 'Inactive' | 'On Leave' | 'Available';
+  specialization: string[];
+  bio: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const defaultTrainer: TrainerForm = {
+  id: '',
+  name: '',
+  email: '',
+  experience: 0,
+  rating: 0,
+  clients: 0,
+  status: 'Available',
+  specialization: [],
+  bio: '',
+  imageUrl: '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  specializations: []
+};
+
+const specializationOptions = [
+  'Strength Training', 'Cardio', 'Yoga', 'Pilates', 'CrossFit',
+  'Weight Loss', 'Bodybuilding', 'Rehabilitation', 'Nutrition'
+];
+
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+
 const EditTrainer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [trainer, setTrainer] = useState<Trainer | null>(null);
+  const [trainer, setTrainer] = useState<TrainerForm>(defaultTrainer);
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const specializationOptions = [
-    'Strength Training', 'Cardio', 'Yoga', 'Pilates', 'CrossFit',
-    'Weight Loss', 'Bodybuilding', 'Rehabilitation', 'Nutrition'
-  ];
-
   useEffect(() => {
+    if (!id) {
+      toast.error('Invalid trainer ID');
+      navigate('/gym/trainers');
+      return;
+    }
+
     const loadTrainer = () => {
       try {
         const savedTrainers = localStorage.getItem('gymTrainers');
-        if (savedTrainers) {
-          const trainers: Trainer[] = JSON.parse(savedTrainers);
-          const foundTrainer = trainers.find(t => t.id === id);
-          if (foundTrainer) {
-            setTrainer(foundTrainer);
-            setPreviewImage(foundTrainer.imageUrl || null);
-          } else {
-            toast.error('Trainer not found');
-            navigate('/gym/trainers');
-          }
-        } else {
-          toast.error('No trainers data available');
-          navigate('/gym/trainers');
+        if (!savedTrainers) {
+          throw new Error('No trainers data available');
         }
+
+        const trainers: TrainerForm[] = JSON.parse(savedTrainers);
+        const foundTrainer = trainers.find(t => t.id === id);
+
+        if (!foundTrainer) {
+          throw new Error('Trainer not found');
+        }
+
+        setTrainer({
+          ...defaultTrainer,
+          ...foundTrainer,
+          updatedAt: new Date().toISOString()
+        });
+        setPreviewImage(foundTrainer.imageUrl || null);
       } catch (error) {
         console.error('Error loading trainer:', error);
-        toast.error('Failed to load trainer data');
+        toast.error(error instanceof Error ? error.message : 'Failed to load trainer data');
         navigate('/gym/trainers');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadTrainer();
   }, [id, navigate]);
 
-  const validateForm = () => {
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
-    if (!trainer?.name) newErrors.name = 'Name is required';
-    if (!trainer?.email) {
+    if (!trainer.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!trainer.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^\S+@\S+\.\S+$/.test(trainer.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trainer.email)) {
       newErrors.email = 'Invalid email format';
     }
-    if (trainer?.experience < 0) newErrors.experience = 'Must be positive';
-    if (trainer?.rating < 0 || trainer?.rating > 5) newErrors.rating = 'Must be between 0-5';
-    
+
+    if (trainer.experience < 0 || trainer.experience > 50) {
+      newErrors.experience = 'Must be between 0-50 years';
+    }
+
+    if (trainer.rating < 0 || trainer.rating > 5) {
+      newErrors.rating = 'Must be between 0-5';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setTrainer(prev => prev ? {
+    
+    setTrainer(prev => ({
       ...prev,
       [name]: name === 'experience' || name === 'rating' || name === 'clients' 
-        ? Number(value) 
+        ? Math.max(0, isNaN(Number(value)) ? 0 : Number(value))
         : value
-    } : null);
-    
-    // Clear error when field is edited
+    }));
+
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -85,19 +142,15 @@ const EditTrainer: React.FC = () => {
 
   const handleSpecializationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
+    
     setTrainer(prev => {
-      if (!prev) return null;
-      
-      let newSpecializations = [...prev.specialization];
-      if (checked) {
-        newSpecializations.push(value);
-      } else {
-        newSpecializations = newSpecializations.filter(s => s !== value);
-      }
+      const newSpecializations = checked
+        ? [...prev.specialization, value]
+        : prev.specialization.filter(s => s !== value);
       
       return {
         ...prev,
-        specialization: newSpecializations
+        specialization: [...new Set(newSpecializations)] // Ensure uniqueness
       };
     });
   };
@@ -106,81 +159,85 @@ const EditTrainer: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate image file
-    if (!file.type.match('image.*')) {
-      toast.error('Please select an image file');
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file (JPEG, PNG, etc.)');
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-      toast.error('Image size should be less than 2MB');
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error(`Image must be smaller than ${MAX_IMAGE_SIZE / (1024 * 1024)}MB`);
       return;
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadstart = () => {
+      toast.info('Uploading image...');
+    };
+    reader.onload = () => {
       const result = reader.result as string;
       setPreviewImage(result);
-      setTrainer(prev => prev ? {
+      setTrainer(prev => ({
         ...prev,
         imageUrl: result
-      } : null);
+      }));
+      toast.success('Image uploaded successfully');
     };
     reader.onerror = () => {
-      toast.error('Error reading image file');
+      toast.error('Failed to read image file');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     };
     reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
     setPreviewImage(null);
-    setTrainer(prev => prev ? {
+    setTrainer(prev => ({
       ...prev,
       imageUrl: ''
-    } : null);
+    }));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    toast.info('Profile image removed');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trainer) return;
     
     if (!validateForm()) {
-      toast.error('Please fix the errors in the form');
+      toast.error('Please fix the form errors');
       return;
     }
 
     setIsSaving(true);
     try {
-      // Get current trainers from localStorage
       const savedTrainers = localStorage.getItem('gymTrainers');
-      if (savedTrainers) {
-        const trainers: Trainer[] = JSON.parse(savedTrainers);
-        
-        // Update the trainer
-        const updatedTrainers = trainers.map(t => 
-          t.id === trainer.id ? trainer : t
-        );
-        
-        // Save back to localStorage
-        localStorage.setItem('gymTrainers', JSON.stringify(updatedTrainers));
-        
-        toast.success('Trainer updated successfully!');
-        navigate(`/gym/trainers/view/${trainer.id}`);
-      } else {
+      if (!savedTrainers) {
         throw new Error('No trainers data available');
       }
+
+      const trainers: TrainerForm[] = JSON.parse(savedTrainers);
+      const updatedTrainers = trainers.map(t => 
+        t.id === trainer.id ? {
+          ...trainer,
+          updatedAt: new Date().toISOString()
+        } : t
+      );
+
+      localStorage.setItem('gymTrainers', JSON.stringify(updatedTrainers));
+      toast.success('Trainer updated successfully!');
+      navigate(`/gym/trainers/view/${trainer.id}`);
     } catch (error) {
       console.error('Failed to save trainer:', error);
-      toast.error('Failed to save trainer');
+      toast.error(error instanceof Error ? error.message : 'Failed to save trainer');
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (!trainer) {
+  if (isLoading) {
     return (
       <div className="p-6 flex justify-center items-center h-64">
         <div className="text-center">
@@ -196,13 +253,14 @@ const EditTrainer: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <Button
           variant="outline"
-          onClick={() => navigate('/gym/trainers')}  // Fixed typo here
+          onClick={() => navigate('/gym/trainers')}
           className="flex items-center gap-2"
         >
           <FiArrowLeft /> Back to Trainers
         </Button>
         <h1 className="text-2xl font-bold">Edit Trainer</h1>
         <Button
+          type="submit"
           onClick={handleSubmit}
           isLoading={isSaving}
           disabled={isSaving}
@@ -217,26 +275,33 @@ const EditTrainer: React.FC = () => {
             {/* Image Upload Section */}
             <div className="w-full md:w-1/3">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Profile Image
+                </label>
                 <div className="flex flex-col items-center">
                   <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square mb-4 w-full">
                     {previewImage ? (
                       <>
                         <img
                           src={previewImage}
-                          alt={trainer.name}
+                          alt={`Profile of ${trainer.name}`}
                           className="w-full h-full object-cover"
+                          aria-label="Trainer profile image"
                         />
                         <button
                           type="button"
                           onClick={removeImage}
-                          className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                          className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-colors"
+                          aria-label="Remove profile image"
                         >
                           <FiX className="text-gray-600" />
                         </button>
                       </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div 
+                        className="w-full h-full flex items-center justify-center bg-gray-100"
+                        aria-label="No profile image"
+                      >
                         <FiUser className="text-gray-400 text-6xl" />
                       </div>
                     )}
@@ -247,6 +312,7 @@ const EditTrainer: React.FC = () => {
                     onChange={handleImageUpload}
                     accept="image/*"
                     className="hidden"
+                    aria-label="Upload profile image"
                   />
                   <Button
                     type="button"
@@ -274,6 +340,8 @@ const EditTrainer: React.FC = () => {
                     onChange={handleChange}
                     required
                     className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'name-error' : undefined}
                   />
                 </div>
                 <div>
@@ -287,6 +355,8 @@ const EditTrainer: React.FC = () => {
                     onChange={handleChange}
                     required
                     className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
                   />
                 </div>
               </div>
@@ -304,6 +374,7 @@ const EditTrainer: React.FC = () => {
                     value={trainer.experience}
                     onChange={handleChange}
                     className={`w-full border ${errors.experience ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.experience}
                   />
                 </div>
                 <div>
@@ -319,10 +390,13 @@ const EditTrainer: React.FC = () => {
                     value={trainer.rating}
                     onChange={handleChange}
                     className={`w-full border ${errors.rating ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.rating}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Clients</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Clients
+                  </label>
                   <input
                     type="number"
                     name="clients"
@@ -335,7 +409,9 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
                 <select
                   name="status"
                   value={trainer.status}
@@ -349,7 +425,9 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Specializations</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Specializations
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {specializationOptions.map(spec => (
                     <div key={spec} className="flex items-center">
@@ -370,10 +448,12 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
                 <textarea
                   name="bio"
-                  value={trainer.bio || ''}
+                  value={trainer.bio}
                   onChange={handleChange}
                   rows={4}
                   className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"

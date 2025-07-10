@@ -8,6 +8,13 @@ import { FiEdit2, FiTrash2, FiPlus, FiUser, FiSearch, FiEye, FiClock, FiAward } 
 import { useRecoilState } from 'recoil';
 import { trainerListAtom, TrainerType } from '../../../../atoms/trainerAtom';
 
+interface TableRowData extends TrainerType {
+  experience: number;
+  rating: React.ReactNode;
+  status: React.ReactNode;
+  actions: React.ReactNode;
+}
+
 const TrainersList: React.FC = () => {
   const [trainers, setTrainers] = useRecoilState(trainerListAtom);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
@@ -38,14 +45,11 @@ const TrainersList: React.FC = () => {
 
         const data = await response.json();
         
-        // Ensure the response is an array
         if (Array.isArray(data)) {
           setTrainers(data);
         } else if (data && Array.isArray(data.trainers)) {
-          // Handle case where API returns { trainers: [...] }
           setTrainers(data.trainers);
         } else if (data && Array.isArray(data.data)) {
-          // Handle case where API returns { data: [...] }
           setTrainers(data.data);
         } else {
           console.error('API response is not in expected format:', data);
@@ -54,7 +58,7 @@ const TrainersList: React.FC = () => {
       } catch (error) {
         console.error('Error fetching trainers:', error);
         setError('Failed to load trainers. Please try again.');
-        setTrainers([]); // Clear trainers on error instead of using mock data
+        setTrainers([]);
       } finally {
         setLoading(false);
       }
@@ -64,15 +68,14 @@ const TrainersList: React.FC = () => {
   }, [setTrainers]);
 
   const handleDelete = async (id: string) => {
-    // Ensure trainers is an array before proceeding
     if (!Array.isArray(trainers)) {
       console.error('Trainers is not an array:', trainers);
       return;
     }
 
-    const trainerToDelete = trainers.find(t => t._id === id);
+    const trainerToDelete = trainers.find((t: TrainerType) => t._id === id);
     if (!trainerToDelete) return;
-    console.log(id)
+
     if (window.confirm(`Are you sure you want to delete ${trainerToDelete.fullName}?`)) {
       try {
         const response = await fetch(`/api/gym/deleteTrainer/${id}`, {
@@ -87,11 +90,9 @@ const TrainersList: React.FC = () => {
           throw new Error('Failed to delete trainer');
         }
 
-        // Update local state
-        const updatedTrainers = trainers.filter(trainer => trainer._id !== id);
+        const updatedTrainers = trainers.filter((trainer: TrainerType) => trainer._id !== id);
         setTrainers(updatedTrainers);
 
-        // Close modal if deleted trainer was selected
         if (selectedTrainer?._id === id) {
           setIsModalOpen(false);
           setSelectedTrainer(null);
@@ -103,27 +104,60 @@ const TrainersList: React.FC = () => {
     }
   };
 
-  // Ensure trainers is an array before filtering
-  const filteredTrainers = Array.isArray(trainers) ? trainers.filter(trainer =>
+  const filteredTrainers = Array.isArray(trainers) ? trainers.filter((trainer: TrainerType) =>
     trainer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trainer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    trainer.specializations.some(spec =>
+    (trainer.specializations && trainer.specializations.some((spec: string) =>
       spec.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    ))
   ) : [];
 
-  // Table columns configuration
   const columns = [
     { header: 'Name', accessor: 'fullName' },
     { header: 'Email', accessor: 'email' },
     { header: 'Experience', accessor: 'experience' },
     { header: 'Rating', accessor: 'rating' },
     { header: 'Status', accessor: 'status' },
-    { header: 'Actions', accessor: 'actions' }
+    { 
+      header: 'Actions', 
+      accessor: 'actions',
+      cell: (row: { original: TrainerType }) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedTrainer(row.original);
+              setIsModalOpen(true);
+            }}
+            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded hover:bg-gray-200 flex items-center gap-1"
+          >
+            <FiEye size={14} />
+            View
+          </button>
+          <Link
+            to={`/gym/trainers/edit/${row.original._id}`}
+            className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FiEdit2 size={14} />
+            Edit
+          </Link>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(row.original._id);
+            }}
+            className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 flex items-center gap-1"
+          >
+            <FiTrash2 size={14} />
+            Delete
+          </button>
+        </div>
+      )
+    }
   ];
 
-  // Prepare table data
-  const tableData = filteredTrainers.map(trainer => ({
+  const tableData: TableRowData[] = filteredTrainers.map((trainer: TrainerType) => ({
     ...trainer,
     experience: `${trainer.experience} years`,
     rating: (
@@ -141,7 +175,8 @@ const TrainersList: React.FC = () => {
     actions: (
       <div className="flex space-x-2">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setSelectedTrainer(trainer);
             setIsModalOpen(true);
           }}
@@ -150,15 +185,19 @@ const TrainersList: React.FC = () => {
           <FiEye size={14} />
           View
         </button>
-        <button
-          onClick={() => navigate(`/gym/trainers/edit/${trainer._id}`)}
+        <Link
+          to={`/gym/trainers/edit/${trainer._id}`}
           className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center gap-1"
+          onClick={(e) => e.stopPropagation()}
         >
           <FiEdit2 size={14} />
           Edit
-        </button>
+        </Link>
         <button
-          onClick={() => handleDelete(trainer._id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(trainer._id);
+          }}
           className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 flex items-center gap-1"
         >
           <FiTrash2 size={14} />
@@ -168,28 +207,15 @@ const TrainersList: React.FC = () => {
     )
   }));
 
-  // Trainer card component
-  const TrainerCard = ({ trainer }: { trainer: TrainerType }) => {
-    const handleCardClick = () => {
-      setSelectedTrainer(trainer);
-      setIsModalOpen(true);
-    };
-
-    const handleActionClick = (e: React.MouseEvent, action: string) => {
-      e.stopPropagation();
-      if (action === 'edit') {
-        navigate(`/gym/trainers/edit/${trainer._id}`);
-      } else if (action === 'delete') {
-        handleDelete(trainer._id);
-      }
-    };
-
+  const TrainerCard: React.FC<{ trainer: TrainerType }> = ({ trainer }) => {
     return (
       <div
         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 cursor-pointer"
-        onClick={handleCardClick}
+        onClick={() => {
+          setSelectedTrainer(trainer);
+          setIsModalOpen(true);
+        }}
       >
-        {/* Trainer Image */}
         <div className="h-48 w-full bg-gray-200 overflow-hidden">
           {trainer.image ? (
             <img 
@@ -232,7 +258,7 @@ const TrainersList: React.FC = () => {
           <div className="mt-3">
             <h4 className="text-sm font-medium text-gray-900">Specializations</h4>
             <div className="flex flex-wrap gap-1 mt-1">
-              {trainer.specializations.slice(0, 3).map((spec, index) => (
+              {trainer.specializations?.slice(0, 3).map((spec: string, index: number) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
@@ -240,7 +266,7 @@ const TrainersList: React.FC = () => {
                   {spec}
                 </span>
               ))}
-              {trainer.specializations.length > 3 && (
+              {trainer.specializations && trainer.specializations.length > 3 && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                   +{trainer.specializations.length - 3} more
                 </span>
@@ -252,7 +278,7 @@ const TrainersList: React.FC = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleActionClick(e, 'edit');
+                navigate(`/gym/trainers/edit/${trainer._id}`);
               }}
               className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-300 text-sm flex items-center justify-center gap-1"
             >
@@ -392,13 +418,12 @@ const TrainersList: React.FC = () => {
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrainers.map(trainer => (
+          {filteredTrainers.map((trainer: TrainerType) => (
             <TrainerCard key={trainer._id} trainer={trainer} />
           ))}
         </div>
       )}
 
-      {/* Trainer Detail Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -444,7 +469,7 @@ const TrainersList: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Current Clients</h3>
-                    <p className="mt-1 text-sm text-gray-900">{selectedTrainer.currentClients}</p>
+                    <p className="mt-1 text-sm text-gray-900">{selectedTrainer.currentClients || 0}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Status</h3>
@@ -460,7 +485,7 @@ const TrainersList: React.FC = () => {
             <div>
               <h3 className="text-sm font-medium text-gray-500">Specializations</h3>
               <div className="mt-2 flex flex-wrap gap-2">
-                {selectedTrainer.specializations.map((spec, index) => (
+                {selectedTrainer.specializations?.map((spec: string, index: number) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"

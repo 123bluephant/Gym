@@ -44,7 +44,7 @@ import ViewList from './pages/gymOwner/Pages/Users/ViewUser';
 import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
 import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
 import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
-import GymFinder from './pages/GymFinder';
+
 import ManageProducts from './pages/gymOwner/Pages/Shop/ManageProducts';
 import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
@@ -65,6 +65,8 @@ import AddWorkoutPage from './pages/Workout/AddWorkoutPage';
 import UserMeals from './pages/gymOwner/Pages/Users/Meals';
 import MealForm from './pages/gymOwner/Pages/Users/MealForm';
 import EditMeal from './pages/gymOwner/Pages/Users/EditMeal';
+import GymDetail from './pages/GymFinder/GymDetail';
+import GymList from './pages/GymFinder/GymList';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -110,7 +112,7 @@ function AppContent() {
                 <Route path="/gym/members/meals/:id" element={<UserMeals />} />
                 <Route path="/gym/members/meals/:id/add" element={<MealForm />} />
                 <Route path="/gym/members/meals/:id/edit/:mealId" element={<MealForm />} />
-                <Route path='/gym/members/meals/:userId/edit/:mealId' element= {<EditMeal />} />
+                <Route path='/gym/members/meals/:userId/edit/:mealId' element={<EditMeal />} />
                 <Route path="/gyms/List" element={<GymListing />} />
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
@@ -161,7 +163,8 @@ function AppContent() {
                 <Route path="/women-health" element={<WomensHealthPage />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
                 <Route path="/workouts/Add" element={<AddWorkoutPage />} />
-                <Route path="/Finder" element={<GymFinder />} />
+                <Route path="/Finder" element={<GymList />} />
+                <Route path="/Finder/:id" element={<GymDetail />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
                 <Route path="/tracking" element={<TrackingPage />} />
                 <Route path="/shop" element={<ShopPage />} />

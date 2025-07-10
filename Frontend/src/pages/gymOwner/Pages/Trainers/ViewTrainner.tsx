@@ -109,8 +109,8 @@ const ViewTrainer: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Status</h3>
                   <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                    ${trainer.status === 'Available' ? 'bg-green-100 text-green-800' : 
-                      trainer.status === 'Busy' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                    ${trainer.status === 'Active' ? 'bg-green-100 text-green-800' :
+                      trainer.status === 'Inactive' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
                     {trainer.status}
                   </span>
                 </div>
@@ -119,7 +119,7 @@ const ViewTrainer: React.FC = () => {
               <div className="mb-8">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Specializations</h3>
                 <div className="flex flex-wrap gap-2">
-                  {trainer.specialization.map((spec, index) => (
+                  {trainer.specialization.map((spec: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined, index: React.Key | null | undefined) => (
                     <span
                       key={index}
                       className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
