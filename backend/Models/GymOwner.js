@@ -34,8 +34,13 @@ const gymOwnerSchema = new mongoose.Schema(
     allmembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     activeMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     workoutsCreated: [{ type: mongoose.Schema.Types.ObjectId, ref: "Workout" }],
-    dietPlansCreated: [{ type: mongoose.Schema.Types.ObjectId, ref: "DietPlan" }],
-    productsPublished: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    dietPlansCreated: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "DietPlan" },
+    ],
+    productsPublished: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    ],
+    trainers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Trainer" }],
   },
   { timestamps: true }
 );

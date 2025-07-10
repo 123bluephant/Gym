@@ -318,7 +318,7 @@ function Calories() {
   };
 
   const totals = calculateTotals();
-
+  console.log(totals," totals");
   const filteredFoods = foodDatabase.filter((food: any) => {
     const matchesCategory = selectedCategory === 'all' || food?.category === selectedCategory;
     return matchesCategory;
@@ -805,18 +805,18 @@ function Calories() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
             {[
-              { name: 'Calories', value: totals.calories, unit: 'kcal', color: 'from-rose-400 to-pink-500', target: dailyCaloriesGoal },
-              { name: 'Protein', value: totals.protein, unit: 'g', color: 'from-blue-400 to-indigo-500', target: dailyCaloriesGoal * 0.15 / 4 },
-              { name: 'Carbs', value: totals.carbs, unit: 'g', color: 'from-green-400 to-emerald-500', target: dailyCaloriesGoal * 0.55 / 4 },
-              { name: 'Fats', value: totals.fats, unit: 'g', color: 'from-yellow-400 to-orange-500', target: dailyCaloriesGoal * 0.30 / 9 },
-              { name: 'Fiber', value: totals.fiber, unit: 'g', color: 'from-purple-400 to-violet-500', target: 25 },
-              { name: 'Sugar', value: totals.sugar, unit: 'g', color: 'from-pink-400 to-rose-500', target: 50 }
+              { name: 'Calories', value: mealStats?.totalCalories, unit: 'kcal', color: 'from-rose-400 to-pink-500', target: dailyCaloriesGoal },
+              { name: 'Protein', value: mealStats?.totalProtein, unit: 'g', color: 'from-blue-400 to-indigo-500', target: dailyCaloriesGoal * 0.15 / 4 },
+              { name: 'Carbs', value: mealStats?.totalCarbs, unit: 'g', color: 'from-green-400 to-emerald-500', target: dailyCaloriesGoal * 0.55 / 4 },
+              { name: 'Fats', value: mealStats?.totalFats, unit: 'g', color: 'from-yellow-400 to-orange-500', target: dailyCaloriesGoal * 0.30 / 9 },
+              { name: 'Fiber', value: mealStats?.totalFiber, unit: 'g', color: 'from-purple-400 to-violet-500', target: 25 },
+              { name: 'Sugar', value: mealStats?.totalSugar, unit: 'g', color: 'from-pink-400 to-rose-500', target: 50 }
             ].map((macro) => {
               const percentage = (macro.value / macro.target) * 100;
               return (
                 <div key={macro.name} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm">
                   <div className={`w-4 h-4 bg-gradient-to-r ${macro.color} rounded-full mb-3`}></div>
-                  <div className="text-2xl font-bold text-gray-800 mb-1">{macro.value.toFixed(1)}</div>
+                  <div className="text-2xl font-bold text-gray-800 mb-1">{macro.value}</div>
                   <div className="text-sm font-medium text-gray-600 mb-1">{macro.name}</div>
                   <div className="text-xs text-gray-500 mb-2">{macro.unit}</div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
