@@ -110,6 +110,7 @@ export const getMealByType = async (req, res) => {
     if (!log) {
       return res.status(200).json({
         meal: [],
+        allmeals: [],
         totalCalories: 0,
         totalProtein: 0,
         totalCarbs: 0,
@@ -137,6 +138,7 @@ export const getMealByType = async (req, res) => {
 
     res.status(200).json({
       meal: log.meals[mealType],
+      allmeals: log.meals,
       totalCalories: log.totalCalories || 0,
       totalProtein: log.totalProtein || 0,
       totalCarbs: log.totalCarbs || 0,
