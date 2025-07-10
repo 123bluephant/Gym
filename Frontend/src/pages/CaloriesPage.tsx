@@ -688,7 +688,7 @@ function Calories() {
             <div className="flex space-x-2 mb-6 bg-pink-50 p-2 rounded-xl">
               {mealTypes.map((meal) => {
                 const MealIcon = meal.icon;
-                const mealFoods = consumedFoods.filter(food => food.mealType === meal.id);
+                const mealFoods = consumedFoods.filter((food: { mealType: string; }) => food.mealType === meal.id);
                 return (
                   <button
                     key={meal.id}
