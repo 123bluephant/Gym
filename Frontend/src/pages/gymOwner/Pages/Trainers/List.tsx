@@ -30,7 +30,7 @@ const TrainersList: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch('/api/gym/getTrainers', {
           method: 'GET',
           headers: {
@@ -44,7 +44,8 @@ const TrainersList: React.FC = () => {
         }
 
         const data = await response.json();
-        
+
+        // Ensure the response is an array
         if (Array.isArray(data)) {
           setTrainers(data);
         } else if (data && Array.isArray(data.trainers)) {
@@ -103,8 +104,13 @@ const TrainersList: React.FC = () => {
       }
     }
   };
-
-  const filteredTrainers = Array.isArray(trainers) ? trainers.filter((trainer: TrainerType) =>
+const handleEdit = () => {
+    const path = `/gym/trainers/edit/${selectedTrainer?._id}`;
+    console.log(path); // Log the path
+    navigate(path);    // Navigate to the path
+  };
+  // Ensure trainers is an array before filtering
+  const filteredTrainers = Array.isArray(trainers) ? trainers.filter(trainer =>
     trainer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trainer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (trainer.specializations && trainer.specializations.some((spec: string) =>
@@ -218,8 +224,8 @@ const TrainersList: React.FC = () => {
       >
         <div className="h-48 w-full bg-gray-200 overflow-hidden">
           {trainer.image ? (
-            <img 
-              src={trainer.image} 
+            <img
+              src={trainer.image}
               alt={trainer.fullName}
               className="w-full h-full object-cover"
             />
@@ -229,7 +235,7 @@ const TrainersList: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         <div className="p-4">
           <div className="flex justify-between items-start">
             <h3 className="text-lg font-bold text-gray-900">{trainer.fullName}</h3>
@@ -504,13 +510,13 @@ const TrainersList: React.FC = () => {
             )}
 
             <div className="flex justify-end space-x-3 pt-4">
-              <Link
-                to={`/gym/trainers/edit/${selectedTrainer._id}`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center gap-1"
-              >
-                <FiEdit2 size={14} />
-                Edit Trainer
-              </Link>
+              <button
+      onClick={handleEdit}
+      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center gap-1"
+    >
+      <FiEdit2 size={14} />
+      Edit Trainer
+    </button>
               <Button
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
