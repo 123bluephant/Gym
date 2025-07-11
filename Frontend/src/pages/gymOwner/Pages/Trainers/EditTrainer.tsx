@@ -2,11 +2,11 @@
 // src/pages/Trainers/EditTrainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import Button from '../../components/Ui/Button';
 import { FiArrowLeft, FiUpload, FiUser, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { trainerAtom, trainerListAtom, TrainerType } from '../../../../atoms/trainerAtom';
+import { trainerAtom, trainerListAtom } from '../../../../atoms/trainerAtom';
 
 const EditTrainer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,9 +19,11 @@ const EditTrainer: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+   const specializationOptions = [
+    'Strength Training', 'Cardio', 'Yoga', 'Pilates', 'CrossFit',
+    'Weight Loss', 'Bodybuilding', 'Rehabilitation', 'Nutrition'
+  ];
   useEffect(() => {
     const loadTrainer = async () => {
       try {

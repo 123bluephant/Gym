@@ -67,6 +67,7 @@ import MealForm from './pages/gymOwner/Pages/Users/MealForm';
 import EditMeal from './pages/gymOwner/Pages/Users/EditMeal';
 import GymDetail from './pages/GymFinder/GymDetail';
 import GymList from './pages/GymFinder/GymList';
+import Layout from './pages/gymOwner/components/Layout';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -90,9 +91,9 @@ function AppContent() {
 
       {(isGymRoute && isGymOwner) ? (
         <div className="flex h-screen bg-gray-100">
-          <Sidebar />
+      
           <div className="flex-1 flex flex-col overflow-hidden">
-            <Navbar />
+           
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
               <Routes>
                 <Route path="/gym/settings" element={<SettingsPagegym />} />
@@ -204,11 +205,13 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <Layout>
       <ProductProvider>
         <CartProvider>
           <AppContent />
         </CartProvider>
       </ProductProvider>
+    </Layout>
     </Router>
   );
 }

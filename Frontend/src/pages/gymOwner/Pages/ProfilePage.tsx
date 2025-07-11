@@ -1,6 +1,6 @@
 // src/pages/gymOwner/Profile.tsx
-import React, { useEffect, useState } from 'react';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiClock, FiEdit, FiSave, FiLock, FiCalendar } from 'react-icons/fi';
+import React, { useEffect, useState, useRef } from 'react';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiClock, FiEdit, FiSave, FiLock, FiCalendar, FiCamera, FiTrash2, FiPlus } from 'react-icons/fi';
 import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 import userAtom from '../../../atoms/UserAtom';
 import { useRecoilValue } from 'recoil';
@@ -21,6 +21,9 @@ type ProfileData = {
   location: string;
   established: string;
   hours: string;
+  profilePhoto: string;
+  avatar: string;
+  gymImages: string[];
   membershipPlans: MembershipPlan[];
   socialMedia: {
     facebook: string;
@@ -28,6 +31,14 @@ type ProfileData = {
     twitter: string;
   };
 };
+
+const avatars = [
+  'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+  'https://cdn-icons-png.flaticon.com/512/4140/4140048.png',
+  'https://cdn-icons-png.flaticon.com/512/4333/4333609.png',
+  'https://cdn-icons-png.flaticon.com/512/236/236832.png',
+  'https://cdn-icons-png.flaticon.com/512/3667/3667339.png',
+];
 
 const GymOwnerProfile = () => {
   const user = useRecoilValue(userAtom);
@@ -41,18 +52,29 @@ const GymOwnerProfile = () => {
     location: user?.location || '',
     established: user?.established || '',
     hours: user?.hours || '',
+    profilePhoto: user?.profilePhoto || '',
+    avatar: user?.avatar || avatars[0],
+    gymImages: Array.isArray(user?.gymImages) ? user.gymImages : [],
     membershipPlans: Array.isArray(user?.membershipPlans) ? user.membershipPlans : [],
     socialMedia: typeof user?.socialMedia === 'object' && user?.socialMedia !== null
       ? user.socialMedia
       : { facebook: '', instagram: '', twitter: '' },
   });
 
+  const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
+  const [selectedAvatar, setSelectedAvatar] = useState(profileData.avatar);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(profileData.profilePhoto);
+  const [gymImagePreviews, setGymImagePreviews] = useState<string[]>(profileData.gymImages);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const gymImagesInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (user && user.role !== "gym_owner") {
       <Navigate to="/dashboard" replace />;
     }
-  }, [])
-  const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
+  }, []);
+
   const handleAddFeature = () => {
     setNewPlan(prev => ({ ...prev, features: [...prev.features, ''] }));
   };
@@ -78,15 +100,83 @@ const GymOwnerProfile = () => {
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhotoPreview(reader.result as string);
+        setProfileData(prev => ({ ...prev, profilePhoto: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGymImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files).slice(0, 5 - gymImagePreviews.length);
+      const newPreviews: string[] = [];
+      
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews[index] = reader.result as string;
+          if (newPreviews.length === files.length && !newPreviews.includes(undefined as any)) {
+            setGymImagePreviews(prev => [...prev, ...newPreviews]);
+            setProfileData(prev => ({
+              ...prev,
+              gymImages: [...prev.gymImages, ...newPreviews]
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeGymImage = (index: number) => {
+    setGymImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setProfileData(prev => ({
+      ...prev,
+      gymImages: prev.gymImages.filter((_, i) => i !== index)
+    }));
+  };
+
+  const selectAvatar = (avatar: string) => {
+    setSelectedAvatar(avatar);
+    setProfileData(prev => ({ ...prev, avatar }));
+    setShowAvatarModal(false);
+  };
+
   const handleSave = async () => {
     try {
+      const formData = new FormData();
+      formData.append('name', profileData.name);
+      formData.append('email', profileData.email);
+      formData.append('phone', profileData.phone);
+      formData.append('bio', profileData.bio);
+      formData.append('gymName', profileData.gymName);
+      formData.append('location', profileData.location);
+      formData.append('established', profileData.established);
+      formData.append('hours', profileData.hours);
+      formData.append('profilePhoto', profileData.profilePhoto);
+      formData.append('avatar', profileData.avatar);
+      profileData.gymImages.forEach((img, index) => formData.append(`gymImages[${index}]`, img));
+      profileData.membershipPlans.forEach((plan, index) => {
+        formData.append(`membershipPlans[${index}][name]`, plan.name);
+        formData.append(`membershipPlans[${index}][price]`, plan.price);
+        plan.features.forEach((feature, featIndex) => 
+          formData.append(`membershipPlans[${index}][features][${featIndex}]`, feature)
+        );
+      });
+      formData.append('socialMedia[facebook]', profileData.socialMedia.facebook);
+      formData.append('socialMedia[instagram]', profileData.socialMedia.instagram);
+      formData.append('socialMedia[twitter]', profileData.socialMedia.twitter);
+
       const response = await fetch('/api/gym/update', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         credentials: 'include',
-        body: JSON.stringify(profileData)
+        body: formData,
       });
 
       if (!response.ok) {
@@ -106,6 +196,11 @@ const GymOwnerProfile = () => {
           location: result.updatedOwner.location || '',
           established: result.updatedOwner.established || '',
           hours: result.updatedOwner.hours || '',
+          profilePhoto: result.updatedOwner.profilePhoto || '',
+          avatar: result.updatedOwner.avatar || avatars[0],
+          gymImages: Array.isArray(result.updatedOwner.gymImages)
+            ? result.updatedOwner.gymImages
+            : [],
           membershipPlans: Array.isArray(result.updatedOwner.membershipPlans)
             ? result.updatedOwner.membershipPlans
             : [],
@@ -114,6 +209,8 @@ const GymOwnerProfile = () => {
               ? result.updatedOwner.socialMedia
               : { facebook: '', instagram: '', twitter: '' },
         });
+        setProfilePhotoPreview(result.updatedOwner.profilePhoto || '');
+        setGymImagePreviews(Array.isArray(result.updatedOwner.gymImages) ? result.updatedOwner.gymImages : []);
         localStorage.setItem('user', JSON.stringify(result.updatedOwner));
       }
 
@@ -125,10 +222,10 @@ const GymOwnerProfile = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
+    <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Gym Owner Profile</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gym Owner Profile</h1>
           {isEditing ? (
             <button
               onClick={handleSave}
@@ -150,8 +247,43 @@ const GymOwnerProfile = () => {
           {/* Personal Information Card */}
           <div className="bg-white rounded-xl shadow-sm p-6 lg:col-span-1">
             <div className="flex flex-col items-center mb-6">
-              <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                <FiUser className="text-blue-500 text-5xl" />
+              <div className="relative w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mb-4 overflow-hidden">
+                {profilePhotoPreview ? (
+                  <img 
+                    src={profilePhotoPreview} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img 
+                    src={selectedAvatar} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {isEditing && (
+                  <>
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition"
+                    >
+                      <FiCamera size={16} />
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleProfilePhotoChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button 
+                      onClick={() => setShowAvatarModal(true)}
+                      className="absolute bottom-0 left-0 bg-purple-500 text-white p-2 rounded-full hover:bg-purple-600 transition"
+                    >
+                      <FiUser size={16} />
+                    </button>
+                  </>
+                )}
               </div>
               {isEditing ? (
                 <input
@@ -292,6 +424,68 @@ const GymOwnerProfile = () => {
               </div>
             </div>
 
+            {/* Gym Images Section */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 mb-4">Gym Photos</h3>
+              {gymImagePreviews.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {gymImagePreviews.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={img} 
+                        alt={`Gym ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      {isEditing && (
+                        <button
+                          onClick={() => removeGymImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {isEditing && gymImagePreviews.length < 5 && (
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 cursor-pointer hover:border-blue-500 transition"
+                      onClick={() => gymImagesInputRef.current?.click()}
+                    >
+                      <FiPlus size={24} className="text-gray-400" />
+                      <input 
+                        type="file" 
+                        ref={gymImagesInputRef}
+                        onChange={handleGymImagesChange}
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : isEditing ? (
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 cursor-pointer hover:border-blue-500 transition"
+                  onClick={() => gymImagesInputRef.current?.click()}
+                >
+                  <div className="text-center">
+                    <FiPlus size={24} className="mx-auto text-gray-400 mb-2" />
+                    <p className="text-gray-500">Add Gym Photos (max 5)</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={gymImagesInputRef}
+                    onChange={handleGymImagesChange}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <p className="text-gray-500">No gym photos added yet</p>
+              )}
+            </div>
+
             <h3 className="font-semibold text-gray-800 mb-4">Membership Plans</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {isEditing && (
@@ -383,27 +577,60 @@ const GymOwnerProfile = () => {
               </div>
             ) : (
               <div className="flex space-x-4">
-                <a href={`${profileData.socialMedia.facebook}`}
-                  className="text-blue-600 hover:text-blue-800"
-                  target="_blank" rel="noopener noreferrer">
-                  <FaFacebook size={24} />
-                </a>
-                <a href={`${profileData.socialMedia.instagram}`}
-                  className="text-pink-600 hover:text-pink-800"
-                  target="_blank" rel="noopener noreferrer">
-                  <FaInstagram size={24} />
-                </a>
-                <a href={`${profileData.socialMedia.twitter}`}
-                  className="text-blue-400 hover:text-blue-600"
-                  target="_blank" rel="noopener noreferrer">
-                  <FaTwitter size={24} />
-                </a>
+                {profileData.socialMedia.facebook && (
+                  <a href={`${profileData.socialMedia.facebook}`}
+                    className="text-blue-600 hover:text-blue-800"
+                    target="_blank" rel="noopener noreferrer">
+                    <FaFacebook size={24} />
+                  </a>
+                )}
+                {profileData.socialMedia.instagram && (
+                  <a href={`${profileData.socialMedia.instagram}`}
+                    className="text-pink-600 hover:text-pink-800"
+                    target="_blank" rel="noopener noreferrer">
+                    <FaInstagram size={24} />
+                  </a>
+                )}
+                {profileData.socialMedia.twitter && (
+                  <a href={`${profileData.socialMedia.twitter}`}
+                    className="text-blue-400 hover:text-blue-600"
+                    target="_blank" rel="noopener noreferrer">
+                    <FaTwitter size={24} />
+                  </a>
+                )}
               </div>
             )}
-
           </div>
         </div>
       </div>
+
+      {/* Avatar Selection Modal */}
+      {showAvatarModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Select Avatar</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {avatars.map((avatar) => (
+                <div 
+                  key={avatar} 
+                  className={`p-1 rounded-full cursor-pointer ${selectedAvatar === avatar ? 'ring-2 ring-blue-500' : ''}`}
+                  onClick={() => selectAvatar(avatar)}
+                >
+                  <img src={avatar} alt="Avatar" className="w-full rounded-full" />
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
