@@ -1,5 +1,5 @@
-import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from 'react';
-import { Gym, Location } from '../types/gym';
+import { useState, useEffect } from 'react';
+import { Gym, Location } from '../../types/gym';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Mock data - in a real app you would fetch this from an API
@@ -11,7 +11,7 @@ const mockGyms: Gym[] = [
     distance: 0.5,
     rating: 4.5,
     open_now: true,
-    photo_url: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f',
+    photo_url: 'https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=800',
     equipment: ['Weights', 'Cardio', 'Pool', 'Yoga'],
     hours: '6:00 AM - 10:00 PM',
     description: 'A full-service fitness center with state-of-the-art equipment and a variety of classes for all fitness levels.',
@@ -30,7 +30,7 @@ const mockGyms: Gym[] = [
     distance: 1.2,
     rating: 4.2,
     open_now: true,
-    photo_url: 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb',
+    photo_url: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800',
     equipment: ['Weights', 'Crossfit', 'Sauna'],
     hours: '5:00 AM - 11:00 PM',
     description: 'A hardcore gym for serious lifters with top-notch equipment and a no-frills approach to fitness.',
@@ -49,7 +49,7 @@ const mockGyms: Gym[] = [
     distance: 2.1,
     rating: 4.7,
     open_now: false,
-    photo_url: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597',
+    photo_url: 'https://images.pexels.com/photos/3822843/pexels-photo-3822843.jpeg?auto=compress&cs=tinysrgb&w=800',
     equipment: ['Yoga', 'Pilates', 'Meditation'],
     hours: '7:00 AM - 9:00 PM',
     description: 'A peaceful sanctuary offering yoga, meditation, and holistic wellness programs in a serene environment.',
@@ -87,7 +87,7 @@ const GymFinder = () => {
           });
           setLoading(false);
         },
-        (err) => {
+        () => {
           setLocationError('Unable to retrieve your location. Using default location.');
           setUserLocation({ lat: 40.7128, lng: -74.0060 }); // Default to NYC
           setLoading(false);
@@ -102,16 +102,10 @@ const GymFinder = () => {
   // Load gyms - in a real app, this would be an API call
   useEffect(() => {
     setLoading(true);
-    try {
-      // Simulate API call
-      setTimeout(() => {
-        setGyms(mockGyms);
-        setLoading(false);
-      }, 800);
-    } catch (err) {
-      setError('Failed to load gyms. Please try again later.');
+    setTimeout(() => {
+      setGyms(mockGyms);
       setLoading(false);
-    }
+    }, 800);
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -243,9 +237,6 @@ const GymFinder = () => {
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
               >
-                <svg className={`h-4 w-4 mr-1 ${filter === 'all' ? 'text-white' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
                 All Gyms
               </button>
               <button
@@ -256,16 +247,7 @@ const GymFinder = () => {
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
               >
-                <svg className={`h-4 w-4 mr-1 ${filter === 'open' ? 'text-white' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 Open Now
-              </button>
-              <button className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200 flex items-center">
-                <svg className="h-4 w-4 mr-1 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                More Filters
               </button>
             </div>
           </div>
@@ -486,65 +468,6 @@ const GymFinder = () => {
         )}
       </main>
 
-      {/* Register Gym CTA Section */}
-      <section className="bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl border border-white/20"
-          >
-            <div className="md:flex md:items-center md:justify-between">
-              <div className="md:w-2/3">
-                <h2 className="text-3xl font-bold mb-4">Own a Gym? Join Our Platform!</h2>
-                <p className="text-lg text-indigo-100 max-w-2xl">
-                  List your gym on our platform and reach thousands of fitness enthusiasts in your area. 
-                  Get more visibility, manage memberships, and grow your business.
-                </p>
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-white/20 p-2 rounded-full">
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-sm text-indigo-100">Increase visibility</p>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-white/20 p-2 rounded-full">
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-sm text-indigo-100">Manage memberships</p>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-white/20 p-2 rounded-full">
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-sm text-indigo-100">Verified badge</p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 md:mt-0 md:w-1/3 md:flex md:justify-end">
-                <button
-                  className="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-lg text-indigo-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all duration-200 hover:scale-[1.02]"
-                >
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  Register Your Gym
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Gym Detail Modal */}
       <AnimatePresence>
         {showModal && selectedGym && (
@@ -555,7 +478,7 @@ const GymFinder = () => {
             className="fixed inset-0 z-50 overflow-y-auto"
           >
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              {/* Background overlay */}
+              {/* Background overlay - THIS IS WHAT CAUSES THE BLUR */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -563,25 +486,27 @@ const GymFinder = () => {
                 className="fixed inset-0 transition-opacity"
                 aria-hidden="true"
               >
-                <div className="absolute inset-0 bg-gray-900/75 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
+                <div 
+                  className="absolute inset-0 bg-gray-900/75 backdrop-blur-sm" 
+                  onClick={() => setShowModal(false)}
+                ></div>
               </motion.div>
 
               {/* Modal content */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="inline-block align-bottom bg-white rounded-t-2xl rounded-b-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="modal-headline"
               >
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-2xl leading-6 font-bold text-gray-900" id="modal-headline">
+                          <h3 className="text-2xl leading-6 font-bold text-gray-900">
                             {selectedGym.name}
                           </h3>
                           <div className="mt-1 flex items-center">
@@ -626,7 +551,6 @@ const GymFinder = () => {
                                 src={selectedGym.photo_url}
                                 alt={selectedGym.name}
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                             </div>
                           )}
 
@@ -663,14 +587,14 @@ const GymFinder = () => {
                           <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
                             <h4 className="text-lg font-medium text-gray-900">Membership Plans</h4>
                             <div className="mt-4 space-y-4">
-                              {selectedGym.membership_plans.map((plan: { name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; price: number; features: (string | number | boolean | ReactPortal | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined)[]; }, index: Key | null | undefined) => (
+                              {selectedGym.membership_plans.map((plan, index) => (
                                 <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white shadow-xs">
                                   <div className="flex justify-between items-start">
                                     <h5 className="font-medium text-gray-900">{plan.name}</h5>
                                     <span className="text-lg font-bold text-indigo-600">${plan.price.toFixed(2)}</span>
                                   </div>
                                   <ul className="mt-2 space-y-2 text-sm text-gray-600">
-                                    {plan.features.map((feature: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined, i: Key | null | undefined) => (
+                                    {plan.features.map((feature, i) => (
                                       <li key={i} className="flex items-start">
                                         <svg className="h-4 w-4 mr-1.5 mt-0.5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -690,7 +614,7 @@ const GymFinder = () => {
                           <div className="mt-6 bg-gray-50 p-4 rounded-xl shadow-sm">
                             <h4 className="text-lg font-medium text-gray-900">Amenities</h4>
                             <div className="mt-2 flex flex-wrap gap-2">
-                              {selectedGym.amenities.map((amenity: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined, index: Key | null | undefined) => (
+                              {selectedGym.amenities.map((amenity, index) => (
                                 <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                   {amenity}
                                 </span>

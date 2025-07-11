@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.10.0",
     "backend": "file:..",
     "bcryptjs": "^3.0.2",
@@ -21,6 +22,7 @@
     "framer-motion": "^12.18.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "leaflet": "^1.9.4",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.344.0",
     "mongoose": "^8.15.2",
@@ -32,6 +34,7 @@
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "react-intersection-observer": "^9.16.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^6.30.1",
     "react-toastify": "^11.0.5",
     "recoil": "^0.7.7"
@@ -42,6 +45,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/leaflet": "^1.9.20",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.10",
     "@types/react": "^18.3.23",
@@ -57,6 +61,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "vite": "^7.0.4"
   }
 }

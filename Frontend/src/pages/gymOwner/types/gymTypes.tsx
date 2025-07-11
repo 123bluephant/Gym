@@ -1,5 +1,7 @@
 // src/types/gymTypes.ts
 
+import { ReactNode } from "react";
+
 // Core User Types
 export interface User {
   id: string;
@@ -18,6 +20,7 @@ export interface User {
 }
 
 export interface Trainer {
+  specialization: any;
   id: string;
   name: string;
   email: string;
@@ -26,7 +29,7 @@ export interface Trainer {
   experience: number; // in years
   rating: number; // 1-5
   clients: number;
-  status: 'Active' | 'On Leave' | 'Inactive';
+  status: 'Active' | 'On Leave' | 'Inactive'|'Available';
   specializations: string[];
   bio?: string;
   certifications?: string[];
@@ -36,6 +39,10 @@ export interface Trainer {
 
 // Nutrition Types
 export interface Meal {
+  category: any;
+  prepTime: string;
+  fat: ReactNode;
+  instructions: any;
   id: string;
   userId: string; // Reference to user
   date: string;

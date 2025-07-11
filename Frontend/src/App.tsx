@@ -29,7 +29,6 @@ import ActivityPage from './pages/Dashboard/ActivityPage';
 import AchievementsPage from './pages/Dashboard/AchievementsPage';
 import SettingsPage from './pages/Dashboard/SettingsPage';
 import WomensHealthPage from './pages/Workout/WomensHealthPage';
-import AnalyticsPage from './pages/gymOwner/Pages/Analytics';
 import SettingsPagegym from './pages/gymOwner/Pages/Settings';
 import Dashboardgym from './pages/gymOwner/Pages/Dashboard';
 import Meals from './pages/gymOwner/Pages/Meals/List';
@@ -45,7 +44,7 @@ import ViewList from './pages/gymOwner/Pages/Users/ViewUser';
 import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
 import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
 import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
-import GymFinder from './pages/GymFinder';
+
 import ManageProducts from './pages/gymOwner/Pages/Shop/ManageProducts';
 import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
@@ -66,6 +65,9 @@ import AddWorkoutPage from './pages/Workout/AddWorkoutPage';
 import UserMeals from './pages/gymOwner/Pages/Users/Meals';
 import MealForm from './pages/gymOwner/Pages/Users/MealForm';
 import EditMeal from './pages/gymOwner/Pages/Users/EditMeal';
+import GymDetail from './pages/GymFinder/GymDetail';
+import GymList from './pages/GymFinder/GymList';
+import Layout from './pages/gymOwner/components/Layout';
 
 function AppContent() {
   const user = useRecoilValue(userAtom);
@@ -89,13 +91,12 @@ function AppContent() {
 
       {(isGymRoute && isGymOwner) ? (
         <div className="flex h-screen bg-gray-100">
-          <Sidebar />
+      
           <div className="flex-1 flex flex-col overflow-hidden">
-            <Navbar />
+           
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
               <Routes>
                 <Route path="/gym/settings" element={<SettingsPagegym />} />
-                <Route path="/gym/analytics" element={<AnalyticsPage />} />
                 <Route path="/gym/profile" element={<GymOwnerProfile />} />
                 <Route path="/gym" element={<Dashboardgym />} />
                 <Route path="/gym/meals" element={<Meals />} />
@@ -112,7 +113,7 @@ function AppContent() {
                 <Route path="/gym/members/meals/:id" element={<UserMeals />} />
                 <Route path="/gym/members/meals/:id/add" element={<MealForm />} />
                 <Route path="/gym/members/meals/:id/edit/:mealId" element={<MealForm />} />
-                <Route path='/gym/members/meals/:userId/edit/:mealId' element= {<EditMeal />} />
+                <Route path='/gym/members/meals/:userId/edit/:mealId' element={<EditMeal />} />
                 <Route path="/gyms/List" element={<GymListing />} />
                 <Route path="/gym/workouts" element={<WorkoutsList />} />
                 <Route path="/gym/workouts/add" element={<AddWorkout />} />
@@ -163,7 +164,8 @@ function AppContent() {
                 <Route path="/women-health" element={<WomensHealthPage />} />
                 <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
                 <Route path="/workouts/Add" element={<AddWorkoutPage />} />
-                <Route path="/Finder" element={<GymFinder />} />
+                <Route path="/Finder" element={<GymList />} />
+                <Route path="/Finder/:id" element={<GymDetail />} />
                 <Route path="/nutrition" element={<NutritionPage />} />
                 <Route path="/tracking" element={<TrackingPage />} />
                 <Route path="/shop" element={<ShopPage />} />
@@ -203,11 +205,13 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <Layout>
       <ProductProvider>
         <CartProvider>
           <AppContent />
         </CartProvider>
       </ProductProvider>
+    </Layout>
     </Router>
   );
 }

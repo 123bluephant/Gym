@@ -1,11 +1,12 @@
 // src/pages/Trainers/EditTrainer.tsx
+// src/pages/Trainers/EditTrainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import Button from '../../components/Ui/Button';
 import { FiArrowLeft, FiUpload, FiUser, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { trainerAtom, trainerListAtom, TrainerType } from '../../../../atoms/trainerAtom';
+import { trainerAtom, trainerListAtom } from '../../../../atoms/trainerAtom';
 
 const EditTrainer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,12 +20,10 @@ const EditTrainer: React.FC = () => {
   const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const specializationOptions = [
+   const specializationOptions = [
     'Strength Training', 'Cardio', 'Yoga', 'Pilates', 'CrossFit',
     'Weight Loss', 'Bodybuilding', 'Rehabilitation', 'Nutrition'
   ];
-
   useEffect(() => {
     const loadTrainer = async () => {
       try {
@@ -57,23 +56,31 @@ const EditTrainer: React.FC = () => {
     }
   }, [id, navigate, setTrainer]);
 
-  const validateForm = () => {
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
     if (!trainer?.fullName) newErrors.fullName = 'Name is required';
     if (!trainer?.email) {
       newErrors.email = 'Email is required';
-    } else if (!/^\S+@\S+\.\S+$/.test(trainer.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trainer.email)) {
       newErrors.email = 'Invalid email format';
     }
-    if (trainer?.experience < 0) newErrors.experience = 'Must be positive';
-    if (trainer?.rating < 0 || trainer?.rating > 5) newErrors.rating = 'Must be between 0-5';
-    
+
+    if (trainer.experience < 0 || trainer.experience > 50) {
+      newErrors.experience = 'Must be between 0-50 years';
+    }
+
+    if (trainer.rating < 0 || trainer.rating > 5) {
+      newErrors.rating = 'Must be between 0-5';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setTrainer(prev => ({
       ...prev,
@@ -94,6 +101,7 @@ const EditTrainer: React.FC = () => {
 
   const handleSpecializationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
+    
     setTrainer(prev => {
       let newSpecializations = [...prev.specializations];
       if (checked) {
@@ -113,9 +121,8 @@ const EditTrainer: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate image file
-    if (!file.type.match('image.*')) {
-      toast.error('Please select an image file');
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file (JPEG, PNG, etc.)');
       return;
     }
 
@@ -124,12 +131,18 @@ const EditTrainer: React.FC = () => {
 
     // Create preview URL
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadstart = () => {
+      toast.info('Uploading image...');
+    };
+    reader.onload = () => {
       const result = reader.result as string;
       setPreviewImage(result);
     };
     reader.onerror = () => {
-      toast.error('Error reading image file');
+      toast.error('Failed to read image file');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -141,13 +154,14 @@ const EditTrainer: React.FC = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    toast.info('Profile image removed');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error('Please fix the errors in the form');
+      toast.error('Please fix the form errors');
       return;
     }
 
@@ -202,7 +216,7 @@ const EditTrainer: React.FC = () => {
       
     } catch (error) {
       console.error('Failed to save trainer:', error);
-      toast.error('Failed to save trainer');
+      toast.error(error instanceof Error ? error.message : 'Failed to save trainer');
     } finally {
       setIsSaving(false);
     }
@@ -231,6 +245,7 @@ const EditTrainer: React.FC = () => {
         </Button>
         <h1 className="text-2xl font-bold">Edit Trainer</h1>
         <Button
+          type="submit"
           onClick={handleSubmit}
           disabled={isSaving}
         >
@@ -244,7 +259,9 @@ const EditTrainer: React.FC = () => {
             {/* Image Upload Section */}
             <div className="w-full md:w-1/3">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Profile Image
+                </label>
                 <div className="flex flex-col items-center">
                   <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square mb-4 w-full">
                     {previewImage ? (
@@ -253,17 +270,22 @@ const EditTrainer: React.FC = () => {
                           src={previewImage}
                           alt={trainer.fullName}
                           className="w-full h-full object-cover"
+                          aria-label="Trainer profile image"
                         />
                         <button
                           type="button"
                           onClick={removeImage}
-                          className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                          className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-colors"
+                          aria-label="Remove profile image"
                         >
                           <FiX className="text-gray-600" />
                         </button>
                       </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div 
+                        className="w-full h-full flex items-center justify-center bg-gray-100"
+                        aria-label="No profile image"
+                      >
                         <FiUser className="text-gray-400 text-6xl" />
                       </div>
                     )}
@@ -274,6 +296,7 @@ const EditTrainer: React.FC = () => {
                     onChange={handleImageUpload}
                     accept="image/*"
                     className="hidden"
+                    aria-label="Upload profile image"
                   />
                   <Button
                     type="button"
@@ -314,6 +337,8 @@ const EditTrainer: React.FC = () => {
                     onChange={handleChange}
                     required
                     className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
                   />
                 </div>
               </div>
@@ -331,6 +356,7 @@ const EditTrainer: React.FC = () => {
                     value={trainer.experience}
                     onChange={handleChange}
                     className={`w-full border ${errors.experience ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.experience}
                   />
                 </div>
                 <div>
@@ -346,6 +372,7 @@ const EditTrainer: React.FC = () => {
                     value={trainer.rating}
                     onChange={handleChange}
                     className={`w-full border ${errors.rating ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    aria-invalid={!!errors.rating}
                   />
                 </div>
                 <div>
@@ -362,7 +389,9 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
                 <select
                   name="status"
                   value={trainer.status}
@@ -375,7 +404,9 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Specializations</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Specializations
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {specializationOptions.map(spec => (
                     <div key={spec} className="flex items-center">
@@ -396,10 +427,12 @@ const EditTrainer: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
                 <textarea
                   name="bio"
-                  value={trainer.bio || ''}
+                  value={trainer.bio}
                   onChange={handleChange}
                   rows={4}
                   className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
