@@ -44,7 +44,6 @@ import ViewList from './pages/gymOwner/Pages/Users/ViewUser';
 import WorkoutsList from './pages/gymOwner/Pages/Workouts/List';
 import AddWorkout from './pages/gymOwner/Pages/Workouts/AddWorkout';
 import EditWorkout from './pages/gymOwner/Pages/Workouts/EditWorkout';
-
 import ManageProducts from './pages/gymOwner/Pages/Shop/ManageProducts';
 import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
@@ -83,6 +82,7 @@ function AppContent() {
   if (isGymRoute && (!user || !isGymOwner)) {
     return <Navigate to="/" replace />;
   }
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Regular Header (for non-gym routes) */}
@@ -90,10 +90,8 @@ function AppContent() {
       {!user && !isDashboard && !isGymRoute && <Header />}
 
       {(isGymRoute && isGymOwner) ? (
-        <div className="flex h-screen bg-gray-100">
-      
+        <Layout>
           <div className="flex-1 flex flex-col overflow-hidden">
-           
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
               <Routes>
                 <Route path="/gym/settings" element={<SettingsPagegym />} />
@@ -122,7 +120,7 @@ function AppContent() {
               </Routes>
             </main>
           </div>
-        </div>
+        </Layout>
       ) : isAdminRoute ? (
         <div className="flex h-screen bg-gray-100">
           <AdminSidebar
@@ -205,13 +203,11 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <Layout>
       <ProductProvider>
         <CartProvider>
           <AppContent />
         </CartProvider>
       </ProductProvider>
-    </Layout>
     </Router>
   );
 }

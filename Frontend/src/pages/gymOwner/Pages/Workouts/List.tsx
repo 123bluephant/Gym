@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/Ui/Button';
-import DataTable from '../../components/Ui/DataTable';
 import Modal from '../../components/Ui/Modal';
 import { mockWorkouts } from '../../Data/MockWorkouts';
 import { WorkoutPlan } from '../../types/gymTypes';
 import { motion } from 'framer-motion';
 
 const WorkoutsList: React.FC = () => {
-    const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedWorkout, setSelectedWorkout] = useState<WorkoutPlan | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,55 +18,6 @@ const WorkoutsList: React.FC = () => {
         workout.targetMuscles.some(muscle =>
             muscle.toLowerCase().includes(searchTerm.toLowerCase())
         ));
-
-    // Table columns configuration
-    const columns = [
-        { header: 'Name', accessor: 'name' },
-        { 
-            header: 'Difficulty', 
-            accessor: 'difficulty',
-            cell: (value: string) => (
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                    value === 'Beginner' ? 'bg-green-100 text-green-800' :
-                    value === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                }`}>
-                    {value}
-                </span>
-            )
-        },
-        { header: 'Duration', accessor: 'duration' },
-        { header: 'Exercises', accessor: 'exerciseCount' },
-        { 
-            header: 'Actions', 
-            accessor: 'actions',
-            cell: (value: React.ReactNode) => (
-                <div className="flex space-x-2 justify-center">
-                    {value}
-                </div>
-            )
-        }
-    ];
-
-    // Prepare table data
-    const tableData = filteredWorkouts.map(workout => ({
-        ...workout,
-        duration: `${workout.duration} min`,
-        exerciseCount: workout.exercises.length,
-        actions: (
-            <>
-                <Link
-                    to={`/gym/workouts/edit/${workout.id}`}
-                    className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
-                >
-                    Edit
-                </Link>
-                <button className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors">
-                    Delete
-                </button>
-            </>
-        )
-    }));
 
     // Handle card click
     const handleCardClick = (workout: WorkoutPlan) => {
@@ -204,38 +153,14 @@ const WorkoutsList: React.FC = () => {
                         />
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            variant={viewMode === 'table' ? 'primary' : 'outline'}
-                            onClick={() => setViewMode('table')}
-                            size="sm"
-                            className="flex-1 sm:flex-none"
-                        >
+                    <Link to="/gym/workouts/add" className="w-full sm:w-auto">
+                        <Button size="sm" className="w-full">
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Table
+                            New Workout
                         </Button>
-                        <Button
-                            variant={viewMode === 'cards' ? 'primary' : 'outline'}
-                            onClick={() => setViewMode('cards')}
-                            size="sm"
-                            className="flex-1 sm:flex-none"
-                        >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                            Cards
-                        </Button>
-                        <Link to="/gym/workouts/add" className="flex-1 sm:flex-none">
-                            <Button size="sm" className="w-full">
-                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                New Workout
-                            </Button>
-                        </Link>
-                    </div>
+                    </Link>
                 </div>
             </div>
 
@@ -263,18 +188,8 @@ const WorkoutsList: React.FC = () => {
                         </Link>
                     </div>
                 </motion.div>
-            ) : viewMode === 'table' ? (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                    <DataTable
-                        columns={columns}
-                        data={tableData as any}
-                        className="border-none"
-                        rowClassName="hover:bg-gray-50 border-b border-gray-200 last:border-0"
-                        headerClassName="bg-gray-50 border-b border-gray-200"
-                    />
-                </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     {filteredWorkouts.map(workout => (
                         <WorkoutCard key={workout.id} workout={workout} />
                     ))}
@@ -296,13 +211,13 @@ const WorkoutsList: React.FC = () => {
                                 <img
                                     src={selectedWorkout.imageUrl}
                                     alt={selectedWorkout.name}
-                                    className="w-full h-64 object-cover"
+                                    className="w-full h-48 sm:h-64 object-cover"
                                 />
                             )}
                             {selectedWorkout.videoUrl && (
                                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                     <button className="bg-white/90 hover:bg-white text-indigo-600 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110">
-                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -310,7 +225,7 @@ const WorkoutsList: React.FC = () => {
                                 </div>
                             )}
                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                         selectedWorkout.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
                                         selectedWorkout.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
@@ -318,14 +233,14 @@ const WorkoutsList: React.FC = () => {
                                     }`}>
                                         {selectedWorkout.difficulty}
                                     </span>
-                                    <span className="text-white text-sm flex items-center">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <span className="text-white text-xs sm:text-sm flex items-center">
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         {selectedWorkout.duration} min
                                     </span>
-                                    <span className="text-white text-sm flex items-center">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <span className="text-white text-xs sm:text-sm flex items-center">
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
                                         {selectedWorkout.exercises.length} exercises
@@ -334,7 +249,7 @@ const WorkoutsList: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                             <div className="md:col-span-2">
                                 <h3 className="text-sm font-medium text-gray-500">Description</h3>
                                 <p className="mt-1 text-gray-700">{selectedWorkout.description}</p>
@@ -342,11 +257,11 @@ const WorkoutsList: React.FC = () => {
                             
                             <div>
                                 <h3 className="text-sm font-medium text-gray-500 mb-2">Target Muscles</h3>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1 sm:gap-2">
                                     {selectedWorkout.targetMuscles.map((muscle, index) => (
                                         <span
                                             key={index}
-                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                                         >
                                             {muscle}
                                         </span>
@@ -356,8 +271,8 @@ const WorkoutsList: React.FC = () => {
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Exercises</h3>
-                            <div className="space-y-4">
+                            <h3 className="text-lg font-medium text-gray-900 mb-3 sm:mb-4">Exercises</h3>
+                            <div className="space-y-3 sm:space-y-4">
                                 {selectedWorkout.exercises.map((exercise, index) => (
                                     <motion.div 
                                         key={index}
@@ -366,10 +281,10 @@ const WorkoutsList: React.FC = () => {
                                         transition={{ delay: index * 0.05 }}
                                         className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
                                     >
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start">
-                                                <h4 className="font-medium text-lg text-gray-900">{exercise.name}</h4>
-                                                <div className="flex space-x-3 text-sm text-gray-500">
+                                        <div className="p-3 sm:p-4">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                                                <h4 className="font-medium text-base sm:text-lg text-gray-900">{exercise.name}</h4>
+                                                <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-gray-500">
                                                     <span>{exercise.sets} sets</span>
                                                     <span>{exercise.reps} reps</span>
                                                     <span>{exercise.restInterval}s rest</span>
@@ -377,7 +292,7 @@ const WorkoutsList: React.FC = () => {
                                             </div>
                                             
                                             {exercise.notes && (
-                                                <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                                                <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 sm:p-3 rounded-md">
                                                     <span className="font-medium">Notes: </span>
                                                     {exercise.notes}
                                                 </div>
@@ -390,7 +305,7 @@ const WorkoutsList: React.FC = () => {
                                                     <img 
                                                         src={exercise.imageUrl} 
                                                         alt={exercise.name}
-                                                        className="w-full h-48 object-cover"
+                                                        className="w-full h-40 sm:h-48 object-cover"
                                                     />
                                                 )}
                                                 {exercise.videoUrl && (
@@ -402,12 +317,12 @@ const WorkoutsList: React.FC = () => {
                                                                     frameBorder="0"
                                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                                     allowFullScreen
-                                                                    className="w-full h-48"
+                                                                    className="w-full h-40 sm:h-48"
                                                                 ></iframe>
                                                             ) : (
                                                                 <video 
                                                                     controls 
-                                                                    className="w-full h-48"
+                                                                    className="w-full h-40 sm:h-48"
                                                                     poster={exercise.imageUrl}
                                                                 >
                                                                     <source src={exercise.videoUrl} type="video/mp4" />
@@ -424,7 +339,14 @@ const WorkoutsList: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
+                        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsModalOpen(false)}
+                                className="flex items-center justify-center"
+                            >
+                                Close
+                            </Button>
                             <Link
                                 to={`/gym/workouts/edit/${selectedWorkout.id}`}
                                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center"
@@ -434,13 +356,6 @@ const WorkoutsList: React.FC = () => {
                                 </svg>
                                 Edit Workout
                             </Link>
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsModalOpen(false)}
-                                className="flex items-center justify-center"
-                            >
-                                Close
-                            </Button>
                         </div>
                     </div>
                 )}
