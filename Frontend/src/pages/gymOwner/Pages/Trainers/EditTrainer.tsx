@@ -1,5 +1,3 @@
-// src/pages/Trainers/EditTrainer.tsx
-// src/pages/Trainers/EditTrainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
@@ -20,10 +18,12 @@ const EditTrainer: React.FC = () => {
   const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-   const specializationOptions = [
+  
+  const specializationOptions = [
     'Strength Training', 'Cardio', 'Yoga', 'Pilates', 'CrossFit',
     'Weight Loss', 'Bodybuilding', 'Rehabilitation', 'Nutrition'
   ];
+
   useEffect(() => {
     const loadTrainer = async () => {
       try {
@@ -35,9 +35,7 @@ const EditTrainer: React.FC = () => {
         }
         
         const data = await res.json();
-
         setTrainer(data?.trainer);
-        // Set preview image to existing trainer image
         setPreviewImage(data.trainer.image || null);
         setImageRemoved(false);
         setSelectedFile(null);
@@ -45,7 +43,6 @@ const EditTrainer: React.FC = () => {
       } catch (error) {
         console.error('Error loading trainer:', error);
         toast.error('Failed to load trainer data');
-        // navigate('/gym/trainers');
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +86,6 @@ const EditTrainer: React.FC = () => {
         : value
     }));
     
-    // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -129,7 +125,6 @@ const EditTrainer: React.FC = () => {
     setSelectedFile(file);
     setImageRemoved(false);
 
-    // Create preview URL
     const reader = new FileReader();
     reader.onloadstart = () => {
       toast.info('Uploading image...');
@@ -177,15 +172,11 @@ const EditTrainer: React.FC = () => {
       formData.append('bio', trainer.bio);
       trainer.specializations.forEach((spec) => formData.append('specializations', spec));
       
-      // Handle image upload
       if (selectedFile) {
-        // New image file selected
         formData.append('image', selectedFile);
       } else if (imageRemoved) {
-        // Image was removed
         formData.append('removeImage', 'true');
       } else if (trainer.image) {
-        // Keep existing image (original trainer image)
         formData.append('existingImage', trainer.image);
       }
       
@@ -206,7 +197,6 @@ const EditTrainer: React.FC = () => {
         throw new Error(result.message || 'Failed to update trainer');
       }
 
-      // Update trainer list atom
       setTrainerList(prev => 
         prev.map(t => t._id === trainer._id ? { ...trainer, ...result } : t)
       );
@@ -224,7 +214,7 @@ const EditTrainer: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex justify-center items-center h-64">
+      <div className="p-4 sm:p-6 flex justify-center items-center min-h-[50vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading trainer data...</p>
@@ -234,58 +224,60 @@ const EditTrainer: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <Button
           variant="outline"
           onClick={() => navigate('/gym/trainers')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start"
         >
           <FiArrowLeft /> Back to Trainers
         </Button>
-        <h1 className="text-2xl font-bold">Edit Trainer</h1>
+        
+        <h1 className="text-xl sm:text-2xl font-bold text-center sm:text-left w-full sm:w-auto">
+          Edit Trainer
+        </h1>
+        
         <Button
           type="submit"
           onClick={handleSubmit}
           disabled={isSaving}
+          className="w-full sm:w-auto justify-center"
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
 
+      {/* Main Form */}
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Image Upload Section */}
-            <div className="w-full md:w-1/3">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Image Upload Section - Full width on mobile, 1/3 on larger screens */}
+            <div className="w-full lg:w-1/3">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Profile Image
                 </label>
                 <div className="flex flex-col items-center">
-                  <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square mb-4 w-full">
+                  <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square mb-4 w-full max-w-xs mx-auto">
                     {previewImage ? (
                       <>
                         <img
                           src={previewImage}
                           alt={trainer.fullName}
                           className="w-full h-full object-cover"
-                          aria-label="Trainer profile image"
                         />
                         <button
                           type="button"
                           onClick={removeImage}
                           className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-colors"
-                          aria-label="Remove profile image"
                         >
                           <FiX className="text-gray-600" />
                         </button>
                       </>
                     ) : (
-                      <div 
-                        className="w-full h-full flex items-center justify-center bg-gray-100"
-                        aria-label="No profile image"
-                      >
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
                         <FiUser className="text-gray-400 text-6xl" />
                       </div>
                     )}
@@ -296,13 +288,12 @@ const EditTrainer: React.FC = () => {
                     onChange={handleImageUpload}
                     accept="image/*"
                     className="hidden"
-                    aria-label="Upload profile image"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     <FiUpload /> {previewImage ? 'Change Image' : 'Upload Image'}
                   </Button>
@@ -310,9 +301,10 @@ const EditTrainer: React.FC = () => {
               </div>
             </div>
 
-            {/* Form Fields Section */}
-            <div className="w-full md:w-2/3 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Form Fields Section - Full width on mobile, 2/3 on larger screens */}
+            <div className="w-full lg:w-2/3 space-y-4 sm:space-y-6">
+              {/* Basic Info - Stack on mobile, 2 columns on medium+ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Full Name {errors.fullName && <span className="text-red-500 text-xs"> - {errors.fullName}</span>}
@@ -337,13 +329,12 @@ const EditTrainer: React.FC = () => {
                     onChange={handleChange}
                     required
                     className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                    aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? 'email-error' : undefined}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Stats - 1 column on mobile, 3 columns on medium+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Experience (years) {errors.experience && <span className="text-red-500 text-xs"> - {errors.experience}</span>}
@@ -356,7 +347,6 @@ const EditTrainer: React.FC = () => {
                     value={trainer.experience}
                     onChange={handleChange}
                     className={`w-full border ${errors.experience ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                    aria-invalid={!!errors.experience}
                   />
                 </div>
                 <div>
@@ -372,7 +362,6 @@ const EditTrainer: React.FC = () => {
                     value={trainer.rating}
                     onChange={handleChange}
                     className={`w-full border ${errors.rating ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                    aria-invalid={!!errors.rating}
                   />
                 </div>
                 <div>
@@ -388,6 +377,7 @@ const EditTrainer: React.FC = () => {
                 </div>
               </div>
 
+              {/* Status - Full width */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -403,11 +393,12 @@ const EditTrainer: React.FC = () => {
                 </select>
               </div>
 
+              {/* Specializations - 1 column on mobile, 2 on medium, 3 on large */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Specializations
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {specializationOptions.map(spec => (
                     <div key={spec} className="flex items-center">
                       <input
@@ -426,6 +417,7 @@ const EditTrainer: React.FC = () => {
                 </div>
               </div>
 
+              {/* Bio - Full width */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Bio
