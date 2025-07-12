@@ -67,17 +67,18 @@ const mockGyms: Gym[] = [
 
 const GymDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [gym, setGym] = useState<Gym | null>(null);
+  const [gym, setGym] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const foundGym = mockGyms.find(g => g.id === id);
-      setGym(foundGym || null);
+    const getGymDetails = async () => {
+      const res = await fetch(`/api/gym/getGym/${id}`);
+      const data = await res.json();
+      setGym(data.gym || null);
       setLoading(false);
-    }, 500);
+    }
+    getGymDetails();
   }, [id]);
 
   if (loading) {
@@ -119,7 +120,7 @@ const GymDetail = () => {
       <div className="relative h-96 overflow-hidden">
         <img
           className="w-full h-full object-cover"
-          src={gym.photo_url}
+          src={gym.gymImg[1]}
           alt={gym.name}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
@@ -149,15 +150,11 @@ const GymDetail = () => {
                   <Star className="h-5 w-5 text-yellow-300 fill-current mr-1" />
                   <span>{gym.rating} ({Math.floor(gym.rating * 20)} reviews)</span>
                 </div>
-                <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-1" />
-                  <span>{gym.distance.toFixed(1)} miles away</span>
-                </div>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                {/* <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                   gym.open_now ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
                   {gym.open_now ? 'Open Now' : 'Closed'}
-                </span>
+                </span> */}
               </div>
             </motion.div>
           </div>
@@ -177,7 +174,7 @@ const GymDetail = () => {
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Gym</h2>
-              <p className="text-gray-600 leading-relaxed">{gym.description}</p>
+              <p className="text-gray-600 leading-relaxed">{gym.bio}</p>
             </motion.div>
 
             {/* Equipment & Facilities */}
@@ -192,12 +189,12 @@ const GymDetail = () => {
                 Equipment & Facilities
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {gym.equipment.map((item, index) => (
+                {/* {gym.equipment.map((item, index) => (
                   <div key={index} className="flex items-center p-3 bg-indigo-50 rounded-lg">
                     <div className="w-2 h-2 bg-indigo-600 rounded-full mr-3"></div>
                     <span className="text-gray-800 font-medium">{item}</span>
                   </div>
-                ))}
+                ))} */}
               </div>
             </motion.div>
 
@@ -210,12 +207,12 @@ const GymDetail = () => {
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {gym.amenities.map((amenity, index) => (
+                {/* {gym.amenities.map((amenity, index) => (
                   <div key={index} className="flex items-center">
                     <Check className="h-5 w-5 text-green-500 mr-3" />
                     <span className="text-gray-700">{amenity}</span>
                   </div>
-                ))}
+                ))} */}
               </div>
             </motion.div>
 
@@ -243,11 +240,11 @@ const GymDetail = () => {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Phone className="h-5 w-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700">{gym.contact.phone}</span>
+                    <span className="text-gray-700">{gym?.phone}</span>
                   </div>
                   <div className="flex items-center">
                     <Mail className="h-5 w-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700">{gym.contact.email}</span>
+                    <span className="text-gray-700">{gym?.email}</span>
                   </div>
                 </div>
               </div>
@@ -265,7 +262,7 @@ const GymDetail = () => {
                 Location
               </h3>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 mb-4">{gym.address}</p>
+                <p className="text-gray-700 mb-4">{gym.location}</p>
                 <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <MapPin className="h-4 w-4 mr-2" />
                   Get Directions
@@ -285,7 +282,7 @@ const GymDetail = () => {
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Membership Plans</h2>
                 <div className="space-y-4">
-                  {gym.membership_plans.map((plan, index) => (
+                  {gym.membershipPlans.map((plan, index) => (
                     <div
                       key={index}
                       className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
@@ -297,7 +294,7 @@ const GymDetail = () => {
                     >
                       <div className="flex justify-between items-start mb-3">
                         <h3 className="font-bold text-gray-900">{plan.name}</h3>
-                        <span className="text-2xl font-bold text-indigo-600">${plan.price.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-indigo-600">{plan.price}</span>
                       </div>
                       <ul className="space-y-2 text-sm text-gray-600">
                         {plan.features.map((feature, i) => (
