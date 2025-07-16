@@ -46,7 +46,6 @@ const avatars = [
 const GymOwnerProfile = () => {
   const user = useRecoilValue(userAtom);
   const [isEditing, setIsEditing] = useState(false);
-  console.log('User:', user);
   const [profileData, setProfileData] = useState<ProfileData>({
     name: user?.name || '',
     email: user?.email || '',
@@ -77,6 +76,7 @@ const GymOwnerProfile = () => {
   const [newGymImageFiles, setNewGymImageFiles] = useState<File[]>([]);
   const [newEquipment, setNewEquipment] = useState('');
   const [newAmenity, setNewAmenity] = useState('');
+
   useEffect(() => {
     if (user && user.role !== "gym_owner") {
       <Navigate to="/dashboard" replace />;
@@ -180,7 +180,6 @@ const GymOwnerProfile = () => {
     }
   };
 
-
   const removeGymImage = (index: number) => {
     setGymImagePreviews((prev: string[]) => prev.filter((_, i) => i !== index));
     setNewGymImageFiles((prev: File[]) => prev.filter((_, i) => i !== index));
@@ -218,31 +217,22 @@ const GymOwnerProfile = () => {
       formData.append('location', profileData.location);
       formData.append('established', profileData.established);
       formData.append('hours', profileData.hours);
-
       formData.append('equipment', JSON.stringify(profileData.equipment));
       formData.append('amenities', JSON.stringify(profileData.amenities));
       
       if (profilePhotoPreview && !profilePhotoPreview.startsWith('http') && profilePhotoPreview !== selectedAvatar) {
-
-      if (
-        profilePhotoPreview &&
-        !profilePhotoPreview.startsWith('http') &&
-        profilePhotoPreview !== selectedAvatar
-      ) {
-
         const avatarBlob = dataURLtoBlob(profilePhotoPreview);
         formData.append('avatar', avatarBlob, 'avatar.jpg');
       } else if (selectedAvatar?.startsWith('http')) {
         formData.append('avatarUrl', selectedAvatar);
       }
-
+      
       const existingImages: any = [];
       profileData.gymImages.forEach((imageUrl) => {
         if (imageUrl.startsWith('http')) {
           existingImages.push(imageUrl);
         }
       });
-
       
       if (existingImages.length > 0) {
         formData.append('existingGymImages', JSON.stringify(existingImages));
@@ -258,23 +248,6 @@ const GymOwnerProfile = () => {
       
       if (profileData.socialMedia) {
         formData.append('socialMedia', JSON.stringify(profileData.socialMedia));
-      }
-
-
-      if (existingImages.length > 0) {
-        formData.append('existingGymImages', JSON.stringify(existingImages));
-      }
-      newGymImageFiles.forEach((file) => {
-        formData.append('gymImg', file);
-      });
-      if (profileData.membershipPlans && profileData.membershipPlans.length > 0) {
-        formData.append('membershipPlans', JSON.stringify(profileData.membershipPlans));
-      }
-      if (profileData.socialMedia) {
-        formData.append('socialMedia', JSON.stringify(profileData.socialMedia));
-      }
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
       }
 
       const response = await fetch('/api/gym/update', {
@@ -323,7 +296,6 @@ const GymOwnerProfile = () => {
       alert('Failed to save profile. Please try again.');
     }
   };
-
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
