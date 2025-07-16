@@ -5,67 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Clock, Star, Filter, Grid3X3, Map, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import MapView from './MapView';
 
-// Mock data - in a real app you would fetch this from an API
-const mockGyms: Gym[] = [
-  {
-    id: '1',
-    name: 'Power Fitness Center',
-    address: '123 Main St, New York, NY',
-    distance: 0.5,
-    rating: 4.5,
-    open_now: true,
-    photo_url: 'https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Weights', 'Cardio', 'Pool', 'Yoga'],
-    hours: '6:00 AM - 10:00 PM',
-    description: 'A full-service fitness center with state-of-the-art equipment and a variety of classes for all fitness levels.',
-    membership_plans: [
-      { name: 'Basic', price: 29.99, features: ['Gym access', 'Locker room'] },
-      { name: 'Premium', price: 49.99, features: ['Gym access', 'All classes', 'Pool', 'Sauna'] },
-      { name: 'Annual', price: 499.99, features: ['All premium features', '1 free personal training session', '10% discount on merchandise'] }
-    ],
-    amenities: ['Free Wi-Fi', 'Locker rooms', 'Showers', 'Towel service'],
-    contact: { phone: '(212) 555-1234', email: 'info@powerfitness.com' }
-  },
-  {
-    id: '2',
-    name: 'Iron Paradise Gym',
-    address: '456 Broadway, New York, NY',
-    distance: 1.2,
-    rating: 4.2,
-    open_now: true,
-    photo_url: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Weights', 'Crossfit', 'Sauna'],
-    hours: '5:00 AM - 11:00 PM',
-    description: 'A hardcore gym for serious lifters with top-notch equipment and a no-frills approach to fitness.',
-    membership_plans: [
-      { name: 'Monthly', price: 39.99, features: ['Gym access', 'Locker room'] },
-      { name: '6 Months', price: 199.99, features: ['Gym access', 'Crossfit classes'] },
-      { name: 'Annual', price: 349.99, features: ['All features', '2 free personal training sessions'] }
-    ],
-    amenities: ['Locker rooms', 'Showers', 'Supplement shop'],
-    contact: { phone: '(212) 555-5678', email: 'info@ironparadise.com' }
-  },
-  {
-    id: '3',
-    name: 'Zen Yoga & Fitness',
-    address: '789 Park Ave, New York, NY',
-    distance: 2.1,
-    rating: 4.7,
-    open_now: false,
-    photo_url: 'https://images.pexels.com/photos/3822843/pexels-photo-3822843.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Yoga', 'Pilates', 'Meditation'],
-    hours: '7:00 AM - 9:00 PM',
-    description: 'A peaceful sanctuary offering yoga, meditation, and holistic wellness programs in a serene environment.',
-    membership_plans: [
-      { name: 'Drop-in', price: 20.00, features: ['Single class'] },
-      { name: 'Monthly Unlimited', price: 89.99, features: ['Unlimited classes', 'Meditation sessions'] },
-      { name: 'Annual', price: 899.99, features: ['Unlimited classes', '2 private sessions', 'Wellness workshops'] }
-    ],
-    amenities: ['Changing rooms', 'Showers', 'Tea lounge', 'Retail shop'],
-    contact: { phone: '(212) 555-9012', email: 'info@zenyoga.com' }
-  },
-];
-
 const GymList = () => {
   const [gyms, setGyms] = useState<Gym[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -131,6 +70,20 @@ const GymList = () => {
     e.preventDefault();
     setIsSearching(true);
 
+
+    try {
+      const res = await fetch(`/api/gym/search?query=${searchTerm}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Search failed');
+      }
+      setGyms(data.gyms);
+    } catch (err) {
+      setError('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const filtered = mockGyms.filter(gym =>
@@ -139,12 +92,30 @@ const GymList = () => {
     );
     setGyms(filtered);
     setIsSearching(false);
+
   };
 
   const resetFilters = () => {
     setSearchTerm('');
     setFilter('all');
-    setGyms(mockGyms);
+    // Reload all gyms
+    const loadGyms = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/gym/getAllgyms');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch gyms');
+        }
+        setGyms(data.gyms);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load gyms. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadGyms();
   };
 
   const filteredGyms = filter === 'open'
@@ -447,10 +418,17 @@ const GymList = () => {
                             transition={{ delay: 0.2 }}
                           >
                             {gym.open_now ? 'Open Now' : 'Closed'}
+
+                          </motion.span> 
+                          <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white shadow-sm">
+                            {/* {gym.distance.toFixed(1)} miles */}
+                          </span>
+
                           </motion.span> */}
                           {/* <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white shadow-sm">
                             {gym.distance.toFixed(1)} miles
                           </span> */}
+
                         </div>
                       )}
                       <div className="p-4 sm:p-5">
@@ -566,25 +544,25 @@ const GymList = () => {
               >
                 {filteredGyms.map((gym) => (
                   <motion.div
-                    key={gym.id}
+                    key={gym._id}
                     variants={itemVariants}
                     whileHover={{ y: -3 }}
                   >
                     <Link
-                      to={`/Finder/${gym.id}`}
+                      to={`/Finder/${gym._id}`}
                       className="block bg-white rounded-lg border border-gray-200 p-3 sm:p-4 hover:border-indigo-300 hover:shadow-md transition-all duration-200"
                     >
                       <div className="flex items-start space-x-3">
-                        {gym.photo_url && (
+                        {gym.gymImg && (
                           <motion.img
-                            src={gym.photo_url}
-                            alt={gym.name}
+                            src={gym.gymImg[1]}
+                            alt={gym.gymName}
                             className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                             whileHover={{ scale: 1.05 }}
                           />
                         )}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{gym.name}</h4>
+                          <h4 className="font-medium text-gray-900 truncate">{gym.gymName}</h4>
                           <div className="flex items-center mt-1">
                             <Star className="h-3 w-3 text-yellow-400 fill-current" />
                             <span className="ml-1 text-sm text-gray-600">{gym.rating}</span>
@@ -593,7 +571,7 @@ const GymList = () => {
                               {gym.open_now ? 'Open' : 'Closed'}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 mt-1 truncate">{gym.address}</p>
+                          <p className="text-sm text-gray-500 mt-1 truncate">{gym.location}</p>
                         </div>
                       </div>
                     </Link>
