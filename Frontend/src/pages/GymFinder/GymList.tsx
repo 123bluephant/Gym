@@ -70,6 +70,7 @@ const GymList = () => {
     e.preventDefault();
     setIsSearching(true);
 
+
     try {
       const res = await fetch(`/api/gym/search?query=${searchTerm}`);
       const data = await res.json();
@@ -82,6 +83,16 @@ const GymList = () => {
     } finally {
       setIsSearching(false);
     }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const filtered = mockGyms.filter(gym =>
+      gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gym.address.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setGyms(filtered);
+    setIsSearching(false);
+
   };
 
   const resetFilters = () => {
@@ -110,7 +121,6 @@ const GymList = () => {
   const filteredGyms = filter === 'open'
     ? gyms.filter(gym => gym.open_now)
     : gyms;
-
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -390,6 +400,7 @@ const GymList = () => {
                             whileHover={{ scale: 1.05 }}
                             transition={{ duration: 0.3 }}
                           />
+                          {console.log('Gym image:', gym)}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                           <div className="absolute bottom-0 left-0 p-4 text-white">
                             <h2 className="text-xl font-bold">{gym.gymName}</h2>
@@ -398,7 +409,7 @@ const GymList = () => {
                               <span className="ml-1 text-sm">{gym.rating} ({Math.floor(gym.rating * 20)})</span>
                             </div>
                           </div>
-                          <motion.span 
+                          {/* <motion.span 
                             className={`absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm ${
                               gym.open_now ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                             }`}
@@ -407,10 +418,17 @@ const GymList = () => {
                             transition={{ delay: 0.2 }}
                           >
                             {gym.open_now ? 'Open Now' : 'Closed'}
+
                           </motion.span> 
                           <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white shadow-sm">
                             {/* {gym.distance.toFixed(1)} miles */}
                           </span>
+
+                          </motion.span> */}
+                          {/* <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white shadow-sm">
+                            {gym.distance.toFixed(1)} miles
+                          </span> */}
+
                         </div>
                       )}
                       <div className="p-4 sm:p-5">

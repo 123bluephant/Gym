@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 
 const gymOwnerSchema = new mongoose.Schema(
   {
+    avatar:{type:String},
+    gymImg:[
+      {
+        type:String
+      }
+    ],
+    rating:{type:Number, default:0},
     username: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     gymName: { type: String },
