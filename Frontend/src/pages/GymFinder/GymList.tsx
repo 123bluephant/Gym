@@ -5,67 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Clock, Star, Filter, Grid3X3, Map, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import MapView from './MapView';
 
-// Mock data - in a real app you would fetch this from an API
-const mockGyms: Gym[] = [
-  {
-    id: '1',
-    name: 'Power Fitness Center',
-    address: '123 Main St, New York, NY',
-    distance: 0.5,
-    rating: 4.5,
-    open_now: true,
-    photo_url: 'https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Weights', 'Cardio', 'Pool', 'Yoga'],
-    hours: '6:00 AM - 10:00 PM',
-    description: 'A full-service fitness center with state-of-the-art equipment and a variety of classes for all fitness levels.',
-    membership_plans: [
-      { name: 'Basic', price: 29.99, features: ['Gym access', 'Locker room'] },
-      { name: 'Premium', price: 49.99, features: ['Gym access', 'All classes', 'Pool', 'Sauna'] },
-      { name: 'Annual', price: 499.99, features: ['All premium features', '1 free personal training session', '10% discount on merchandise'] }
-    ],
-    amenities: ['Free Wi-Fi', 'Locker rooms', 'Showers', 'Towel service'],
-    contact: { phone: '(212) 555-1234', email: 'info@powerfitness.com' }
-  },
-  {
-    id: '2',
-    name: 'Iron Paradise Gym',
-    address: '456 Broadway, New York, NY',
-    distance: 1.2,
-    rating: 4.2,
-    open_now: true,
-    photo_url: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Weights', 'Crossfit', 'Sauna'],
-    hours: '5:00 AM - 11:00 PM',
-    description: 'A hardcore gym for serious lifters with top-notch equipment and a no-frills approach to fitness.',
-    membership_plans: [
-      { name: 'Monthly', price: 39.99, features: ['Gym access', 'Locker room'] },
-      { name: '6 Months', price: 199.99, features: ['Gym access', 'Crossfit classes'] },
-      { name: 'Annual', price: 349.99, features: ['All features', '2 free personal training sessions'] }
-    ],
-    amenities: ['Locker rooms', 'Showers', 'Supplement shop'],
-    contact: { phone: '(212) 555-5678', email: 'info@ironparadise.com' }
-  },
-  {
-    id: '3',
-    name: 'Zen Yoga & Fitness',
-    address: '789 Park Ave, New York, NY',
-    distance: 2.1,
-    rating: 4.7,
-    open_now: false,
-    photo_url: 'https://images.pexels.com/photos/3822843/pexels-photo-3822843.jpeg?auto=compress&cs=tinysrgb&w=800',
-    equipment: ['Yoga', 'Pilates', 'Meditation'],
-    hours: '7:00 AM - 9:00 PM',
-    description: 'A peaceful sanctuary offering yoga, meditation, and holistic wellness programs in a serene environment.',
-    membership_plans: [
-      { name: 'Drop-in', price: 20.00, features: ['Single class'] },
-      { name: 'Monthly Unlimited', price: 89.99, features: ['Unlimited classes', 'Meditation sessions'] },
-      { name: 'Annual', price: 899.99, features: ['Unlimited classes', '2 private sessions', 'Wellness workshops'] }
-    ],
-    amenities: ['Changing rooms', 'Showers', 'Tea lounge', 'Retail shop'],
-    contact: { phone: '(212) 555-9012', email: 'info@zenyoga.com' }
-  },
-];
-
 const GymList = () => {
   const [gyms, setGyms] = useState<Gym[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -77,7 +16,6 @@ const GymList = () => {
   const [activeTab, setActiveTab] = useState<'gyms' | 'map'>('gyms');
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Get user's current location
   useEffect(() => {
     const getLocation = async () => {
       try {
@@ -103,18 +41,19 @@ const GymList = () => {
         setUserLocation({ lat: 40.7128, lng: -74.0060 });
       }
     };
-
     getLocation();
   }, []);
 
-  // Load gyms - in a real app, this would be an API call
   useEffect(() => {
     const loadGyms = async () => {
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setGyms(mockGyms);
+        const res = await fetch('/api/gym/getAllgyms');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch gyms');
+        }
+        setGyms(data.gyms);
         setError(null);
       } catch (err) {
         setError('Failed to load gyms. Please try again later.');
@@ -130,22 +69,42 @@ const GymList = () => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
-    
-    // Simulate search delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const filtered = mockGyms.filter(gym =>
-      gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      gym.address.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setGyms(filtered);
-    setIsSearching(false);
+
+    try {
+      const res = await fetch(`/api/gym/search?query=${searchTerm}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Search failed');
+      }
+      setGyms(data.gyms);
+    } catch (err) {
+      setError('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const resetFilters = () => {
     setSearchTerm('');
     setFilter('all');
-    setGyms(mockGyms);
+    // Reload all gyms
+    const loadGyms = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/gym/getAllgyms');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch gyms');
+        }
+        setGyms(data.gyms);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load gyms. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadGyms();
   };
 
   const filteredGyms = filter === 'open'
@@ -198,7 +157,7 @@ const GymList = () => {
             />
           ))}
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -206,16 +165,16 @@ const GymList = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-center"
           >
-            <motion.h1 
+            <motion.h1
               className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4"
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 transition: { type: "spring", stiffness: 300 }
               }}
             >
               Find Your Perfect Gym
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-lg md:text-xl text-indigo-100 max-w-3xl mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.9 }}
@@ -224,7 +183,7 @@ const GymList = () => {
               Discover fitness centers tailored to your needs and goals
             </motion.p>
           </motion.div>
-          
+
           {/* Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -288,9 +247,8 @@ const GymList = () => {
             <div className="flex rounded-lg bg-gray-100 p-1">
               <motion.button
                 onClick={() => setActiveTab('gyms')}
-                className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 flex items-center ${
-                  activeTab === 'gyms' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 flex items-center ${activeTab === 'gyms' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'
+                  }`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -299,9 +257,8 @@ const GymList = () => {
               </motion.button>
               <motion.button
                 onClick={() => setActiveTab('map')}
-                className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 flex items-center ${
-                  activeTab === 'map' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 flex items-center ${activeTab === 'map' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'
+                  }`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -315,11 +272,10 @@ const GymList = () => {
               <span className="text-sm font-medium text-gray-700 hidden sm:inline">Filter:</span>
               <motion.button
                 onClick={() => setFilter('all')}
-                className={`px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  filter === 'all'
+                className={`px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${filter === 'all'
                     ? 'bg-indigo-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -327,11 +283,10 @@ const GymList = () => {
               </motion.button>
               <motion.button
                 onClick={() => setFilter('open')}
-                className={`px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  filter === 'open'
+                className={`px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${filter === 'open'
                     ? 'bg-indigo-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -367,7 +322,7 @@ const GymList = () => {
               >
                 <div className="h-16 w-16 rounded-full border-4 border-indigo-500 border-t-transparent"></div>
               </motion.div>
-              <motion.p 
+              <motion.p
                 className="mt-4 text-gray-600 font-medium"
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -414,9 +369,9 @@ const GymList = () => {
           >
             <AnimatePresence>
               {filteredGyms.length > 0 ? (
-                filteredGyms.map((gym) => (
+                filteredGyms.map((gym: any) => (
                   <motion.div
-                    key={gym.id}
+                    key={gym?._id}
                     layout
                     variants={itemVariants}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -424,20 +379,20 @@ const GymList = () => {
                     whileHover={{ y: -5 }}
                     className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg group"
                   >
-                    <Link to={`/Finder/${gym.id}`} className="block">
-                      {gym.photo_url && (
+                    <Link to={`/Finder/${gym._id}`} className="block">
+                      {gym.gymImg && (
                         <div className="h-48 sm:h-56 overflow-hidden relative">
                           <motion.img
                             className="w-full h-full object-cover"
-                            src={gym.photo_url}
-                            alt={gym.name}
+                            src={gym.gymImg[1]}
+                            alt={gym.gymName}
                             initial={{ scale: 1 }}
                             whileHover={{ scale: 1.05 }}
                             transition={{ duration: 0.3 }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                           <div className="absolute bottom-0 left-0 p-4 text-white">
-                            <h2 className="text-xl font-bold">{gym.name}</h2>
+                            <h2 className="text-xl font-bold">{gym.gymName}</h2>
                             <div className="flex items-center mt-1">
                               <Star className="h-4 w-4 text-yellow-300 fill-current" />
                               <span className="ml-1 text-sm">{gym.rating} ({Math.floor(gym.rating * 20)})</span>
@@ -452,9 +407,9 @@ const GymList = () => {
                             transition={{ delay: 0.2 }}
                           >
                             {gym.open_now ? 'Open Now' : 'Closed'}
-                          </motion.span>
+                          </motion.span> 
                           <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white shadow-sm">
-                            {gym.distance.toFixed(1)} miles
+                            {/* {gym.distance.toFixed(1)} miles */}
                           </span>
                         </div>
                       )}
@@ -462,33 +417,35 @@ const GymList = () => {
                         <div className="text-gray-600 space-y-2">
                           <p className="flex items-center text-sm">
                             <MapPin className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-                            <span className="truncate">{gym.address}</span>
+                            <span className="truncate">{gym.location}</span>
                           </p>
                           <p className="flex items-center text-sm">
                             <Clock className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
                             {gym.hours}
                           </p>
                         </div>
-                        <div className="mt-3 sm:mt-4">
-                          <h3 className="text-sm font-medium text-gray-900 mb-2">Facilities:</h3>
-                          <div className="flex flex-wrap gap-1 sm:gap-2">
-                            {gym.equipment.slice(0, 4).map((item) => (
-                              <motion.span 
-                                key={item} 
-                                className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                                whileHover={{ scale: 1.05 }}
-                              >
-                                {item}
-                              </motion.span>
-                            ))}
-                            {gym.equipment.length > 4 && (
-                              <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                +{gym.equipment.length - 4} more
-                              </span>
-                            )}
+                        {gym.equipment && gym.equipment.length > 0 && (
+                          <div className="mt-3 sm:mt-4">
+                            <h3 className="text-sm font-medium text-gray-900 mb-2">Facilities:</h3>
+                            <div className="flex flex-wrap gap-1 sm:gap-2">
+                              {gym.equipment.slice(0, 4).map((item) => (
+                                <motion.span
+                                  key={item}
+                                  className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                  whileHover={{ scale: 1.05 }}
+                                >
+                                  {item}
+                                </motion.span>
+                              ))}
+                              {gym.equipment.length > 4 && (
+                                <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  +{gym.equipment.length - 4} more
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <motion.div 
+                        )}
+                        <motion.div
                           className="mt-4 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 group-hover:shadow-md"
                           whileHover={{ scale: 1.02 }}
                         >
@@ -508,7 +465,7 @@ const GymList = () => {
                 >
                   <div className="max-w-md mx-auto">
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: [0, 10, -10, 0],
                         scale: [1, 1.1, 1]
                       }}
@@ -548,7 +505,7 @@ const GymList = () => {
                 Explore {filteredGyms.length} gym{filteredGyms.length !== 1 ? 's' : ''} on the map
               </p>
             </div>
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -557,11 +514,11 @@ const GymList = () => {
             >
               <MapView gyms={filteredGyms} userLocation={userLocation} />
             </motion.div>
-            
+
             {/* Gym list below map for reference */}
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">All Locations</h3>
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                 variants={containerVariants}
                 initial="hidden"
@@ -569,35 +526,34 @@ const GymList = () => {
               >
                 {filteredGyms.map((gym) => (
                   <motion.div
-                    key={gym.id}
+                    key={gym._id}
                     variants={itemVariants}
                     whileHover={{ y: -3 }}
                   >
                     <Link
-                      to={`/Finder/${gym.id}`}
+                      to={`/Finder/${gym._id}`}
                       className="block bg-white rounded-lg border border-gray-200 p-3 sm:p-4 hover:border-indigo-300 hover:shadow-md transition-all duration-200"
                     >
                       <div className="flex items-start space-x-3">
-                        {gym.photo_url && (
+                        {gym.gymImg && (
                           <motion.img
-                            src={gym.photo_url}
-                            alt={gym.name}
+                            src={gym.gymImg[1]}
+                            alt={gym.gymName}
                             className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                             whileHover={{ scale: 1.05 }}
                           />
                         )}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{gym.name}</h4>
+                          <h4 className="font-medium text-gray-900 truncate">{gym.gymName}</h4>
                           <div className="flex items-center mt-1">
                             <Star className="h-3 w-3 text-yellow-400 fill-current" />
                             <span className="ml-1 text-sm text-gray-600">{gym.rating}</span>
-                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              gym.open_now ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${gym.open_now ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
                               {gym.open_now ? 'Open' : 'Closed'}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 mt-1 truncate">{gym.address}</p>
+                          <p className="text-sm text-gray-500 mt-1 truncate">{gym.location}</p>
                         </div>
                       </div>
                     </Link>

@@ -60,27 +60,7 @@ const ContactUs = () => {
     }
   ];
 
-  const teamMembers = [
-    {
-      name: 'Nilabh Kumar',
-      role: 'Head of Development',
-      expertise: 'Gym Owner Solutions',
-       image: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      name: 'Ishant Sharma',
-      role: 'Frontend Head',
-      expertise: 'Prenatal & Cycle Fitness',
-      image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400'
-    },
-    {
-      name: 'Sagar Seth',
-      role: 'Backend Lead',
-      expertise: 'Platform & Integration',
-      image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400'
-    }
-  ];
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -285,22 +265,9 @@ const ContactUs = () => {
 
             {/* Team Members */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Meet Our Team</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4"></h3>
               <div className="space-y-4">
-                {teamMembers.map((member, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <h4 className="font-medium text-gray-900">{member.name}</h4>
-                      <p className="text-sm text-gray-600">{member.role}</p>
-                      <p className="text-xs text-pink-600">{member.expertise}</p>
-                    </div>
-                  </div>
-                ))}
+                
               </div>
             </div>
 

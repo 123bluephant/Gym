@@ -5,6 +5,7 @@ import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 import userAtom from '../../../atoms/UserAtom';
 import { useRecoilValue } from 'recoil';
 import { Navigate } from 'react-router-dom';
+import { ChevronsUp } from 'lucide-react';
 
 type MembershipPlan = {
   name: string;
@@ -30,6 +31,8 @@ type ProfileData = {
     instagram: string;
     twitter: string;
   };
+  equipment: string[];
+  amenities: string[];
 };
 
 const avatars = [
@@ -54,11 +57,13 @@ const GymOwnerProfile = () => {
     hours: user?.hours || '',
     profilePhoto: user?.profilePhoto || '',
     avatar: user?.avatar || avatars[0],
-    gymImages: Array.isArray(user?.gymImages) ? user.gymImages : [],
+    gymImages: Array.isArray(user?.gymImg) ? user.gymImg : [],
     membershipPlans: Array.isArray(user?.membershipPlans) ? user.membershipPlans : [],
     socialMedia: typeof user?.socialMedia === 'object' && user?.socialMedia !== null
       ? user.socialMedia
       : { facebook: '', instagram: '', twitter: '' },
+    equipment: Array.isArray(user?.equipment) ? user.equipment : [],
+    amenities: Array.isArray(user?.amenities) ? user.amenities : [],
   });
 
   const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
@@ -68,12 +73,49 @@ const GymOwnerProfile = () => {
   const [gymImagePreviews, setGymImagePreviews] = useState<string[]>(profileData.gymImages);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const gymImagesInputRef = useRef<HTMLInputElement>(null);
+  const [newGymImageFiles, setNewGymImageFiles] = useState<File[]>([]);
+  const [newEquipment, setNewEquipment] = useState('');
+  const [newAmenity, setNewAmenity] = useState('');
 
   useEffect(() => {
     if (user && user.role !== "gym_owner") {
       <Navigate to="/dashboard" replace />;
     }
   }, []);
+
+  const handleAddEquipment = () => {
+    if (newEquipment.trim()) {
+      setProfileData(prev => ({
+        ...prev,
+        equipment: [...prev.equipment, newEquipment.trim()]
+      }));
+      setNewEquipment('');
+    }
+  };
+
+  const handleAddAmenity = () => {
+    if (newAmenity.trim()) {
+      setProfileData(prev => ({
+        ...prev,
+        amenities: [...prev.amenities, newAmenity.trim()]
+      }));
+      setNewAmenity('');
+    }
+  };
+
+  const handleRemoveEquipment = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      equipment: prev.equipment.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleRemoveAmenity = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      amenities: prev.amenities.filter((_, i) => i !== index)
+    }));
+  };
 
   const handleAddFeature = () => {
     setNewPlan(prev => ({ ...prev, features: [...prev.features, ''] }));
@@ -116,13 +158,17 @@ const GymOwnerProfile = () => {
     if (e.target.files) {
       const files = Array.from(e.target.files).slice(0, 5 - gymImagePreviews.length);
       const newPreviews: string[] = [];
-      
+      const newFiles: File[] = [];
+
       files.forEach((file, index) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews[index] = reader.result as string;
+          newFiles[index] = file;
+
           if (newPreviews.length === files.length && !newPreviews.includes(undefined as any)) {
-            setGymImagePreviews(prev => [...prev, ...newPreviews]);
+            setGymImagePreviews((prev: string[]) => [...prev, ...newPreviews]);
+            setNewGymImageFiles((prev: File[]) => [...prev, ...newFiles]);
             setProfileData(prev => ({
               ...prev,
               gymImages: [...prev.gymImages, ...newPreviews]
@@ -135,7 +181,8 @@ const GymOwnerProfile = () => {
   };
 
   const removeGymImage = (index: number) => {
-    setGymImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setGymImagePreviews((prev: string[]) => prev.filter((_, i) => i !== index));
+    setNewGymImageFiles((prev: File[]) => prev.filter((_, i) => i !== index));
     setProfileData(prev => ({
       ...prev,
       gymImages: prev.gymImages.filter((_, i) => i !== index)
@@ -148,6 +195,17 @@ const GymOwnerProfile = () => {
     setShowAvatarModal(false);
   };
 
+  function dataURLtoBlob(dataURL: string): Blob {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ia], { type: mimeString });
+  }
+
   const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -159,19 +217,38 @@ const GymOwnerProfile = () => {
       formData.append('location', profileData.location);
       formData.append('established', profileData.established);
       formData.append('hours', profileData.hours);
-      formData.append('profilePhoto', profileData.profilePhoto);
-      formData.append('avatar', profileData.avatar);
-      profileData.gymImages.forEach((img, index) => formData.append(`gymImages[${index}]`, img));
-      profileData.membershipPlans.forEach((plan, index) => {
-        formData.append(`membershipPlans[${index}][name]`, plan.name);
-        formData.append(`membershipPlans[${index}][price]`, plan.price);
-        plan.features.forEach((feature, featIndex) => 
-          formData.append(`membershipPlans[${index}][features][${featIndex}]`, feature)
-        );
+      formData.append('equipment', JSON.stringify(profileData.equipment));
+      formData.append('amenities', JSON.stringify(profileData.amenities));
+      
+      if (profilePhotoPreview && !profilePhotoPreview.startsWith('http') && profilePhotoPreview !== selectedAvatar) {
+        const avatarBlob = dataURLtoBlob(profilePhotoPreview);
+        formData.append('avatar', avatarBlob, 'avatar.jpg');
+      } else if (selectedAvatar?.startsWith('http')) {
+        formData.append('avatarUrl', selectedAvatar);
+      }
+      
+      const existingImages: any = [];
+      profileData.gymImages.forEach((imageUrl) => {
+        if (imageUrl.startsWith('http')) {
+          existingImages.push(imageUrl);
+        }
       });
-      formData.append('socialMedia[facebook]', profileData.socialMedia.facebook);
-      formData.append('socialMedia[instagram]', profileData.socialMedia.instagram);
-      formData.append('socialMedia[twitter]', profileData.socialMedia.twitter);
+      
+      if (existingImages.length > 0) {
+        formData.append('existingGymImages', JSON.stringify(existingImages));
+      }
+      
+      newGymImageFiles.forEach((file) => {
+        formData.append('gymImg', file);
+      });
+      
+      if (profileData.membershipPlans && profileData.membershipPlans.length > 0) {
+        formData.append('membershipPlans', JSON.stringify(profileData.membershipPlans));
+      }
+      
+      if (profileData.socialMedia) {
+        formData.append('socialMedia', JSON.stringify(profileData.socialMedia));
+      }
 
       const response = await fetch('/api/gym/update', {
         method: 'POST',
@@ -179,12 +256,8 @@ const GymOwnerProfile = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
       const result = await response.json();
-      console.log('Update successful:', result);
+      if (!response.ok) throw new Error(result.message || 'Failed to update');
 
       if (result.updatedOwner) {
         setProfileData({
@@ -198,9 +271,7 @@ const GymOwnerProfile = () => {
           hours: result.updatedOwner.hours || '',
           profilePhoto: result.updatedOwner.profilePhoto || '',
           avatar: result.updatedOwner.avatar || avatars[0],
-          gymImages: Array.isArray(result.updatedOwner.gymImages)
-            ? result.updatedOwner.gymImages
-            : [],
+          gymImages: Array.isArray(result.updatedOwner.gymImg) ? result.updatedOwner.gymImg : [],
           membershipPlans: Array.isArray(result.updatedOwner.membershipPlans)
             ? result.updatedOwner.membershipPlans
             : [],
@@ -208,9 +279,14 @@ const GymOwnerProfile = () => {
             typeof result.updatedOwner.socialMedia === 'object' && result.updatedOwner.socialMedia !== null
               ? result.updatedOwner.socialMedia
               : { facebook: '', instagram: '', twitter: '' },
+          equipment: Array.isArray(result.updatedOwner.equipment) ? result.updatedOwner.equipment : [],
+          amenities: Array.isArray(result.updatedOwner.amenities) ? result.updatedOwner.amenities : [],
         });
+
         setProfilePhotoPreview(result.updatedOwner.profilePhoto || '');
-        setGymImagePreviews(Array.isArray(result.updatedOwner.gymImages) ? result.updatedOwner.gymImages : []);
+        setGymImagePreviews(Array.isArray(result.updatedOwner.gymImg) ? result.updatedOwner.gymImg : []);
+        setSelectedAvatar(result.updatedOwner.avatar || avatars[0]);
+        setNewGymImageFiles([]);
         localStorage.setItem('user', JSON.stringify(result.updatedOwner));
       }
 
@@ -249,34 +325,34 @@ const GymOwnerProfile = () => {
             <div className="flex flex-col items-center mb-6">
               <div className="relative w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mb-4 overflow-hidden">
                 {profilePhotoPreview ? (
-                  <img 
-                    src={profilePhotoPreview} 
-                    alt="Profile" 
+                  <img
+                    src={profilePhotoPreview}
+                    alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <img 
-                    src={selectedAvatar} 
-                    alt="Avatar" 
+                  <img
+                    src={selectedAvatar}
+                    alt="Avatar"
                     className="w-full h-full object-cover"
                   />
                 )}
                 {isEditing && (
                   <>
-                    <button 
+                    <button
                       onClick={() => fileInputRef.current?.click()}
                       className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition"
                     >
                       <FiCamera size={16} />
                     </button>
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       ref={fileInputRef}
                       onChange={handleProfilePhotoChange}
                       accept="image/*"
                       className="hidden"
                     />
-                    <button 
+                    <button
                       onClick={() => setShowAvatarModal(true)}
                       className="absolute bottom-0 left-0 bg-purple-500 text-white p-2 rounded-full hover:bg-purple-600 transition"
                     >
@@ -431,9 +507,9 @@ const GymOwnerProfile = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                   {gymImagePreviews.map((img, index) => (
                     <div key={index} className="relative group">
-                      <img 
-                        src={img} 
-                        alt={`Gym ${index + 1}`} 
+                      <img
+                        src={img}
+                        alt={`Gym ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg"
                       />
                       {isEditing && (
@@ -447,13 +523,13 @@ const GymOwnerProfile = () => {
                     </div>
                   ))}
                   {isEditing && gymImagePreviews.length < 5 && (
-                    <div 
+                    <div
                       className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 cursor-pointer hover:border-blue-500 transition"
                       onClick={() => gymImagesInputRef.current?.click()}
                     >
                       <FiPlus size={24} className="text-gray-400" />
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         ref={gymImagesInputRef}
                         onChange={handleGymImagesChange}
                         accept="image/*"
@@ -464,7 +540,7 @@ const GymOwnerProfile = () => {
                   )}
                 </div>
               ) : isEditing ? (
-                <div 
+                <div
                   className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 cursor-pointer hover:border-blue-500 transition"
                   onClick={() => gymImagesInputRef.current?.click()}
                 >
@@ -472,8 +548,8 @@ const GymOwnerProfile = () => {
                     <FiPlus size={24} className="mx-auto text-gray-400 mb-2" />
                     <p className="text-gray-500">Add Gym Photos (max 5)</p>
                   </div>
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     ref={gymImagesInputRef}
                     onChange={handleGymImagesChange}
                     accept="image/*"
@@ -486,6 +562,105 @@ const GymOwnerProfile = () => {
               )}
             </div>
 
+            {/* Equipment & Facilities Section */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 mb-4">Equipment & Facilities</h3>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newEquipment}
+                      onChange={(e) => setNewEquipment(e.target.value)}
+                      placeholder="Add equipment/facility"
+                      className="flex-1 border p-2 rounded"
+                    />
+                    <button
+                      onClick={handleAddEquipment}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {profileData.equipment.map((item, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{item}</span>
+                        <button
+                          onClick={() => handleRemoveEquipment(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profileData.equipment.length > 0 ? (
+                    profileData.equipment.map((item, index) => (
+                      <span key={index} className="bg-gray-100 px-3 py-1 rounded-full">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No equipment listed</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Amenities Section */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 mb-4">Amenities</h3>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newAmenity}
+                      onChange={(e) => setNewAmenity(e.target.value)}
+                      placeholder="Add amenity"
+                      className="flex-1 border p-2 rounded"
+                    />
+                    <button
+                      onClick={handleAddAmenity}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {profileData.amenities.map((item, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{item}</span>
+                        <button
+                          onClick={() => handleRemoveAmenity(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profileData.amenities.length > 0 ? (
+                    profileData.amenities.map((item, index) => (
+                      <span key={index} className="bg-gray-100 px-3 py-1 rounded-full">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No amenities listed</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Membership Plans Section */}
             <h3 className="font-semibold text-gray-800 mb-4">Membership Plans</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {isEditing && (
@@ -552,6 +727,7 @@ const GymOwnerProfile = () => {
               ))}
             </div>
 
+            {/* Social Media Section */}
             <h3 className="font-semibold text-gray-800 mb-4">Social Media</h3>
             {isEditing ? (
               <div className="space-y-2">
@@ -611,8 +787,8 @@ const GymOwnerProfile = () => {
             <h3 className="text-xl font-bold mb-4">Select Avatar</h3>
             <div className="grid grid-cols-3 gap-4">
               {avatars.map((avatar) => (
-                <div 
-                  key={avatar} 
+                <div
+                  key={avatar}
                   className={`p-1 rounded-full cursor-pointer ${selectedAvatar === avatar ? 'ring-2 ring-blue-500' : ''}`}
                   onClick={() => selectAvatar(avatar)}
                 >
