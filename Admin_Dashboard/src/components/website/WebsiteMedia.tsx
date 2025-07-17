@@ -1,4 +1,3 @@
-// components/website/WebsiteMedia.tsx
 import { FiImage, FiDownload, FiTrash2, FiFileText } from 'react-icons/fi';
 
 type MediaItem = {

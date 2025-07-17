@@ -4,6 +4,7 @@ import { FiFilter, FiDownload, FiPieChart, FiUsers, FiCalendar } from 'react-ico
 import { MembershipGrowthChart } from '../components/reports/MembershipGrowthChart';
 import { ClassAttendanceChart } from '../components/reports/ClassAttendanceChart';
 import { useState } from 'react';
+import { RevenueChart } from '../components/payments/RevenueChart';
 
 export const Reports = () => {
   const [activeReport, setActiveReport] = useState('membership');

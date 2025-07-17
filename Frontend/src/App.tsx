@@ -49,17 +49,6 @@ import GymListing from './pages/gymOwner/components/Gym/GymListing';
 import EditTrainer from './pages/gymOwner/Pages/Trainers/EditTrainer';
 import ViewTrainer from './pages/gymOwner/Pages/Trainers/ViewTrainner';
 import TrainersList from './pages/gymOwner/Pages/Trainers/List';
-import { AdminSidebar } from './pages/Admin/components/layout/Sidebar';
-import { AdminHeader } from './pages/Admin/components/layout/Header';
-import { Dashboard } from './pages/Admin/Pages/Dashboard';
-import { AdminMembers } from './pages/Admin/Pages/Members';
-import { Classes } from './pages/Admin/Pages/Classes';
-import { Equipment } from './pages/Admin/Pages/Equipment';
-import { Payments } from './pages/Admin/Pages/Payments';
-import { Reports } from './pages/Admin/Pages/Reports';
-import { Website } from './pages/Admin/Pages/Website';
-import { Settings } from './pages/Admin/Pages/Settings';
-import { Staff } from './pages/Admin/Pages/Staff';
 import AddWorkoutPage from './pages/Workout/AddWorkoutPage';
 import UserMeals from './pages/gymOwner/Pages/Users/Meals';
 import MealForm from './pages/gymOwner/Pages/Users/MealForm';
@@ -121,32 +110,6 @@ function AppContent() {
             </main>
           </div>
         </Layout>
-      ) : isAdminRoute ? (
-        <div className="flex h-screen bg-gray-100">
-          <AdminSidebar
-            sidebarOpen={false}
-            setSidebarOpen={() => { }}
-          />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <AdminHeader
-              sidebarOpen={false}
-              setSidebarOpen={() => { }}
-            />
-            <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
-              <Routes>
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/members" element={<AdminMembers />} />
-                <Route path="/admin/classes" element={<Classes />} />
-                <Route path="/admin/equipment" element={<Equipment />} />
-                <Route path="/admin/payments" element={<Payments />} />
-                <Route path="/admin/reports" element={<Reports />} />
-                <Route path="/admin/website" element={<Website />} />
-                <Route path="/admin/settings" element={<Settings />} />
-                <Route path="/admin/staff" element={<Staff />} />
-              </Routes>
-            </main>
-          </div>
-        </div>
       ) : (
         <div className="flex-1">
           <Routes>
