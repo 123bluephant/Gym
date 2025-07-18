@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const foodEntrySchema = new mongoose.Schema(
   {
-    foodName: { type: String, required: true },
+    name: { type: String, required: true },
     category: { type: String },
     per100g: {
       calories: Number,
@@ -12,7 +12,7 @@ const foodEntrySchema = new mongoose.Schema(
       fiber: Number,
       sugar: Number,
     },
-    servings: { type: Number, required: true },
+    servings: { type: Number, default: 1 },
     calculated: {
       calories: Number,
       protein: Number,
@@ -22,8 +22,50 @@ const foodEntrySchema = new mongoose.Schema(
       sugar: Number,
     },
   },
-  { _id: false }
 );
+
+const dailyFoodPlanSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  weekStartDate: { type: Date, required: true },  
+  plan: {
+    Monday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Tuesday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Wednesday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Thursday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Friday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Saturday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+    Sunday: {
+      Breakfast: [foodEntrySchema],
+      Lunch: [foodEntrySchema],
+      Dinner: [foodEntrySchema],
+    },
+  },
+
+}, { timestamps: true });
 
 const dailyFoodLogSchema = new mongoose.Schema(
   {
@@ -46,4 +88,7 @@ const dailyFoodLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("DailyFoodLog", dailyFoodLogSchema);
+const DailyPlan = mongoose.model("DailyPlan", dailyFoodPlanSchema);
+const DailyFoodLog = mongoose.model("DailyFoodLog", dailyFoodLogSchema);
+
+export { DailyPlan, DailyFoodLog };

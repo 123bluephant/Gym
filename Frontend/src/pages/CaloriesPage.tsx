@@ -80,7 +80,7 @@ function Calories() {
 
       // Transform meal for display
       const transformed = meal.map((food: any) => ({
-        name: food.foodName,
+        name: food.name,
         category: food.category,
         calories: food.calculated.calories,
         protein: food.calculated.protein,
@@ -157,7 +157,7 @@ function Calories() {
       date: new Date().toISOString().slice(0, 10),
       mealType: selectedMealType,
       food: {
-        foodName: selectedFood.name,
+        name: selectedFood.name,
         category: selectedFood.category,
         per100g: {
           calories: selectedFood.calories,
@@ -657,7 +657,7 @@ function Calories() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search from 200+ foods..."
+                placeholder="Search from 500+ foods..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 border-2 border-pink-200 rounded-xl focus:ring-4 focus:ring-pink-200 focus:border-pink-400 transition-all duration-200 bg-pink-50/50 text-lg"

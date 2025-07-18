@@ -133,10 +133,7 @@ const GymList = () => {
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    const filtered = mockGyms.filter(gym =>
-      gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      gym.address.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    
     setGyms(filtered);
     setIsSearching(false);
   };
@@ -144,7 +141,6 @@ const GymList = () => {
   const resetFilters = () => {
     setSearchTerm('');
     setFilter('all');
-    setGyms(mockGyms);
   };
 
   const filteredGyms = filter === 'open'
