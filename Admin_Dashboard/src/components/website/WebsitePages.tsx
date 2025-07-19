@@ -1,4 +1,3 @@
-// components/website/WebsitePages.tsx
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
 
 type Page = {

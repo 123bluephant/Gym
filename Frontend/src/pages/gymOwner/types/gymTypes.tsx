@@ -71,6 +71,10 @@ export interface MealSummary {
 
 // Workout Types
 export interface Exercise {
+  sets: string | number | readonly string[] | undefined;
+  reps: string | number | readonly string[] | undefined;
+  restInterval: string | number | readonly string[] | undefined;
+  notes: string;
   id: string;
   name: string;
   description: string;

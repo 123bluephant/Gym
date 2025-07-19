@@ -31,6 +31,8 @@ type ProfileData = {
     instagram: string;
     twitter: string;
   };
+  equipment: string[];
+  amenities: string[];
 };
 
 const avatars = [
@@ -44,7 +46,6 @@ const avatars = [
 const GymOwnerProfile = () => {
   const user = useRecoilValue(userAtom);
   const [isEditing, setIsEditing] = useState(false);
-  console.log('User:', user);
   const [profileData, setProfileData] = useState<ProfileData>({
     name: user?.name || '',
     email: user?.email || '',
@@ -61,6 +62,8 @@ const GymOwnerProfile = () => {
     socialMedia: typeof user?.socialMedia === 'object' && user?.socialMedia !== null
       ? user.socialMedia
       : { facebook: '', instagram: '', twitter: '' },
+    equipment: Array.isArray(user?.equipment) ? user.equipment : [],
+    amenities: Array.isArray(user?.amenities) ? user.amenities : [],
   });
 
   const [newPlan, setNewPlan] = useState<MembershipPlan>({ name: '', price: '', features: [''] });
@@ -71,11 +74,48 @@ const GymOwnerProfile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const gymImagesInputRef = useRef<HTMLInputElement>(null);
   const [newGymImageFiles, setNewGymImageFiles] = useState<File[]>([]);
+  const [newEquipment, setNewEquipment] = useState('');
+  const [newAmenity, setNewAmenity] = useState('');
+
   useEffect(() => {
     if (user && user.role !== "gym_owner") {
       <Navigate to="/dashboard" replace />;
     }
   }, []);
+
+  const handleAddEquipment = () => {
+    if (newEquipment.trim()) {
+      setProfileData(prev => ({
+        ...prev,
+        equipment: [...prev.equipment, newEquipment.trim()]
+      }));
+      setNewEquipment('');
+    }
+  };
+
+  const handleAddAmenity = () => {
+    if (newAmenity.trim()) {
+      setProfileData(prev => ({
+        ...prev,
+        amenities: [...prev.amenities, newAmenity.trim()]
+      }));
+      setNewAmenity('');
+    }
+  };
+
+  const handleRemoveEquipment = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      equipment: prev.equipment.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleRemoveAmenity = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      amenities: prev.amenities.filter((_, i) => i !== index)
+    }));
+  };
 
   const handleAddFeature = () => {
     setNewPlan(prev => ({ ...prev, features: [...prev.features, ''] }));
@@ -129,8 +169,6 @@ const GymOwnerProfile = () => {
           if (newPreviews.length === files.length && !newPreviews.includes(undefined as any)) {
             setGymImagePreviews((prev: string[]) => [...prev, ...newPreviews]);
             setNewGymImageFiles((prev: File[]) => [...prev, ...newFiles]);
-
-            // Store the base64 for preview, but keep files for upload
             setProfileData(prev => ({
               ...prev,
               gymImages: [...prev.gymImages, ...newPreviews]
@@ -141,7 +179,6 @@ const GymOwnerProfile = () => {
       });
     }
   };
-
 
   const removeGymImage = (index: number) => {
     setGymImagePreviews((prev: string[]) => prev.filter((_, i) => i !== index));
@@ -180,37 +217,39 @@ const GymOwnerProfile = () => {
       formData.append('location', profileData.location);
       formData.append('established', profileData.established);
       formData.append('hours', profileData.hours);
-      if (
-        profilePhotoPreview &&
-        !profilePhotoPreview.startsWith('http') &&
-        profilePhotoPreview !== selectedAvatar
-      ) {
+      formData.append('equipment', JSON.stringify(profileData.equipment));
+      formData.append('amenities', JSON.stringify(profileData.amenities));
+      
+      if (profilePhotoPreview && !profilePhotoPreview.startsWith('http') && profilePhotoPreview !== selectedAvatar) {
         const avatarBlob = dataURLtoBlob(profilePhotoPreview);
         formData.append('avatar', avatarBlob, 'avatar.jpg');
       } else if (selectedAvatar?.startsWith('http')) {
         formData.append('avatarUrl', selectedAvatar);
       }
+      
       const existingImages: any = [];
       profileData.gymImages.forEach((imageUrl) => {
         if (imageUrl.startsWith('http')) {
           existingImages.push(imageUrl);
         }
       });
+      
       if (existingImages.length > 0) {
         formData.append('existingGymImages', JSON.stringify(existingImages));
       }
+      
       newGymImageFiles.forEach((file) => {
         formData.append('gymImg', file);
       });
+      
       if (profileData.membershipPlans && profileData.membershipPlans.length > 0) {
         formData.append('membershipPlans', JSON.stringify(profileData.membershipPlans));
       }
+      
       if (profileData.socialMedia) {
         formData.append('socialMedia', JSON.stringify(profileData.socialMedia));
       }
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
+
       const response = await fetch('/api/gym/update', {
         method: 'POST',
         credentials: 'include',
@@ -240,6 +279,8 @@ const GymOwnerProfile = () => {
             typeof result.updatedOwner.socialMedia === 'object' && result.updatedOwner.socialMedia !== null
               ? result.updatedOwner.socialMedia
               : { facebook: '', instagram: '', twitter: '' },
+          equipment: Array.isArray(result.updatedOwner.equipment) ? result.updatedOwner.equipment : [],
+          amenities: Array.isArray(result.updatedOwner.amenities) ? result.updatedOwner.amenities : [],
         });
 
         setProfilePhotoPreview(result.updatedOwner.profilePhoto || '');
@@ -255,7 +296,6 @@ const GymOwnerProfile = () => {
       alert('Failed to save profile. Please try again.');
     }
   };
-
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
@@ -522,6 +562,105 @@ const GymOwnerProfile = () => {
               )}
             </div>
 
+            {/* Equipment & Facilities Section */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 mb-4">Equipment & Facilities</h3>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newEquipment}
+                      onChange={(e) => setNewEquipment(e.target.value)}
+                      placeholder="Add equipment/facility"
+                      className="flex-1 border p-2 rounded"
+                    />
+                    <button
+                      onClick={handleAddEquipment}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {profileData.equipment.map((item, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{item}</span>
+                        <button
+                          onClick={() => handleRemoveEquipment(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profileData.equipment.length > 0 ? (
+                    profileData.equipment.map((item, index) => (
+                      <span key={index} className="bg-gray-100 px-3 py-1 rounded-full">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No equipment listed</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Amenities Section */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 mb-4">Amenities</h3>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newAmenity}
+                      onChange={(e) => setNewAmenity(e.target.value)}
+                      placeholder="Add amenity"
+                      className="flex-1 border p-2 rounded"
+                    />
+                    <button
+                      onClick={handleAddAmenity}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {profileData.amenities.map((item, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{item}</span>
+                        <button
+                          onClick={() => handleRemoveAmenity(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profileData.amenities.length > 0 ? (
+                    profileData.amenities.map((item, index) => (
+                      <span key={index} className="bg-gray-100 px-3 py-1 rounded-full">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No amenities listed</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Membership Plans Section */}
             <h3 className="font-semibold text-gray-800 mb-4">Membership Plans</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {isEditing && (
@@ -588,6 +727,7 @@ const GymOwnerProfile = () => {
               ))}
             </div>
 
+            {/* Social Media Section */}
             <h3 className="font-semibold text-gray-800 mb-4">Social Media</h3>
             {isEditing ? (
               <div className="space-y-2">

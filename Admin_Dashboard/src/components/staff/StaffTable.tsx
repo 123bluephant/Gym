@@ -1,4 +1,3 @@
-// components/staff/StaffTable.tsx
 import { useState } from 'react';
 import { FiEdit, FiTrash2, FiEye, FiClock } from 'react-icons/fi';
 
