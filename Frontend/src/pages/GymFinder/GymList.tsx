@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Gym, Location } from '../../types/gym';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Clock, Star, Filter, Grid3X3, Map, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, MapPin, Clock, Star, Grid3X3, Map, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import MapView from './MapView';
 
 const GymList = () => {
