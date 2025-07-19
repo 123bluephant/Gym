@@ -93,11 +93,9 @@ const GymList = () => {
   };
 
  
-  const resetFilters = () => {
+ const resetFilters = () => {
     setSearchTerm('');
     setFilter('all');
-
-
     // Reload all gyms
       const loadGyms = async () => {
       try {
@@ -116,8 +114,6 @@ const GymList = () => {
       }
     };
     loadGyms();
-
-
   };
 
   const filteredGyms = filter === 'open'
