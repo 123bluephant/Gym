@@ -97,7 +97,7 @@ const GymList = () => {
     setFilter('all');
 
     // Reload all gyms
-    const loadGyms = async () => {
+      const loadGyms = async () => {
       try {
         setLoading(true);
         const res = await fetch('/api/gym/getAllgyms');
