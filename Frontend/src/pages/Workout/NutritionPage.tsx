@@ -813,7 +813,7 @@ const NutritionPage = () => {
                                   C: {meal.carbs}g
                                 </span>
                                 <span className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                                  F: {meal.fat}g
+                                  F: {meal.fats}g
                                 </span>
                               </div>
                               <div className="flex items-center space-x-4 text-sm text-gray-700">
