@@ -17,6 +17,10 @@ const EditWorkout: React.FC = () => {
     restInterval: 60,
     notes: '',
     imageUrl: '',
+    id: '',
+    description: '',
+    muscleGroups: [],
+    difficulty: 'Beginner',
     videoUrl: ''
   });
   const [showExerciseModal, setShowExerciseModal] = useState(false);
@@ -151,6 +155,10 @@ const EditWorkout: React.FC = () => {
       setCurrentExercise({
         name: '',
         sets: 3,
+        id: '',
+        description: '',
+        muscleGroups: [],
+        difficulty: 'Beginner',
         reps: 10,
         restInterval: 60,
         notes: '',
@@ -197,32 +205,37 @@ const EditWorkout: React.FC = () => {
   };
 
   if (!workout) {
-    return <div className="p-6">Loading workout...</div>;
+    return <div className="p-4 sm:p-6">Loading workout...</div>;
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Edit Workout Plan</h1>
-        <div className="flex space-x-4">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Edit Workout Plan</h1>
+          <p className="text-sm text-gray-500 mt-1">Make changes to your workout routine</p>
+        </div>
+        <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
           <Button 
             onClick={handleSaveWorkout}
             isLoading={isSaving}
+            className="w-full sm:w-auto"
           >
             Save Changes
           </Button>
           <Button 
             variant="outline" 
             onClick={() => navigate('/gym/workouts')}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
         <form className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">Workout Name</label>
               <input
@@ -231,7 +244,7 @@ const EditWorkout: React.FC = () => {
                 value={workout.name}
                 onChange={handleWorkoutChange}
                 required
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
             <div>
@@ -240,7 +253,7 @@ const EditWorkout: React.FC = () => {
                 name="difficulty"
                 value={workout.difficulty}
                 onChange={handleWorkoutChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
@@ -256,7 +269,7 @@ const EditWorkout: React.FC = () => {
                 value={workout.description}
                 onChange={handleWorkoutChange}
                 rows={3}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
 
@@ -269,7 +282,7 @@ const EditWorkout: React.FC = () => {
               max="180"
               value={workout.duration}
               onChange={handleWorkoutChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
 
@@ -277,7 +290,7 @@ const EditWorkout: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Workout Image</label>
-              <div className="mt-1 flex items-center">
+              <div className="mt-1 flex flex-col xs:flex-row xs:items-center gap-2">
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -293,7 +306,7 @@ const EditWorkout: React.FC = () => {
                   Upload Image
                 </button>
                 {previewImage && (
-                  <div className="ml-4 relative">
+                  <div className="relative">
                     <img
                       src={previewImage}
                       alt="Preview"
@@ -324,21 +337,21 @@ const EditWorkout: React.FC = () => {
                 value={workout.videoUrl || ''}
                 onChange={handleVideoUrlChange}
                 placeholder="https://example.com/video.mp4 or YouTube URL"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Target Muscle Groups</label>
-            <div className="mt-1 flex">
+            <div className="mt-1 flex flex-col sm:flex-row">
               <input
                 type="text"
                 value={tempMuscle}
                 onChange={(e) => setTempMuscle(e.target.value)}
                 list="muscleGroups"
                 placeholder="Add muscle group"
-                className="block w-full border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full border border-gray-300 rounded-t-md sm:rounded-tr-none sm:rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
               <datalist id="muscleGroups">
                 {muscleGroups.map(muscle => (
@@ -348,7 +361,7 @@ const EditWorkout: React.FC = () => {
               <button
                 type="button"
                 onClick={handleAddMuscleGroup}
-                className="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-r-md"
+                className="inline-flex items-center justify-center px-4 py-2 border border-t-0 border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-b-md sm:rounded-bl-none sm:rounded-r-md sm:border-t sm:border-l-0"
               >
                 Add
               </button>
@@ -376,7 +389,7 @@ const EditWorkout: React.FC = () => {
           </div>
 
           <div>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <label className="block text-sm font-medium text-gray-700">Exercises</label>
               <Button 
                 type="button" 
@@ -386,6 +399,10 @@ const EditWorkout: React.FC = () => {
                     name: '',
                     sets: 3,
                     reps: 10,
+                    id: '',
+                    description: '',
+                    muscleGroups: [],
+                    difficulty: 'Beginner',
                     restInterval: 60,
                     notes: '',
                     imageUrl: '',
@@ -395,29 +412,30 @@ const EditWorkout: React.FC = () => {
                   setEditingExerciseIndex(null);
                   setShowExerciseModal(true);
                 }}
+                className="w-full sm:w-auto"
               >
                 Add Exercise
               </Button>
             </div>
             
             {workout.exercises.length > 0 ? (
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 space-y-3">
                 {workout.exercises.map((exercise, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-md">
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">{exercise.name}</h4>
+                  <div key={index} className="bg-gray-50 p-3 sm:p-4 rounded-md">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                      <h4 className="font-medium text-sm sm:text-base">{exercise.name}</h4>
                       <div className="flex space-x-2">
                         <button
                           type="button"
                           onClick={() => handleEditExercise(index)}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-blue-500 hover:text-blue-700 text-sm"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveExercise(index)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 text-sm"
                         >
                           Remove
                         </button>
@@ -428,17 +446,17 @@ const EditWorkout: React.FC = () => {
                         <img 
                           src={exercise.imageUrl} 
                           alt={exercise.name}
-                          className="h-32 w-full object-cover rounded-md"
+                          className="h-24 sm:h-32 w-full object-cover rounded-md"
                         />
                       </div>
                     )}
-                    <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs sm:text-sm">
                       <div>Sets: {exercise.sets}</div>
                       <div>Reps: {exercise.reps}</div>
                       <div>Rest: {exercise.restInterval}s</div>
                     </div>
                     {exercise.notes && (
-                      <div className="mt-2 text-sm text-gray-600">
+                      <div className="mt-2 text-xs sm:text-sm text-gray-600">
                         Notes: {exercise.notes}
                       </div>
                     )}
@@ -470,11 +488,11 @@ const EditWorkout: React.FC = () => {
               value={currentExercise.name}
               onChange={handleExerciseChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Sets</label>
               <input
@@ -484,7 +502,7 @@ const EditWorkout: React.FC = () => {
                 max="10"
                 value={currentExercise.sets}
                 onChange={handleExerciseChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
             <div>
@@ -496,7 +514,7 @@ const EditWorkout: React.FC = () => {
                 max="50"
                 value={currentExercise.reps}
                 onChange={handleExerciseChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
             <div>
@@ -508,14 +526,14 @@ const EditWorkout: React.FC = () => {
                 max="300"
                 value={currentExercise.restInterval}
                 onChange={handleExerciseChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Exercise Image</label>
-            <div className="mt-1 flex items-center">
+            <div className="mt-1 flex flex-col xs:flex-row xs:items-center gap-2">
               <input
                 type="file"
                 ref={exerciseFileInputRef}
@@ -531,7 +549,7 @@ const EditWorkout: React.FC = () => {
                 Upload Image
               </button>
               {exercisePreviewImage && (
-                <div className="ml-4 relative">
+                <div className="relative">
                   <img
                     src={exercisePreviewImage}
                     alt="Preview"
@@ -562,7 +580,7 @@ const EditWorkout: React.FC = () => {
               value={currentExercise.videoUrl || ''}
               onChange={handleExerciseVideoUrlChange}
               placeholder="https://example.com/video.mp4 or YouTube URL"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
 
@@ -573,7 +591,7 @@ const EditWorkout: React.FC = () => {
               value={currentExercise.notes || ''}
               onChange={handleExerciseChange}
               rows={2}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
           <div className="flex justify-end">
@@ -581,6 +599,7 @@ const EditWorkout: React.FC = () => {
               type="button" 
               onClick={handleAddEditExercise}
               disabled={!currentExercise.name}
+              className="w-full sm:w-auto"
             >
               {editingExerciseIndex !== null ? 'Update Exercise' : 'Add Exercise'}
             </Button>
