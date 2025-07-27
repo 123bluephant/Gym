@@ -89,7 +89,9 @@ const NutritionService = {
     day: string;
     mealType: "Breakfast" | "Lunch" | "Dinner";
     foodId: string | number;
-  }): Promise<{ success: boolean }> {
+  }): Promise<{
+    plan(plan: any): unknown; success: boolean 
+}> {
     const res = await fetch("/api/food/removeFoodPlanItem", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -111,6 +113,9 @@ const NutritionService = {
 };
 type UserDiet = Record<WeekDay, Record<MealType, Meal[]>>;
 type Meal = {
+  calculated: any;
+  fiber: number;
+  sugar: number;
   _id: string;
   name: string;
   calories: number;
@@ -698,7 +703,6 @@ const NutritionPage = () => {
                                   key={meal._id}
                                   className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-2 border-green-200 rounded-xl p-4 relative group hover:shadow-lg hover:scale-105 transition-all duration-300 hover:border-green-300"
                                 >
-                                  {console.log(meal, "this is meal")}
                                   <button
                                     onClick={() =>
                                       handleRemoveMealFromUserDiet(
